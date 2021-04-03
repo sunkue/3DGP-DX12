@@ -1,8 +1,8 @@
 #pragma once
-
+/*
+#include "pch.h"
 #include <type_traits>
 
-/*
 	폐기 -> 다렉매쓰사용!!
 class vec2 {
 	union {	
@@ -63,9 +63,8 @@ mat4<float> LookAt(vec3<float> eye,vec3<float> at,vec3<float> up) {
 	return reuslt;
 }
 
-*/
-
-
 mat4<float> Perspective(float fovy, float aspect,float n,float f) {
 
 }
+*/
+
