@@ -19,15 +19,15 @@ public:
 
 	float	lifeTime() { return static_cast<std::chrono::duration<float, std::milli>>(clk::now() - m_emitTime).count(); }
 	void	born() { m_emitTime = clk::now(); }
-	bool f() {
-		vec a{}, b{};
-		return a == b;
-	}
 private:
 	vector<Vertex>	m_vertices;
 	m_vec3			m_velocity;
 	tp				m_emitTime;
-
+	int f() {
+		int a;
+		vector<char>v;
+		M2V2(v);
+	}
 };
 
 class Particles

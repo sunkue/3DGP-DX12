@@ -66,8 +66,16 @@ using	Gvec = DirectX::GXMVECTOR;
 using	Hvec = DirectX::HXMVECTOR;
 using	Cvec = DirectX::CXMVECTOR;
 using	CONSTvec = DirectX::XMVECTORF32;
+using namespace DirectX;
+/*
+		auto, ...Args 등으로 맹글면 컴파일 전까지 오류 확인 안됨! 손 아파도 타입 죄다 적자...
+		c++ 20 표준 생기믄 이걸로 가자
+		inlnie auto myf(auto a){return f(a);}
+		template<typename...Args> inline auto myf(Args&&... args) { return f(std::forward<Args>(args)...); }
 
-
+		굳이 이름을 바꾸어야 할까? 라는 고민...
+		하다보면 손에익지 않을까? 라는 생각..
+*/
 
 inline auto	XM_CALLCONV M2V2(const m_vec2* pSource) { return DirectX::XMLoadFloat2(pSource); }
 inline auto	XM_CALLCONV M2V3(const m_vec3* pSource) { return DirectX::XMLoadFloat3(pSource); }
@@ -101,8 +109,11 @@ inline auto XM_CALLCONV Normalize(Fvec V) { return DirectX::XMVector3Normalize(V
 inline auto XM_CALLCONV Orthogonal(Fvec V) { return DirectX::XMVector3Orthogonal(V); }
 inline auto XM_CALLCONV RadiansBetweenVecs(Fvec V1, Fvec V2) { return DirectX::XMVector3AngleBetweenVectors(V1, V2); }
 inline auto XM_CALLCONV ComponentsFromNormal(vec* pParallel, vec* pPerpendcular, Fvec V, Fvec Normal) { return DirectX::XMVector3ComponentsFromNormal(pParallel, pPerpendcular, V, Normal); }
-inline bool operator==(Fvec V1, Fvec V2) { return DirectX::XMVector3Equal(V1, V2); }
-inline bool operator!=(Fvec V1, Fvec V2) { return DirectX::XMVector3NotEqual(V1, V2); }
+
+const DirectX::XMVECTOR Epsilon{ MakeVecWith(0.00000005f) };
+
+inline bool operator==(Fvec V1, Fvec V2) { return DirectX::XMVector3NearEqual(V1, V2, Epsilon); }
+inline bool operator!=(Fvec V1, Fvec V2) { return !(V1 == V2); }
 
 
 
