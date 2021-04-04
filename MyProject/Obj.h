@@ -101,6 +101,7 @@ class OBJ : public WORLDOBJ, public MOVEABLE
 public:
 	OBJ(vector<VERTEX>& vx, FXMVECTOR vel = { XMVectorZero() }) :mp_vertices{ make_shared<vector<VERTEX>>(vx) } { SetVelocity(vel); }
 
+	void CallMeBeforeCaculateChildensWM() { ResetChildrenWM(); Power2ChildrenWM(); }
 private:
 	void		Power2ChildrenWM();	/* 내 월드변환행렬을 자식새끼덜한테 강요하기 */
 	void		ResetChildrenWM();	/* 자식새끼덜 기본좌표계 변환 리셋시키기 */
