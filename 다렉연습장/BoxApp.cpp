@@ -16,7 +16,7 @@ using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
-struct Vertex
+struct VERTEX
 {
     XMFLOAT3 Pos;
     XMFLOAT4 Color;
@@ -363,16 +363,16 @@ void BoxApp::BuildShadersAndInputLayout()
 
 void BoxApp::BuildBoxGeometry()
 {
-    std::array<Vertex, 8> vertices =
+    std::array<VERTEX, 8> vertices =
     {
-        Vertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
-		Vertex({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
+        VERTEX({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
+		VERTEX({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
+		VERTEX({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
+		VERTEX({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
+		VERTEX({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
+		VERTEX({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
+		VERTEX({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
+		VERTEX({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
     };
 
 	std::array<std::uint16_t, 36> indices =
@@ -402,7 +402,7 @@ void BoxApp::BuildBoxGeometry()
 		4, 3, 7
 	};
 
-    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT vbByteSize = (UINT)vertices.size() * sizeof(VERTEX);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
 	mBoxGeo = std::make_unique<MeshGeometry>();
@@ -420,7 +420,7 @@ void BoxApp::BuildBoxGeometry()
 	mBoxGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
 		mCommandList.Get(), indices.data(), ibByteSize, mBoxGeo->IndexBufferUploader);
 
-	mBoxGeo->VertexByteStride = sizeof(Vertex);
+	mBoxGeo->VertexByteStride = sizeof(VERTEX);
 	mBoxGeo->VertexBufferByteSize = vbByteSize;
 	mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	mBoxGeo->IndexBufferByteSize = ibByteSize;
