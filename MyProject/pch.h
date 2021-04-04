@@ -44,6 +44,8 @@ using	index = unsigned int;
 			데이터는 XMVECTOR XMFLOAT(멤버변수) XMMATRIX(XMVECTOR[4]) 등을 사용.
 			sse 레지스터의 활용을 위해, 함수 안에서 계산에 사용할 파라미터 XMVECTOR의 타입을 지정하자. [ 123F 4G 56H etcC ] 함수이름앞에 XM_CALLCONV 지시자 붙이기
 				생성자는 [ 123F etcC ] 지시자 X
+			위치 w = 1 , 방향 w = 0
+
 		edited :	4 / 04
 */
 
@@ -58,8 +60,8 @@ constexpr XMFLOAT4X4 BASICMAT{	1.f,0.f,0.f,0.f,
 								0.f,0.f,1.f,0.f,
 								0.f,0.f,0.f,1.f };
 
-inline bool operator==(FXMVECTOR V1, FXMVECTOR V2) { return DirectX::XMVector3Equal(V1, V2); }
-inline bool operator!=(FXMVECTOR V1, FXMVECTOR V2) { return !(V1 == V2); }
+inline bool XM_CALLCONV operator==(FXMVECTOR V1, FXMVECTOR V2) { return DirectX::XMVector3Equal(V1, V2); }
+inline bool XM_CALLCONV operator!=(FXMVECTOR V1, FXMVECTOR V2) { return !(V1 == V2); }
 
 
 
