@@ -20,18 +20,18 @@ XMVECTOR Camera::GetPosition()const
 	return XMLoadFloat3(&mPosition);
 }
 
-XMFLOAT3 Camera::GetPosition3f()const
+XMFLOAT3A Camera::GetPosition3f()const
 {
 	return mPosition;
 }
 
 void Camera::SetPosition(float x, float y, float z)
 {
-	mPosition = XMFLOAT3(x, y, z);
+	mPosition = XMFLOAT3A(x, y, z);
 	mViewDirty = true;
 }
 
-void Camera::SetPosition(const XMFLOAT3& v)
+void Camera::SetPosition(const XMFLOAT3A& v)
 {
 	mPosition = v;
 	mViewDirty = true;
@@ -42,7 +42,7 @@ XMVECTOR Camera::GetRight()const
 	return XMLoadFloat3(&mRight);
 }
 
-XMFLOAT3 Camera::GetRight3f()const
+XMFLOAT3A Camera::GetRight3f()const
 {
 	return mRight;
 }
@@ -52,7 +52,7 @@ XMVECTOR Camera::GetUp()const
 	return XMLoadFloat3(&mUp);
 }
 
-XMFLOAT3 Camera::GetUp3f()const
+XMFLOAT3A Camera::GetUp3f()const
 {
 	return mUp;
 }
@@ -62,7 +62,7 @@ XMVECTOR Camera::GetLook()const
 	return XMLoadFloat3(&mLook);
 }
 
-XMFLOAT3 Camera::GetLook3f()const
+XMFLOAT3A Camera::GetLook3f()const
 {
 	return mLook;
 }
@@ -142,7 +142,7 @@ void Camera::LookAt(FXMVECTOR pos, FXMVECTOR target, FXMVECTOR worldUp)
 	mViewDirty = true;
 }
 
-void Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up)
+void Camera::LookAt(const XMFLOAT3A& pos, const XMFLOAT3A& target, const XMFLOAT3A& up)
 {
 	XMVECTOR P = XMLoadFloat3(&pos);
 	XMVECTOR T = XMLoadFloat3(&target);

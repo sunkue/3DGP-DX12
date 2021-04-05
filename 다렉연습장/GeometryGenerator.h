@@ -29,9 +29,9 @@ public:
 	{
 		Vertex(){}
         Vertex(
-            const DirectX::XMFLOAT3& p, 
-            const DirectX::XMFLOAT3& n, 
-            const DirectX::XMFLOAT3& t, 
+            const DirectX::XMFLOAT3A& p, 
+            const DirectX::XMFLOAT3A& n, 
+            const DirectX::XMFLOAT3A& t, 
             const DirectX::XMFLOAT2& uv) :
             Position(p), 
             Normal(n), 
@@ -47,9 +47,9 @@ public:
 			TangentU(tx, ty, tz), 
             TexC(u,v){}
 
-        DirectX::XMFLOAT3 Position;
-        DirectX::XMFLOAT3 Normal;
-        DirectX::XMFLOAT3 TangentU;
+        DirectX::XMFLOAT3A Position;
+        DirectX::XMFLOAT3A Normal;
+        DirectX::XMFLOAT3A TangentU;
         DirectX::XMFLOAT2 TexC;
 	};
 

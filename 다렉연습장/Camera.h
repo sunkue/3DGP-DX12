@@ -22,17 +22,17 @@ public:
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
-	DirectX::XMFLOAT3 GetPosition3f()const;
+	DirectX::XMFLOAT3A GetPosition3f()const;
 	void SetPosition(float x, float y, float z);
-	void SetPosition(const DirectX::XMFLOAT3& v);
+	void SetPosition(const DirectX::XMFLOAT3A& v);
 	
 	// Get camera basis vectors.
 	DirectX::XMVECTOR GetRight()const;
-	DirectX::XMFLOAT3 GetRight3f()const;
+	DirectX::XMFLOAT3A GetRight3f()const;
 	DirectX::XMVECTOR GetUp()const;
-	DirectX::XMFLOAT3 GetUp3f()const;
+	DirectX::XMFLOAT3A GetUp3f()const;
 	DirectX::XMVECTOR GetLook()const;
-	DirectX::XMFLOAT3 GetLook3f()const;
+	DirectX::XMFLOAT3A GetLook3f()const;
 
 	// Get frustum properties.
 	float GetNearZ()const;
@@ -52,7 +52,7 @@ public:
 
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	void LookAt(const DirectX::XMFLOAT3A& pos, const DirectX::XMFLOAT3A& target, const DirectX::XMFLOAT3A& up);
 
 	// Get View/Proj matrices.
 	DirectX::XMMATRIX GetView()const;
@@ -75,10 +75,10 @@ public:
 private:
 
 	// Camera coordinate system with coordinates relative to world space.
-	DirectX::XMFLOAT3 mPosition = { 0.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 mRight = { 1.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 mUp = { 0.0f, 1.0f, 0.0f };
-	DirectX::XMFLOAT3 mLook = { 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT3A mPosition = { 0.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3A mRight = { 1.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3A mUp = { 0.0f, 1.0f, 0.0f };
+	DirectX::XMFLOAT3A mLook = { 0.0f, 0.0f, 1.0f };
 
 	// Cache frustum properties.
 	float mNearZ = 0.0f;

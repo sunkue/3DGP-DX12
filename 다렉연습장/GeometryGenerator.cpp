@@ -316,7 +316,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(float radius, uin
 	const float X = 0.525731f; 
 	const float Z = 0.850651f;
 
-	XMFLOAT3 pos[12] = 
+	XMFLOAT3A pos[12] = 
 	{
 		XMFLOAT3(-X, 0.0f, Z),  XMFLOAT3(X, 0.0f, Z),  
 		XMFLOAT3(-X, 0.0f, -Z), XMFLOAT3(X, 0.0f, -Z),    
@@ -409,7 +409,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 			float c = cosf(j*dTheta);
 			float s = sinf(j*dTheta);
 
-			vertex.Position = XMFLOAT3(r*c, y, r*s);
+			vertex.Position = XMFLOAT3A(r*c, y, r*s);
 
 			vertex.TexC.x = (float)j/sliceCount;
 			vertex.TexC.y = 1.0f - (float)i/stackCount;
@@ -434,10 +434,10 @@ GeometryGenerator::MeshData GeometryGenerator::CreateCylinder(float bottomRadius
 			//  dz/dv = (r0-r1)*sin(t)
 
 			// This is unit length.
-			vertex.TangentU = XMFLOAT3(-s, 0.0f, c);
+			vertex.TangentU = XMFLOAT3A(-s, 0.0f, c);
 
 			float dr = bottomRadius-topRadius;
-			XMFLOAT3 bitangent(dr*c, -height, dr*s);
+			XMFLOAT3A bitangent(dr*c, -height, dr*s);
 
 			XMVECTOR T = XMLoadFloat3(&vertex.TangentU);
 			XMVECTOR B = XMLoadFloat3(&bitangent);
@@ -576,9 +576,9 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGrid(float width, float dep
 		{
 			float x = -halfWidth + j*dx;
 
-			meshData.Vertices[i*n+j].Position = XMFLOAT3(x, 0.0f, z);
-			meshData.Vertices[i*n+j].Normal   = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[i*n+j].TangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[i*n+j].Position = XMFLOAT3A(x, 0.0f, z);
+			meshData.Vertices[i*n+j].Normal   = XMFLOAT3A(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[i*n+j].TangentU = XMFLOAT3A(1.0f, 0.0f, 0.0f);
 
 			// Stretch texture over grid.
 			meshData.Vertices[i*n+j].TexC.x = j*du;

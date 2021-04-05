@@ -18,7 +18,7 @@ using namespace DirectX::PackedVector;
 
 struct VERTEX
 {
-    XMFLOAT3 Pos;
+    XMFLOAT3A Pos;
     XMFLOAT4 Color;
 };
 
@@ -365,14 +365,14 @@ void BoxApp::BuildBoxGeometry()
 {
     std::array<VERTEX, 8> vertices =
     {
-        VERTEX({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
-		VERTEX({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
-		VERTEX({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
-		VERTEX({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
-		VERTEX({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
-		VERTEX({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
-		VERTEX({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
-		VERTEX({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
+        VERTEX({ XMFLOAT3A(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
+		VERTEX({ XMFLOAT3A(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
+		VERTEX({ XMFLOAT3A(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
+		VERTEX({ XMFLOAT3A(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
+		VERTEX({ XMFLOAT3A(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
+		VERTEX({ XMFLOAT3A(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
+		VERTEX({ XMFLOAT3A(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
+		VERTEX({ XMFLOAT3A(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
     };
 
 	std::array<std::uint16_t, 36> indices =
