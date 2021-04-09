@@ -1,23 +1,24 @@
-癤�//{{NO_DEPENDENCIES}}
+//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by MyProject.rc
+// Used by LabProject.rc
+//
 
 #define IDS_APP_TITLE			103
 
 #define IDR_MAINFRAME			128
-#define IDD_MYPROJECT_DIALOG	102
+#define IDD_LABPROJECT_DIALOG	102
 #define IDD_ABOUTBOX			103
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
-#define IDI_MYPROJECT			107
+#define IDI_LABPROJECT			107
 #define IDI_SMALL				108
-#define IDC_MYPROJECT			109
+#define IDC_LABPROJECT			109
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1
 #endif
-// Next default values for new objects
-//
+// 다음은 새 개체에 사용할 기본값입니다.
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 

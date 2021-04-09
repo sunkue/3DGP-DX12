@@ -47,9 +47,9 @@ public:
 			TangentU(tx, ty, tz), 
             TexC(u,v){}
 
-        DirectX::XMFLOAT3A Position;
-        DirectX::XMFLOAT3A Normal;
-        DirectX::XMFLOAT3A TangentU;
+        DirectX::XMFLOAT3 Position;
+        DirectX::XMFLOAT3 Normal;
+        DirectX::XMFLOAT3 TangentU;
         DirectX::XMFLOAT2 TexC;
 	};
 

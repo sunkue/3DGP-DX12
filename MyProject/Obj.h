@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pch.h"
+#include "stdafx.h"
 
 /* 버텍스에 담을 정보들.. col 값은 사실상 단색 tex 로 교체 가능함.. */
 struct VERTEX

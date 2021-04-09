@@ -316,7 +316,7 @@ GeometryGenerator::MeshData GeometryGenerator::CreateGeosphere(float radius, uin
 	const float X = 0.525731f; 
 	const float Z = 0.850651f;
 
-	XMFLOAT3A pos[12] = 
+	XMFLOAT3 pos[12] = 
 	{
 		XMFLOAT3(-X, 0.0f, Z),  XMFLOAT3(X, 0.0f, Z),  
 		XMFLOAT3(-X, 0.0f, -Z), XMFLOAT3(X, 0.0f, -Z),    
