@@ -1,22 +1,75 @@
 #include "stdafx.h"
 #include "GameTimer.h"
 
-GameTimer::GameTimer()
+GameTimer::~GameTimer()
 {
-	if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&mPerformanceFrequency)))
+
+}
+
+///////////////////////
+
+void GameTimer::Tick(milliseconds lockFPS)
+{
+	mCurrentTime = steady_clock::now();
+	milliseconds timeElapsed = duration_cast<milliseconds>(mCurrentTime - mLastTime);
+
+	while (timeElapsed < lockFPS)
 	{
-		mbHardWateHasPerformanceCounter = true;
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&mLastTime));
-		mTimeScale = 1.0f / mPerformanceFrequency;
+		mCurrentTime = steady_clock::now();
+		timeElapsed = duration_cast<milliseconds>(mCurrentTime - mLastTime);
 	}
-	else
+
+	mLastTime = mCurrentTime;
+
+	if (abs(timeElapsed - mTimeElapsed) < 1s)
 	{
-		mbHardWateHasPerformanceCounter = false;
-		mLastTime = chrono::high_resolution_clock::now();
-		mTimeScale = 0.001f;
+		memmove(&mFrameTimes.at(1), mFrameTimes.data(), (mFrameTimes.max_size() - 1) * sizeof(milliseconds));
+		mFrameTimes[0] = timeElapsed;
+		if (mSampleCount < mFrameTimes.max_size()) ++mSampleCount;
 	}
+
+	mFramesPerSecond++;
+	mFPSTimeElapsed += timeElapsed;
+	if (1s < mFPSTimeElapsed)
+	{
+		mCurrentFrameRate = mFramesPerSecond;
+		mFramesPerSecond = 0;
+		mFPSTimeElapsed = milliseconds::zero();
+	}
+
+	mTimeElapsed = milliseconds::zero();
+	for (auto& mFT : mFrameTimes) mTimeElapsed += mFT;
+	if (0 != mSampleCount) mTimeElapsed /= mSampleCount;
+}
+
+size_t GameTimer::GetFrameRate(wchar_t* lpszString, size_t characters)
+{
+	if (lpszString)
+	{
+		_itow_s(mCurrentFrameRate, lpszString, characters, 10);
+		wcscat_s(lpszString, characters, _T(" FPS)"));
+	}
+
+	return mCurrentFrameRate;
+}
+
+milliseconds GameTimer::GetTimeElapsed()
+{
+	return mTimeElapsed;
+}
+
+void GameTimer::Reset()
+{
+	mLastTime = steady_clock::now();
+	mCurrentTime = steady_clock::now();
+
 	mSampleCount = 0;
 	mCurrentFrameRate = 0;
 	mFramesPerSecond = 0;
-	mFPSTimeElapsed = 0.0f;
+	mFPSTimeElapsed = milliseconds::zero();
+	mTimeElapsed = milliseconds::zero();
+	
+	mFrameTimes.fill(milliseconds::zero());
+
+	mbStopped = false;
 }

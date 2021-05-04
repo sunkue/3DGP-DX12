@@ -33,8 +33,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AllocConsole();
 		FILE* file;
 		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stdout);
-		_tfreopen_s(&file, _T("CONIN$"), _T("r"), stdin);
-		_tfreopen_s(&file, _T("CONERR$"), _T("w"), stderr);
+		//_tfreopen_s(&file, _T("CONIN$"), _T("r"), stdin);
+		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stderr);
+		//_tfreopen_s(&file, _T("CONERR$"), _T("w"), stderr);
 	}
 
 	cout << "";
@@ -132,6 +133,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
+
+#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+	gGameFramework.ChangeSwapChainState();
+#endif
 
 	return true;
 }

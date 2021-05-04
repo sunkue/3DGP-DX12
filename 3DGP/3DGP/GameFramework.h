@@ -1,11 +1,12 @@
 #pragma once
 
+#include "GameTimer.h"
+
 class GameFramework
 {
 public:
 	GameFramework();
 	~GameFramework();
-	
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
 
@@ -21,11 +22,13 @@ private:
 	void BuildObjects();
 	void ReleaseObjects();
 	
+	void ChangeSwapChainState();
+
 public:
 	void ProcessInput();
 	void AnimateObjects();
+	void PopulateCommandList();
 	void FrameAdvance();
-
 	void WaitForGpuComplete();
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -69,5 +72,10 @@ private:
 
 	D3D12_VIEWPORT mD3dViewport;
 	D3D12_RECT mD3dScissorRect;
+
+
+private:
+	GameTimer mGameTimer;
+	array<wchar_t, 50> mpszFrameRate;
 };
 

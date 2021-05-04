@@ -19,7 +19,7 @@
 #include <shellapi.h>
 
 #include <d3d12.h>
-#include "d3dx12.h""
+#include "d3dx12.h"
 #include <dxgi1_6.h>
 
 #include <D3Dcompiler.h>
@@ -41,6 +41,8 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+
 ////////
 #include <iostream>
 #include <cassert>
@@ -52,9 +54,12 @@ using Microsoft::WRL::ComPtr;
 #include <array>
 
 using namespace std;
-
+using namespace std::chrono;
+using TimePoint = steady_clock::time_point;
 constexpr INT FRAME_BUFFER_WIDTH{ 640 };
 constexpr INT FRAME_BUFFER_HEIGHT{ 480 };
+
+constexpr UINT RFR = 144;
 
 
 /*

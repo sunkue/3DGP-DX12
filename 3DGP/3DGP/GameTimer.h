@@ -1,35 +1,42 @@
 #pragma once
 
-constexpr unsigned long MAX_SAMPLE_COUNT{ 50 };
-
 class GameTimer
 {
 public:
-	GameTimer();
+	GameTimer() :
+		mSampleCount{ 0 },
+		mCurrentFrameRate{ 0 },
+		mFramesPerSecond{ 0 },
+		mFPSTimeElapsed{ milliseconds::zero() },
+		mbStopped{ false },
+		mLastTime{ steady_clock::now() },
+		mCurrentTime{ steady_clock::now() },
+		mTimeElapsed{ milliseconds::zero() }
+	{
+		mFrameTimes.fill(milliseconds::zero());
+	}
 	virtual ~GameTimer();
 
 public:
-	void Start(){}
-	void Stop(){}
+	void Start() {}
+	void Stop() {}
 	void Reset();
-	void Tick(float fLockFPS = 0.0f);
-	unsigned long GetFrameRate(LPSTR lpszString = nullptr, int characters = 0);
-	float GetTimeElapsed();
+	void Tick(milliseconds fLockFPS = 0ms);
+	size_t GetFrameRate(wchar_t* lpszString = nullptr, size_t characters = 0);
+	milliseconds GetTimeElapsed();
 
 private:
-	bool mbHardWateHasPerformanceCounter;
-	float mTimeScale;
-	float mTimeElapsed;
-	__int64 mCurrentTime;
-	__int64 mLastTime;
-	__int64 mPerformanceFrequency;
+	TimePoint mCurrentTime;
+	TimePoint mLastTime;
 
-	float mFrameTime[MAX_SAMPLE_COUNT];
-	unsigned long mSampleCount;
+	milliseconds mTimeElapsed;
 
-	unsigned long mCurrentFrameRate;
-	unsigned long mFramesPerSecond;
-	float mFPSTimeElapsed;
+	array<milliseconds, 50> mFrameTimes;
+	size_t mSampleCount;
+
+	size_t mCurrentFrameRate;
+	size_t mFramesPerSecond;
+	milliseconds mFPSTimeElapsed;
 
 	bool mbStopped;
 };
