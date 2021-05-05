@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GameFramework.h"
-#include "GameFrameworkHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,12 +22,13 @@ GameFramework::GameFramework() :
 	mcomD3dCommandList{},
 	mcomD3dPipelineState{},
 	mcomD3dFence{},
-	mFenceValue{},
+	mFenceValues{},
 	mhFenceEvent{},
 	mD3dViewport{},
 	mD3dScissorRect{},
 	mcomvD3dRenderTargetBuffers{},
-	mGameTimer{}
+	mGameTimer{},
+	mScene{}
 {
 	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
 }
@@ -115,10 +115,10 @@ void GameFramework::CreateDirect3DDevice()
 	mMsaa4xQualityLevels = d3dMsaaQualityLevels.NumQualityLevels;
 	mbMssa4xEnable = (1 < mMsaa4xQualityLevels) ? true : false;
 
-	constexpr decltype(mFenceValue) FENCE_INIT_VALUE{ 0 };
+	constexpr UINT64 FENCE_INIT_VALUE{ 0 };
 	ThrowIfFailed(mcomD3dDevice->CreateFence(FENCE_INIT_VALUE, D3D12_FENCE_FLAG_NONE,
 		IID_PPV_ARGS(mcomD3dFence.GetAddressOf())));
-	mFenceValue = FENCE_INIT_VALUE;
+	mFenceValues.fill(FENCE_INIT_VALUE);
 
 	mhFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
@@ -250,12 +250,16 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::BuildObjects()
 {
+	mScene = make_shared<Scene>();
+	if (mScene)mScene->BuildObjects(mcomD3dDevice.Get());
 
+	mGameTimer.Reset();
 }
 
 void GameFramework::ReleaseObjects()
 {
-
+	if (mScene)mScene->ReleaseObjects();
+	mScene.reset();
 }
 
 void GameFramework::ChangeSwapChainState()
@@ -365,16 +369,14 @@ void GameFramework::ProcessInput()
 
 void GameFramework::AnimateObjects()
 {
-
+	if (mScene)mScene->AnimateObjects(mGameTimer.GetTimeElapsed());
 }
 
 void GameFramework::PopulateCommandList()
 {
 	ThrowIfFailed(mcomD3dCommandAllocator->Reset());
 	ThrowIfFailed(mcomD3dCommandList->Reset(mcomD3dCommandAllocator.Get(), nullptr));
-	//ThrowIfFailed(m_commandList->Reset(m_commandAllocator.Get(), m_pipelineState.Get()));
 
-//	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	mcomD3dCommandList->RSSetViewports(1, &mD3dViewport);
 	mcomD3dCommandList->RSSetScissorRects(1, &mD3dScissorRect);
 
@@ -382,24 +384,18 @@ void GameFramework::PopulateCommandList()
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mcomD3dCommandList->ResourceBarrier(1, &RB);
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle(mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		mSwapChainBufferIndex, mRtvDescriptorIncrementSize);
-
-	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
-	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, nullptr);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		static_cast<INT>(mSwapChainBufferIndex), mRtvDescriptorIncrementSize };
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mcomD3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
-	mcomD3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mcomD3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
-	//
-	// 	   RENDERING HERE 
-	/*
-	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-	m_commandList->DrawInstanced(3, 1, 0, 0);
-	*/
-	//
+	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
+	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, nullptr);
+	mcomD3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	if (mScene)mScene->Render(mcomD3dCommandList.Get());
+
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	mcomD3dCommandList->ResourceBarrier(1, &RB);
@@ -409,18 +405,27 @@ void GameFramework::PopulateCommandList()
 
 void GameFramework::WaitForGpuComplete()
 {
-	const UINT64 Fence{ mFenceValue };
+	const UINT64 Fence{ ++mFenceValues[mSwapChainBufferIndex] };
 	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
+	if (mcomD3dFence->GetCompletedValue() < Fence)
+	{
+		ThrowIfFailed(mcomD3dFence->SetEventOnCompletion(Fence, mhFenceEvent));
+		WaitForSingleObject(mhFenceEvent, INFINITE);
+	}
+}
 
-	++mFenceValue;
+void GameFramework::MoveToNextFrame()
+{
+	mSwapChainBufferIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
+
+	const UINT64 Fence{ ++mFenceValues[mSwapChainBufferIndex] };
+	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
 
 	if (mcomD3dFence->GetCompletedValue() < Fence)
 	{
 		ThrowIfFailed(mcomD3dFence->SetEventOnCompletion(Fence, mhFenceEvent));
 		WaitForSingleObject(mhFenceEvent, INFINITE);
 	}
-
-	mSwapChainBufferIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
 }
 
 void GameFramework::FrameAdvance()
@@ -436,15 +441,14 @@ void GameFramework::FrameAdvance()
 	ID3D12CommandList* comD3dCommandLists[]{ mcomD3dCommandList.Get() };
 	mcomD3dCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
 
+	WaitForGpuComplete();
 
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters{};
-	ThrowIfFailed(mcomDxgiSwapChain->Present1(1, 0, &dxgiPresentParameters));
+	ThrowIfFailed(mcomDxgiSwapChain->Present1(0, 0, &dxgiPresentParameters));
 
+	MoveToNextFrame();
 
 	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
-	const size_t mpszFrameRateLen{ wcslen(mpszFrameRate.data()) };
-	mGameTimer.GetFrameRate(mpszFrameRate.data() + mpszFrameRateLen, mpszFrameRate.size());
+	mGameTimer.GetFrameRate(mpszFrameRate.data() + wcslen(mpszFrameRate.data()), mpszFrameRate.size());
 	SetWindowText(mhWnd, mpszFrameRate.data());
-
-	WaitForGpuComplete();
 }

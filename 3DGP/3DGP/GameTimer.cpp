@@ -1,6 +1,19 @@
 #include "stdafx.h"
 #include "GameTimer.h"
 
+GameTimer::GameTimer() :
+	mSampleCount{ 0 },
+	mCurrentFrameRate{ 0 },
+	mFramesPerSecond{ 0 },
+	mFPSTimeElapsed{ milliseconds::zero() },
+	mbStopped{ false },
+	mLastTime{ steady_clock::now() },
+	mCurrentTime{ steady_clock::now() },
+	mTimeElapsed{ milliseconds::zero() }
+{
+	mFrameTimes.fill(milliseconds::zero());
+}
+
 GameTimer::~GameTimer()
 {
 
@@ -68,7 +81,7 @@ void GameTimer::Reset()
 	mFramesPerSecond = 0;
 	mFPSTimeElapsed = milliseconds::zero();
 	mTimeElapsed = milliseconds::zero();
-	
+
 	mFrameTimes.fill(milliseconds::zero());
 
 	mbStopped = false;

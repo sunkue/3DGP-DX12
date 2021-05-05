@@ -46,9 +46,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MyRegisterClass(hInstance);
 
 	// 애플리케이션 초기화를 수행합니다:
-	if (!InitInstance(hInstance, nCmdShow))
+	try
 	{
-		return FALSE;
+		if (!InitInstance(hInstance, nCmdShow))
+		{
+			return FALSE;
+		}
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what();
 	}
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DGP1));

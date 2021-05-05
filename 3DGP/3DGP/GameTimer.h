@@ -3,18 +3,7 @@
 class GameTimer
 {
 public:
-	GameTimer() :
-		mSampleCount{ 0 },
-		mCurrentFrameRate{ 0 },
-		mFramesPerSecond{ 0 },
-		mFPSTimeElapsed{ milliseconds::zero() },
-		mbStopped{ false },
-		mLastTime{ steady_clock::now() },
-		mCurrentTime{ steady_clock::now() },
-		mTimeElapsed{ milliseconds::zero() }
-	{
-		mFrameTimes.fill(milliseconds::zero());
-	}
+	GameTimer();
 	virtual ~GameTimer();
 
 public:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameTimer.h"
+#include "Scene.h"
 
 class GameFramework
 {
@@ -21,15 +22,16 @@ private:
 
 	void BuildObjects();
 	void ReleaseObjects();
-	
+
 	void ChangeSwapChainState();
 
 public:
 	void ProcessInput();
 	void AnimateObjects();
 	void PopulateCommandList();
-	void FrameAdvance();
 	void WaitForGpuComplete();
+	void MoveToNextFrame();
+	void FrameAdvance();
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -65,14 +67,15 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> mcomD3dCommandList;
 
 	ComPtr<ID3D12PipelineState> mcomD3dPipelineState;
-	
+
 	ComPtr<ID3D12Fence> mcomD3dFence;
-	UINT64 mFenceValue;
+	array<UINT64, mSwapChainBuffers> mFenceValues;
 	HANDLE mhFenceEvent;
 
 	D3D12_VIEWPORT mD3dViewport;
 	D3D12_RECT mD3dScissorRect;
 
+	shared_ptr<Scene> mScene;
 
 private:
 	GameTimer mGameTimer;
