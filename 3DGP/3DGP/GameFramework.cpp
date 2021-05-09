@@ -14,8 +14,8 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 GameFramework* GameFramework::mApp = nullptr;
 ///////////////////////////////////////////////////////////////////////////////////////
 
-GameFramework::GameFramework(HINSTANCE hInstance) :
-	mhInstance{ hInstance },
+GameFramework::GameFramework() :
+	mhInstance{},
 	mhWnd{},
 	mWndClientWidth{ FRAME_BUFFER_WIDTH },
 	mWndClientHeight{ FRAME_BUFFER_HEIGHT },
@@ -47,19 +47,18 @@ GameFramework::GameFramework(HINSTANCE hInstance) :
 
 GameFramework::~GameFramework()
 {
-
 }
+
 int GameFramework::Run()
 {
-	MSG msg;
+	MSG msg{0};
 
 	HACCEL hAccelTable = LoadAccelerators(mhInstance, MAKEINTRESOURCE(IDC_MY3DGP1));
 
-	while (true)
+	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			if (msg.message == WM_QUIT)break;
 			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 			{
 				TranslateMessage(&msg);
@@ -71,8 +70,9 @@ int GameFramework::Run()
 			FrameAdvance();
 		}
 	}
-	OnDestroy();
 
+	OnDestroy();
+	
 	return static_cast<int>(msg.wParam);
 }
 
@@ -137,7 +137,6 @@ bool GameFramework::InitMainWindow()
 
 bool GameFramework::InitDirect3D()
 {
-
 	CreateDirect3DDevice();
 
 	CreateCommandQueueAndList();
@@ -150,6 +149,11 @@ bool GameFramework::InitDirect3D()
 	return true;
 }
 
+void GameFramework::OnCreate(HINSTANCE hInstance)
+{
+	mhInstance = hInstance;
+}
+
 void GameFramework::OnDestroy()
 {
 	WaitForGpuComplete();
@@ -157,7 +161,16 @@ void GameFramework::OnDestroy()
 
 	CloseHandle(mhFenceEvent);
 
-	mcomDxgiSwapChain->SetFullscreenState(FALSE, NULL);
+	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(FALSE, NULL));
+
+	mApp = nullptr;
+
+#if defined(_DEBUG)
+	ComPtr<IDXGIDebug1> comDxgiDebug = NULL;
+	DXGIGetDebugInterface1(0, IID_PPV_ARGS(comDxgiDebug.GetAddressOf()));
+	ThrowIfFailed(comDxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
+		DXGI_DEBUG_RLO_DETAIL));
+#endif
 }
 
 void GameFramework::CreateDirect3DDevice()
@@ -405,7 +418,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			PostQuitMessage(0);
+			DestroyWindow(hWnd);
 			break;
 		case VK_RETURN:
 			break;
@@ -454,8 +467,7 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 		mWndClientHeight = HIWORD(lParam);
 		return 0;
 	case WM_ACTIVATE:
-	default:
-		return DefWindowProc(hWnd, messageID, wParam, lParam);
+	default:return DefWindowProc(hWnd, messageID, wParam, lParam);
 	}
 	assert(0);
 }

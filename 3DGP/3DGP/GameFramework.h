@@ -7,14 +7,16 @@
 class GameFramework
 {
 public:
-	GameFramework(HINSTANCE hInstance);
+	GameFramework();
 	virtual ~GameFramework();
-	bool InitDirect3D();
+	void OnCreate(HINSTANCE hInstance);
 	void OnDestroy();
-	bool InitMainWindow();
 	bool Initialize();
-	int Run();
+	bool InitMainWindow();
+	bool InitDirect3D();
+
 public:
+	int Run();
 	void FrameAdvance();
 	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -22,6 +24,7 @@ public:
 	ATOM MyRegisterClass(HINSTANCE hInstance);
 
 	static GameFramework* GetApp() { return mApp; }
+
 protected:
 	void ProcessInput();
 	void AnimateObjects();
@@ -50,8 +53,8 @@ protected:
 	static GameFramework* mApp;
 
 protected:
-	HINSTANCE mhInstance;
 	HWND mhWnd;
+	HINSTANCE mhInstance;
 
 	int mWndClientWidth;
 	int mWndClientHeight;
