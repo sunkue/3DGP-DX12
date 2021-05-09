@@ -1,10 +1,21 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+LRESULT CALLBACK
+MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
+	// before CreateWindow returns, and thus before mhMainWnd is valid.
+	return GameFramework::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
+}
+
+/// //////////////////////////////////
+
+GameFramework* GameFramework::mApp = nullptr;
 ///////////////////////////////////////////////////////////////////////////////////////
 
-GameFramework::GameFramework() :
-	mhInstance{},
+GameFramework::GameFramework(HINSTANCE hInstance) :
+	mhInstance{ hInstance },
 	mhWnd{},
 	mWndClientWidth{ FRAME_BUFFER_WIDTH },
 	mWndClientHeight{ FRAME_BUFFER_HEIGHT },
@@ -31,28 +42,109 @@ GameFramework::GameFramework() :
 	mScene{}
 {
 	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
+	mApp = this;
 }
 
 GameFramework::~GameFramework()
 {
 
 }
-
-bool GameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
+int GameFramework::Run()
 {
-	mhInstance = hInstance;
-	mhWnd = hMainWnd;
+	MSG msg;
+
+	HACCEL hAccelTable = LoadAccelerators(mhInstance, MAKEINTRESOURCE(IDC_MY3DGP1));
+
+	while (true)
+	{
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			if (msg.message == WM_QUIT)break;
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+		}
+		else
+		{
+			FrameAdvance();
+		}
+	}
+	OnDestroy();
+
+	return static_cast<int>(msg.wParam);
+}
+
+bool GameFramework::Initialize()
+{
+	if (!InitMainWindow())return false;
+	if (!InitDirect3D())return false;
+	return true;
+}
+
+ATOM GameFramework::MyRegisterClass(HINSTANCE hInstance)
+{
+	WNDCLASSEXW wcex;
+
+	wcex.cbSize = sizeof(WNDCLASSEX);
+
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = MainWndProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = mhInstance;
+	wcex.hIcon = LoadIcon(0, IDI_APPLICATION);
+	wcex.hCursor = LoadCursor(0, IDC_ARROW);
+	wcex.hbrBackground = static_cast<HBRUSH>(GetStockObject(NULL_BRUSH));
+	wcex.lpszMenuName = 0;
+	wcex.lpszClassName = L"MainWnd";
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+	return RegisterClassEx(&wcex);
+}
+
+bool GameFramework::InitMainWindow()
+{
+	if (!MyRegisterClass(mhInstance))
+	{
+		MessageBox(0, L"RegisterClass Failed.", 0, 0);
+		return false;
+	}
+
+	RECT rc{ 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+	DWORD dwStyle{ WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION | WS_BORDER };
+	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwStyle);
+	int width{ rc.right - rc.left };
+	int height{ rc.bottom - rc.top };
+	mhWnd = CreateWindowW(L"MainWnd", L"SUNKUE D3D12 App", dwStyle,
+		CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+		nullptr, nullptr, mhInstance, nullptr);
+
+	if (!mhWnd)
+	{
+		return false;
+	}
+
+	ShowWindow(mhWnd, SW_SHOW);
+	UpdateWindow(mhWnd);
+
+#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+	ChangeSwapChainState();
+#endif
+	return true;
+}
+
+bool GameFramework::InitDirect3D()
+{
 
 	CreateDirect3DDevice();
 
-	//fence
-	//msaa
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
-	//CreateRenderTargetViews();
 	CreateDepthStencilView();
-	//viewport
+
 	BuildObjects();
 
 	return true;
@@ -66,13 +158,6 @@ void GameFramework::OnDestroy()
 	CloseHandle(mhFenceEvent);
 
 	mcomDxgiSwapChain->SetFullscreenState(FALSE, NULL);
-
-	//#if defined(_DEBUG)IDXGIDebug1 *pdxgiDebug = NULL;
-	//	DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug1), (void**)&pdxgiDebug);
-	//	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
-	//		DXGI_DEBUG_RLO_DETAIL);
-	//	pdxgiDebug->Release();
-	//#endif
 }
 
 void GameFramework::CreateDirect3DDevice()
@@ -337,29 +422,42 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 	}
 }
 
-LRESULT CALLBACK GameFramework::OnProcessingWindowMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (messageID)
 	{
-	case WM_SIZE:
-	{
-		mWndClientWidth = LOWORD(lParam);
-		mWndClientHeight = HIWORD(lParam);
-		break;
-	}
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-	case WM_MOUSEMOVE:
-		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
-		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 		OnProcessingKeyboardMessage(hWnd, messageID, wParam, lParam);
-		break;
+		return 0;
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_MOUSEMOVE:
+		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
+		return 0;
+	case WM_ENTERSIZEMOVE:
+	case WM_EXITSIZEMOVE:
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	case WM_MENUCHAR:
+		return MAKELRESULT(0, MNC_CLOSE);
+	case WM_GETMINMAXINFO:
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = FRAME_BUFFER_WIDTH;
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = FRAME_BUFFER_HEIGHT;
+		return 0;
+	case WM_SIZE:
+		mWndClientWidth = LOWORD(lParam);
+		mWndClientHeight = HIWORD(lParam);
+		return 0;
+	case WM_ACTIVATE:
+	default:
+		return DefWindowProc(hWnd, messageID, wParam, lParam);
 	}
-	return 0;
+	assert(0);
 }
 
 void GameFramework::ProcessInput()
@@ -380,7 +478,7 @@ void GameFramework::PopulateCommandList()
 	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mcomvD3dRenderTargetBuffers[mSwapChainBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mcomD3dCommandList->ResourceBarrier(1, &RB);
-	
+
 	mcomD3dCommandList->RSSetViewports(1, &mD3dViewport);
 	mcomD3dCommandList->RSSetScissorRects(1, &mD3dScissorRect);
 
@@ -391,10 +489,10 @@ void GameFramework::PopulateCommandList()
 	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
 	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, Colors::LightSeaGreen, 0, nullptr);
 	mcomD3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-	
+
 	mcomD3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
 
-	if (mScene)mScene->Render(mcomD3dCommandList.Get());	
+	if (mScene)mScene->Render(mcomD3dCommandList.Get());
 
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -447,7 +545,7 @@ void GameFramework::FrameAdvance()
 
 	ProcessInput();
 	AnimateObjects();
-	
+
 	PopulateCommandList();
 	ExecuteComandLists();
 	WaitForGpuComplete();

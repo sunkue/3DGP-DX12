@@ -2,22 +2,27 @@
 
 #include "GameTimer.h"
 #include "Scene.h"
+#include "3DGP00.h"
 
 class GameFramework
 {
 public:
-	GameFramework();
-	~GameFramework();
-	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
+	GameFramework(HINSTANCE hInstance);
+	virtual ~GameFramework();
+	bool InitDirect3D();
 	void OnDestroy();
-	bool InitWindows(HINSTANCE, int);
+	bool InitMainWindow();
+	bool Initialize();
+	int Run();
 public:
 	void FrameAdvance();
 	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	
-private:
+	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	ATOM MyRegisterClass(HINSTANCE hInstance);
+
+	static GameFramework* GetApp() { return mApp; }
+protected:
 	void ProcessInput();
 	void AnimateObjects();
 	void PopulateCommandList();
@@ -26,7 +31,7 @@ private:
 	void MoveToNextFrame();
 	void ShowFPS();
 
-private:
+protected:
 	void CreateDirect3DDevice();
 	void CreateSwapChain();
 	void CreateRtvAndDsvDescriptorHeaps();
@@ -38,11 +43,13 @@ private:
 	void BuildObjects();
 	void ReleaseObjects();
 
-private:
+protected:
 	void ChangeSwapChainState();
 
+protected:
+	static GameFramework* mApp;
 
-private:
+protected:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
 
@@ -80,7 +87,7 @@ private:
 	D3D12_VIEWPORT mD3dViewport;
 	D3D12_RECT mD3dScissorRect;
 
-private:
+protected:
 	GameTimer mGameTimer;
 	shared_ptr<Scene> mScene;
 	array<wchar_t, 50> mpszFrameRate;
