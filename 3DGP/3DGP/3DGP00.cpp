@@ -30,6 +30,7 @@ int WINAPI WinMain(
 
 	try
 	{
+		//GameFramework APP; -> 윈도우 끌 때 에러. 왜??!??!?!?!?
 		APP.OnCreate(hInstance);
 
 		if (!APP.Initialize())
