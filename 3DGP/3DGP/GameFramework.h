@@ -10,6 +10,21 @@ public:
 	~GameFramework();
 	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
+	bool InitWindows(HINSTANCE, int);
+public:
+	void FrameAdvance();
+	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	
+private:
+	void ProcessInput();
+	void AnimateObjects();
+	void PopulateCommandList();
+	void ExecuteComandLists();
+	void WaitForGpuComplete();
+	void MoveToNextFrame();
+	void ShowFPS();
 
 private:
 	void CreateDirect3DDevice();
@@ -23,19 +38,9 @@ private:
 	void BuildObjects();
 	void ReleaseObjects();
 
+private:
 	void ChangeSwapChainState();
 
-public:
-	void ProcessInput();
-	void AnimateObjects();
-	void PopulateCommandList();
-	void WaitForGpuComplete();
-	void MoveToNextFrame();
-	void FrameAdvance();
-
-	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 
 private:
 	HINSTANCE mhInstance;
@@ -75,10 +80,9 @@ private:
 	D3D12_VIEWPORT mD3dViewport;
 	D3D12_RECT mD3dScissorRect;
 
-	shared_ptr<Scene> mScene;
-
 private:
 	GameTimer mGameTimer;
+	shared_ptr<Scene> mScene;
 	array<wchar_t, 50> mpszFrameRate;
 };
 

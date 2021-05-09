@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 GameFramework::GameFramework() :
 	mhInstance{},
@@ -129,7 +129,7 @@ void GameFramework::CreateDirect3DDevice()
 	mD3dViewport.MinDepth = 0.0f;
 	mD3dViewport.MaxDepth = 1.0f;
 
-	mD3dScissorRect = { 0,0,mWndClientWidth,mWndClientHeight };
+	mD3dScissorRect = { 100,100,mWndClientWidth,mWndClientHeight };
 }
 
 void GameFramework::CreateCommandQueueAndList()
@@ -367,7 +367,7 @@ void GameFramework::ProcessInput()
 
 }
 
-void GameFramework::AnimateObjects()
+inline void GameFramework::AnimateObjects()
 {
 	if (mScene)mScene->AnimateObjects(mGameTimer.GetTimeElapsed());
 }
@@ -377,24 +377,24 @@ void GameFramework::PopulateCommandList()
 	ThrowIfFailed(mcomD3dCommandAllocator->Reset());
 	ThrowIfFailed(mcomD3dCommandList->Reset(mcomD3dCommandAllocator.Get(), nullptr));
 
-	mcomD3dCommandList->RSSetViewports(1, &mD3dViewport);
-	mcomD3dCommandList->RSSetScissorRects(1, &mD3dScissorRect);
-
 	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mcomvD3dRenderTargetBuffers[mSwapChainBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mcomD3dCommandList->ResourceBarrier(1, &RB);
+	
+	mcomD3dCommandList->RSSetViewports(1, &mD3dViewport);
+	mcomD3dCommandList->RSSetScissorRects(1, &mD3dScissorRect);
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		static_cast<INT>(mSwapChainBufferIndex), mRtvDescriptorIncrementSize };
-
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mcomD3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
-	mcomD3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
 	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
-	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, nullptr);
+	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, Colors::LightSeaGreen, 0, nullptr);
 	mcomD3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	
+	mcomD3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
 
-	if (mScene)mScene->Render(mcomD3dCommandList.Get());
+	if (mScene)mScene->Render(mcomD3dCommandList.Get());	
 
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -428,27 +428,40 @@ void GameFramework::MoveToNextFrame()
 	}
 }
 
+inline void GameFramework::ExecuteComandLists()
+{
+	ID3D12CommandList* comD3dCommandLists[]{ mcomD3dCommandList.Get() };
+	mcomD3dCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
+}
+
+inline void GameFramework::ShowFPS()
+{
+	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
+	mGameTimer.GetFrameRate(mpszFrameRate.data() + wcslen(mpszFrameRate.data()), mpszFrameRate.size());
+	SetWindowText(mhWnd, mpszFrameRate.data());
+}
+
 void GameFramework::FrameAdvance()
 {
 	mGameTimer.Tick();
 
 	ProcessInput();
-
 	AnimateObjects();
-
+	
 	PopulateCommandList();
-
-	ID3D12CommandList* comD3dCommandLists[]{ mcomD3dCommandList.Get() };
-	mcomD3dCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
-
+	ExecuteComandLists();
 	WaitForGpuComplete();
-
+#ifdef _WITH_PRESENT_PARAMETERS
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters{};
 	ThrowIfFailed(mcomDxgiSwapChain->Present1(0, 0, &dxgiPresentParameters));
-
+#else
+#ifdef _WITH_SYNCH_SWAPCHAIN
+	ThrowIfFailed(mcomDxgiSwapChain->Present(1, 0));
+#else
+	ThrowIfFailed(mcomDxgiSwapChain->Present(0, 0));
+#endif // _WITH_SYNCH_SWAPCHAIN
+#endif // _WITH_PRESENT_PARAMETERS
 	MoveToNextFrame();
 
-	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
-	mGameTimer.GetFrameRate(mpszFrameRate.data() + wcslen(mpszFrameRate.data()), mpszFrameRate.size());
-	SetWindowText(mhWnd, mpszFrameRate.data());
+	ShowFPS();
 }

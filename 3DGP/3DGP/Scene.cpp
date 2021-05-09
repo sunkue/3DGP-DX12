@@ -114,5 +114,5 @@ void Scene::PrepareRender(ID3D12GraphicsCommandList* pD3dCommandList)
 void Scene::Render(ID3D12GraphicsCommandList* pD3dCommandList)
 {
 	PrepareRender(pD3dCommandList);
-	pD3dCommandList->DrawInstanced(3, 1, 0, 0);
+	pD3dCommandList->DrawInstanced(6, 1, 0, 0);
 };

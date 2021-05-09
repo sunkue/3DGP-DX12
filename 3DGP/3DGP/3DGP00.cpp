@@ -25,6 +25,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ LPWSTR    lpCmdLine,
 	_In_ int       nCmdShow)
 {
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif // _DEBUG
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -53,16 +57,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			return FALSE;
 		}
 	}
-	catch (const std::exception& e)
+	catch (const DxException& e)
 	{
-		cout << e.what();
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
 	}
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DGP1));
 
-	MSG msg;
 
 	// 기본 메시지 루프입니다:
+	MSG msg;
 	while (true)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -126,7 +131,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
 	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
+	DWORD dwStyle = WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION; // | WS_BORDER;
 	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwStyle);
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, dwStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
@@ -162,23 +167,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	case WM_SIZE:
+	case WM_KEYDOWN:
+	case WM_KEYUP:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
-	case WM_KEYDOWN:
-	case WM_KEYUP:
+	case WM_ENTERSIZEMOVE:
+	case WM_EXITSIZEMOVE:
 		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
-		break;
+		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
+		return 0;
+	case WM_MENUCHAR:
+		return MAKELRESULT(0, MNC_CLOSE);
+	case WM_GETMINMAXINFO:
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = FRAME_BUFFER_WIDTH;
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = FRAME_BUFFER_HEIGHT;
+		return 0;
+	case WM_SIZE:
+		return 0;
+	case WM_ACTIVATE:
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	return 0;
+	assert(0);
 }
 
 // 정보 대화 상자의 메시지 처리기입니다.
