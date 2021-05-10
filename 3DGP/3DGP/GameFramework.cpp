@@ -14,8 +14,8 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 GameFramework* GameFramework::mApp = nullptr;
 ///////////////////////////////////////////////////////////////////////////////////////
 
-GameFramework::GameFramework() :
-	mhInstance{},
+GameFramework::GameFramework(HINSTANCE hInstance) :
+	mhInstance{ hInstance },
 	mhWnd{},
 	mWndClientWidth{ FRAME_BUFFER_WIDTH },
 	mWndClientHeight{ FRAME_BUFFER_HEIGHT },
@@ -41,17 +41,17 @@ GameFramework::GameFramework() :
 	mGameTimer{},
 	mScene{}
 {
-	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
 	mApp = this;
 }
 
 GameFramework::~GameFramework()
 {
+
 }
 
 int GameFramework::Run()
 {
-	MSG msg{0};
+	MSG msg{};
 
 	HACCEL hAccelTable = LoadAccelerators(mhInstance, MAKEINTRESOURCE(IDC_MY3DGP1));
 
@@ -72,7 +72,7 @@ int GameFramework::Run()
 	}
 
 	OnDestroy();
-	
+
 	return static_cast<int>(msg.wParam);
 }
 
@@ -149,9 +149,9 @@ bool GameFramework::InitDirect3D()
 	return true;
 }
 
-void GameFramework::OnCreate(HINSTANCE hInstance)
+void GameFramework::OnCreate()
 {
-	mhInstance = hInstance;
+	
 }
 
 void GameFramework::OnDestroy()
@@ -227,7 +227,7 @@ void GameFramework::CreateDirect3DDevice()
 	mD3dViewport.MinDepth = 0.0f;
 	mD3dViewport.MaxDepth = 1.0f;
 
-	mD3dScissorRect = { 100,100,mWndClientWidth,mWndClientHeight };
+	mD3dScissorRect = { 0,0,mWndClientWidth,mWndClientHeight };
 }
 
 void GameFramework::CreateCommandQueueAndList()
@@ -477,7 +477,7 @@ void GameFramework::ProcessInput()
 
 }
 
-inline void GameFramework::AnimateObjects()
+void GameFramework::AnimateObjects()
 {
 	if (mScene)mScene->AnimateObjects(mGameTimer.GetTimeElapsed());
 }
@@ -487,7 +487,7 @@ void GameFramework::PopulateCommandList()
 	ThrowIfFailed(mcomD3dCommandAllocator->Reset());
 	ThrowIfFailed(mcomD3dCommandList->Reset(mcomD3dCommandAllocator.Get(), nullptr));
 
-	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mcomvD3dRenderTargetBuffers[mSwapChainBufferIndex].Get(),
+	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mcomvD3dRenderTargetBuffers.at(mSwapChainBufferIndex).Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mcomD3dCommandList->ResourceBarrier(1, &RB);
 
@@ -515,7 +515,7 @@ void GameFramework::PopulateCommandList()
 
 void GameFramework::WaitForGpuComplete()
 {
-	const UINT64 Fence{ ++mFenceValues[mSwapChainBufferIndex] };
+	const UINT64 Fence{ ++mFenceValues.at(mSwapChainBufferIndex) };
 	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
 	if (mcomD3dFence->GetCompletedValue() < Fence)
 	{
@@ -528,7 +528,7 @@ void GameFramework::MoveToNextFrame()
 {
 	mSwapChainBufferIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
 
-	const UINT64 Fence{ ++mFenceValues[mSwapChainBufferIndex] };
+	const UINT64 Fence{ ++mFenceValues.at(mSwapChainBufferIndex) };
 	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
 
 	if (mcomD3dFence->GetCompletedValue() < Fence)
@@ -538,17 +538,18 @@ void GameFramework::MoveToNextFrame()
 	}
 }
 
-inline void GameFramework::ExecuteComandLists()
+void GameFramework::ExecuteComandLists()
 {
 	ID3D12CommandList* comD3dCommandLists[]{ mcomD3dCommandList.Get() };
 	mcomD3dCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
 }
 
-inline void GameFramework::ShowFPS()
+void GameFramework::ShowFPS()
 {
-	_tcscpy_s(mpszFrameRate._Elems, _T("Sunkue D3D12 ("));
-	mGameTimer.GetFrameRate(mpszFrameRate.data() + wcslen(mpszFrameRate.data()), mpszFrameRate.size());
-	SetWindowText(mhWnd, mpszFrameRate.data());
+	wcscpy_s(mStrFrameRate.data(), mStrFrameRate.size() - 1, _T("Sunkue D3D12 ("));
+	size_t len{ wcslen(mStrFrameRate.data()) };
+	mGameTimer.GetFrameRate(mStrFrameRate.data() + len, mStrFrameRate.size() - 1 - len);
+	SetWindowText(mhWnd, mStrFrameRate.data());
 }
 
 void GameFramework::FrameAdvance()
@@ -574,4 +575,6 @@ void GameFramework::FrameAdvance()
 	MoveToNextFrame();
 
 	ShowFPS();
+
+	assert(mSwapChainBufferIndex < 3);
 }

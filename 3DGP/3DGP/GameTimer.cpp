@@ -67,7 +67,7 @@ void GameTimer::Reset()
 
 ///////////////// private ////////////////////////////////
 
-inline void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
+void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
 {
 	if (abs(timeElapsed - mTimeElapsed) < 1s)
 	{

@@ -7,9 +7,9 @@
 class GameFramework
 {
 public:
-	GameFramework();
+	GameFramework(HINSTANCE hInstance);
 	virtual ~GameFramework();
-	void OnCreate(HINSTANCE hInstance);
+	void OnCreate();
 	void OnDestroy();
 	bool Initialize();
 	bool InitMainWindow();
@@ -93,6 +93,7 @@ protected:
 protected:
 	GameTimer mGameTimer;
 	shared_ptr<Scene> mScene;
-	array<wchar_t, 50> mpszFrameRate;
+	array<wchar_t, 50> mStrFrameRate;
+
 };
 

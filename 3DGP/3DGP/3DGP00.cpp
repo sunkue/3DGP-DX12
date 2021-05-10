@@ -1,8 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameFramework.h"
-#include <WinBase.h>
 
-GameFramework APP;
 
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
@@ -30,8 +28,7 @@ int WINAPI WinMain(
 
 	try
 	{
-		//GameFramework APP; -> 윈도우 끌 때 에러. 왜??!??!?!?!?
-		APP.OnCreate(hInstance);
+		GameFramework APP{ hInstance };
 
 		if (!APP.Initialize())
 		{
@@ -43,6 +40,11 @@ int WINAPI WinMain(
 	catch (const DxException& e)
 	{
 		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
+	}
+	catch (const exception* e)
+	{
+		cout << "( "<< e->what() <<" ) exception";
 		return 0;
 	}
 
