@@ -1,5 +1,6 @@
 #pragma once
 #include <comdef.h>
+#include <ostream>
 
 using Microsoft::WRL::ComPtr;
 using BYTE = unsigned char;
@@ -53,20 +54,27 @@ public:
     std::wstring wfn = AnsiToWString(__FILE__);                       \
     if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 }
-#endif
+#endif // !ThrowIfFailed
 
 
-inline void ThrowIfFailedWithErr(HRESULT hr, ID3DBlob* err)
+inline void OutputErrorMessage(ID3DBlob* errorMessage, std::ostream& os)
 {
-	if (FAILED(hr))
-	{
-		if (err)
-		{
-			OutputDebugStringA(reinterpret_cast<char*>(err->GetBufferPointer()));
-		}
+	if (errorMessage == nullptr)return;
+	char* compileErrors;
+	size_t bufferSize;
 
-		ThrowIfFailed(hr);
+	compileErrors = (char*)(errorMessage->GetBufferPointer());
+	bufferSize = errorMessage->GetBufferSize();
+
+	for (size_t i = 0; i < bufferSize; i++)
+	{
+		os << compileErrors[i];
 	}
+
+	errorMessage->Release();
+	errorMessage = nullptr;
+
+	return;
 }
 
 inline void GetAssetsPath(_Out_writes_(pathSize) WCHAR* path, UINT pathSize)

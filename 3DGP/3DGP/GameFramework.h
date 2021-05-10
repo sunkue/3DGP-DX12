@@ -7,6 +7,7 @@
 class GameFramework
 {
 public:
+	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance);
 	virtual ~GameFramework();
 	void OnCreate();

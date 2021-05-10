@@ -3,7 +3,7 @@
 
 float4 tri(uint vertexID)
 {
-	float3 output;
+	float3 output = float3(0.0f,0.0f,0.0f);
 	switch (vertexID)
 	{
 	case 0:
@@ -22,7 +22,7 @@ float4 tri(uint vertexID)
 
 float4 fullscreen(uint vertexID)
 {
-	float3 output;
+	float3 output = float3(0.0f, 0.0f, 0.0f);
 	switch (vertexID)
 	{
 	case 0:

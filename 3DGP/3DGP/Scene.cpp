@@ -13,36 +13,46 @@ Scene::~Scene()
 
 void Scene::CreateGraphicsRootSignature(ID3D12Device* pD3dDevice)
 {
+	HRESULT hResult;
 	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags{
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
 	};
 	CD3DX12_ROOT_SIGNATURE_DESC d3DRootSignatureDesc{ 0,nullptr,0,nullptr,rootSignatureFlags };
 	ComPtr<ID3DBlob> comD3dSignatureBlob;
 	ComPtr<ID3DBlob> comD3dErrorBlob;
-	ThrowIfFailedWithErr(D3D12SerializeRootSignature(&d3DRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-		comD3dSignatureBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf()), comD3dErrorBlob.Get());
+	hResult = D3D12SerializeRootSignature(&d3DRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+		comD3dSignatureBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf());
+	OutputErrorMessage(comD3dErrorBlob.Get(),cout);
+	ThrowIfFailed(hResult);
+	
 	ThrowIfFailed(pD3dDevice->CreateRootSignature(0, comD3dSignatureBlob->GetBufferPointer(),
 		comD3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(mcomD3dGraphicsRootSignature.GetAddressOf())));
 }
 
 void Scene::CreateGraphicsPipelineState(ID3D12Device* pD3dDevice)
 {
+	HRESULT hResult;
 	ComPtr<ID3DBlob> comD3dVertexShaderBlob;
 	ComPtr<ID3DBlob> comD3dPixelShaderBlob;
 	ComPtr<ID3DBlob> comD3dErrorBlob;
 
 	UINT compileFlag = 0;
 #if defined(_DEBUG)
-	compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+	compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_WARNINGS_ARE_ERRORS;
 #endif
 
 	wstring shaderFile{ L"Shaders.hlsl" };
+	
+	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "VSMain", "vs_5_1", compileFlag, 0,
+		comD3dVertexShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf());
+	OutputErrorMessage(comD3dErrorBlob.Get(),cout);
+	ThrowIfFailed(hResult);
+	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "PSMain", "ps_5_1", compileFlag, 0,
+		comD3dPixelShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf());
+	OutputErrorMessage(comD3dErrorBlob.Get(),cout);
+	ThrowIfFailed(hResult);
 
-	ThrowIfFailedWithErr(D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "VSMain", "vs_5_1", compileFlag, 0,
-		comD3dVertexShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf()), comD3dErrorBlob.Get());
-	ThrowIfFailedWithErr(D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "PSMain", "ps_5_1", compileFlag, 0,
-		comD3dPixelShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf()), comD3dErrorBlob.Get());
-
+	
 	CD3DX12_RASTERIZER_DESC d3DRasterizerDesc{ CD3DX12_DEFAULT{} };
 	CD3DX12_BLEND_DESC d3DBlendDesc{ CD3DX12_DEFAULT{} };
 

@@ -48,6 +48,7 @@ using Microsoft::WRL::ComPtr;
 #include <list>
 #include <array>
 #include <cassert>
+#include <fstream>
 
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
