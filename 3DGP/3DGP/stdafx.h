@@ -58,13 +58,19 @@ using namespace std::chrono;
 using TimePoint = steady_clock::time_point;
 
 constexpr INT FRAME_BUFFER_WIDTH{ 640 };
-constexpr INT FRAME_BUFFER_HEIGHT{ 480 };
+constexpr INT FRAME_BUFFER_HEIGHT{ 360 };
+
+constexpr INT FRAME_BUFFER_WIDTH_HD{ 1280 };
+constexpr INT FRAME_BUFFER_HEIGHT_HD{ 720 };
+
+constexpr INT FRAME_BUFFER_WIDTH_FHD{ 1920 };
+constexpr INT FRAME_BUFFER_HEIGHT_FHD{ 1080 };
 
 constexpr INT FRAME_BUFFER_WIDTH_QHD{ 2560 };
 constexpr INT FRAME_BUFFER_HEIGHT_QHD{ 1440 };
 
-constexpr INT FRAME_BUFFER_WIDTH_FHD{ 1980 };
-constexpr INT FRAME_BUFFER_HEIGHT_FHD{ 1080 };
+constexpr INT FRAME_BUFFER_WIDTH_UHD{ 3840 };
+constexpr INT FRAME_BUFFER_HEIGHT_UHD{ 2160 };
 
 constexpr UINT RFR = 144;
 

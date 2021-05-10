@@ -36,18 +36,20 @@ void Scene::CreateGraphicsPipelineState(ID3D12Device* pD3dDevice)
 	ComPtr<ID3DBlob> comD3dPixelShaderBlob;
 	ComPtr<ID3DBlob> comD3dErrorBlob;
 
-	UINT compileFlag = 0;
+	UINT compileFlag = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG)
-	compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_WARNINGS_ARE_ERRORS;
+	compileFlag = compileFlag | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_WARNINGS_ARE_ERRORS;
+#else
+	compileFlag = compileFlag | D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
 
 	wstring shaderFile{ L"Shaders.hlsl" };
 	
-	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "VSMain", "vs_5_1", compileFlag, 0,
+	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VSMain", "vs_5_1", compileFlag, 0,
 		comD3dVertexShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf());
 	OutputErrorMessage(comD3dErrorBlob.Get(),cout);
 	ThrowIfFailed(hResult);
-	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, nullptr, "PSMain", "ps_5_1", compileFlag, 0,
+	hResult = D3DCompileFromFile(shaderFile.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PSMain", "ps_5_1", compileFlag, 0,
 		comD3dPixelShaderBlob.GetAddressOf(), comD3dErrorBlob.GetAddressOf());
 	OutputErrorMessage(comD3dErrorBlob.Get(),cout);
 	ThrowIfFailed(hResult);

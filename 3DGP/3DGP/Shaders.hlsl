@@ -20,7 +20,7 @@ float4 tri(uint vertexID)
 	return float4(output, 1.0f);
 }
 
-float4 fullscreen(uint vertexID)
+float4 full(uint vertexID)
 {
 	float3 output = float3(0.0f, 0.0f, 0.0f);
 	switch (vertexID)
@@ -50,7 +50,7 @@ float4 fullscreen(uint vertexID)
 
 float4 VSMain(uint vertexID : SV_VertexID) : SV_POSITION
 {
-	return fullscreen(vertexID);
+	return full(vertexID);
 }
 
 #define FRAME_BUFFER_WIDTH	640.0f;
@@ -59,6 +59,7 @@ float4 VSMain(uint vertexID : SV_VertexID) : SV_POSITION
 float4 PSMain(float4 input : SV_POSITION) : SV_TARGET
 {
 	float4 color = float4(1.0f, 1.0f, 0.0f, 1.0f);
+	if (input.y > 100.0f)color.b = 1.0f;
 	color.r = input.x / FRAME_BUFFER_WIDTH;
 
 	return color;

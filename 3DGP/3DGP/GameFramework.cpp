@@ -11,7 +11,7 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 /// //////////////////////////////////
 
-GameFramework* GameFramework::mApp = nullptr;
+GameFramework* GameFramework::APP = nullptr;
 ///////////////////////////////////////////////////////////////////////////////////////
 
 GameFramework::GameFramework(HINSTANCE hInstance) :
@@ -41,7 +41,7 @@ GameFramework::GameFramework(HINSTANCE hInstance) :
 	mGameTimer{},
 	mScene{}
 {
-	mApp = this;
+	APP = this;
 }
 
 GameFramework::~GameFramework()
@@ -112,7 +112,7 @@ bool GameFramework::InitMainWindow()
 		return false;
 	}
 
-	RECT rc{ 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+	RECT rc{ 0, 0, mWndClientWidth, mWndClientHeight };
 	DWORD dwStyle{ WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION | WS_BORDER };
 	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwStyle);
 	int width{ rc.right - rc.left };
@@ -151,7 +151,7 @@ bool GameFramework::InitDirect3D()
 
 void GameFramework::OnCreate()
 {
-	
+
 }
 
 void GameFramework::OnDestroy()
@@ -163,7 +163,7 @@ void GameFramework::OnDestroy()
 
 	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(FALSE, NULL));
 
-	mApp = nullptr;
+	APP = nullptr;
 
 #if defined(_DEBUG)
 	ComPtr<IDXGIDebug1> comDxgiDebug = NULL;
@@ -220,6 +220,9 @@ void GameFramework::CreateDirect3DDevice()
 
 	mhFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
+	SetViewprtScissorRect();
+}
+void GameFramework::SetViewprtScissorRect(){
 	mD3dViewport.TopLeftX = 0;
 	mD3dViewport.TopLeftY = 0;
 	mD3dViewport.Width = static_cast<float>(mWndClientWidth);
@@ -229,7 +232,6 @@ void GameFramework::CreateDirect3DDevice()
 
 	mD3dScissorRect = { 0,0,mWndClientWidth,mWndClientHeight };
 }
-
 void GameFramework::CreateCommandQueueAndList()
 {
 	D3D12_COMMAND_QUEUE_DESC d3dCommandQueueDesc{};
@@ -262,7 +264,7 @@ void GameFramework::CreateSwapChain()
 	dxgiSwapChainDesc.SampleDesc.Count = (mbMssa4xEnable) ? 4 : 1;
 	dxgiSwapChainDesc.SampleDesc.Quality = (mbMssa4xEnable) ? (mMsaa4xQualityLevels - 1) : 0;
 	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	dxgiSwapChainDesc.BufferCount = mSwapChainBuffers;
+	dxgiSwapChainDesc.BufferCount = mcexprSwapChainBuffers;
 	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = RFR;
@@ -285,8 +287,7 @@ void GameFramework::CreateSwapChain()
 void GameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc{};
-
-	d3dDescriptorHeapDesc.NumDescriptors = mSwapChainBuffers;
+	d3dDescriptorHeapDesc.NumDescriptors = mcexprSwapChainBuffers;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
@@ -304,7 +305,7 @@ void GameFramework::CreateRtvAndDsvDescriptorHeaps()
 void GameFramework::CreateRenderTargetViews()
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (UINT i = 0; i < mSwapChainBuffers; ++i)
+	for (UINT i = 0; i < mcexprSwapChainBuffers; ++i)
 	{
 		ThrowIfFailed(mcomDxgiSwapChain->GetBuffer(i, IID_PPV_ARGS(mcomvD3dRenderTargetBuffers.at(i).GetAddressOf())));
 		mcomD3dDevice->CreateRenderTargetView(mcomvD3dRenderTargetBuffers.at(i).Get(), nullptr, d3dRtvCPUDescriptorHandle);
@@ -360,14 +361,24 @@ void GameFramework::ReleaseObjects()
 	mScene.reset();
 }
 
-void GameFramework::ChangeSwapChainState()
+void GameFramework::ChanegeFullScreenMode()
 {
 	WaitForGpuComplete();
 
-	BOOL bFullScreenState{ false };
-	mcomDxgiSwapChain->GetFullscreenState(&bFullScreenState, nullptr);
-	mcomDxgiSwapChain->SetFullscreenState(!bFullScreenState, nullptr);
+	BOOL bFullScreenNow{ false };
+	ThrowIfFailed(mcomDxgiSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
+	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
 
+	mWndClientWidth = bFullScreenNow ? FRAME_BUFFER_WIDTH : FRAME_BUFFER_WIDTH_UHD;
+	mWndClientHeight = bFullScreenNow ? FRAME_BUFFER_HEIGHT : FRAME_BUFFER_HEIGHT_UHD;
+
+	mcomD3dRtvDescriptorHeap->Release();
+	mcomD3dDsvDescriptorHeap->Release();
+	CreateRtvAndDsvDescriptorHeaps();
+
+	for (auto& RT : mcomvD3dRenderTargetBuffers)RT->Release();
+	mcomD3dDepthStencilBuffer->Release();
+	
 	DXGI_MODE_DESC dxgiTargetParameters;
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = mWndClientWidth;
@@ -376,18 +387,19 @@ void GameFramework::ChangeSwapChainState()
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	mcomDxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
-
-	for (auto& RT : mcomvD3dRenderTargetBuffers)RT->Release();
-
+	ThrowIfFailed(mcomDxgiSwapChain->ResizeTarget(&dxgiTargetParameters));
+	
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-	mcomDxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
-	mcomDxgiSwapChain->ResizeBuffers(mSwapChainBuffers, mWndClientWidth, mWndClientHeight,
-		dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+	ThrowIfFailed(mcomDxgiSwapChain->GetDesc(&dxgiSwapChainDesc));
+	dxgiSwapChainDesc.Windowed = !bFullScreenNow;
+	ThrowIfFailed(mcomDxgiSwapChain->ResizeBuffers(mcexprSwapChainBuffers, mWndClientWidth, mWndClientHeight,
+		dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags));
 
 	mSwapChainBufferIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
 
+	SetViewprtScissorRect();
 	CreateRenderTargetViews();
+	CreateDepthStencilView();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,7 +438,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 			cout << "µµ¿ò¸» : \n";
 			break;
 		case VK_F9:
-			ChangeSwapChainState();
+			ChanegeFullScreenMode();
 			break;
 		default:break;
 		}

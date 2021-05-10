@@ -24,7 +24,7 @@ public:
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	ATOM MyRegisterClass(HINSTANCE hInstance);
 
-	static GameFramework* GetApp() { return mApp; }
+	static GameFramework* GetApp() { return APP; }
 
 protected:
 	void ProcessInput();
@@ -40,18 +40,18 @@ protected:
 	void CreateSwapChain();
 	void CreateRtvAndDsvDescriptorHeaps();
 	void CreateCommandQueueAndList();
-
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
+	void SetViewprtScissorRect();
 
 	void BuildObjects();
 	void ReleaseObjects();
 
 protected:
-	void ChangeSwapChainState();
+	void ChanegeFullScreenMode();
 
 protected:
-	static GameFramework* mApp;
+	static GameFramework* APP;
 
 protected:
 	HWND mhWnd;
@@ -67,10 +67,10 @@ protected:
 	bool mbMssa4xEnable{ false };
 
 	UINT mMsaa4xQualityLevels{ 0 };
-	static constexpr UINT mSwapChainBuffers{ 2 };
+	static constexpr UINT mcexprSwapChainBuffers{ 2 };
 	UINT mSwapChainBufferIndex;
 
-	array<ComPtr<ID3D12Resource>, mSwapChainBuffers> mcomvD3dRenderTargetBuffers;
+	array<ComPtr<ID3D12Resource>, mcexprSwapChainBuffers> mcomvD3dRenderTargetBuffers;
 	ComPtr<ID3D12DescriptorHeap> mcomD3dRtvDescriptorHeap;
 	UINT mRtvDescriptorIncrementSize;
 
@@ -85,7 +85,7 @@ protected:
 	ComPtr<ID3D12PipelineState> mcomD3dPipelineState;
 
 	ComPtr<ID3D12Fence> mcomD3dFence;
-	array<UINT64, mSwapChainBuffers> mFenceValues;
+	array<UINT64, mcexprSwapChainBuffers> mFenceValues;
 	HANDLE mhFenceEvent;
 
 	D3D12_VIEWPORT mD3dViewport;

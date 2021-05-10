@@ -28,14 +28,14 @@ int WINAPI WinMain(
 
 	try
 	{
-		GameFramework APP{ hInstance };
+		GameFramework application{ hInstance };
 
-		if (!APP.Initialize())
+		if (!application.Initialize())
 		{
 			return 0;
 		}
 
-		return APP.Run();
+		return application.Run();
 	}
 	catch (const DxException& e)
 	{
