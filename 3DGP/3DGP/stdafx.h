@@ -56,8 +56,15 @@ using Microsoft::WRL::ComPtr;
 using namespace std;
 using namespace std::chrono;
 using TimePoint = steady_clock::time_point;
+
 constexpr INT FRAME_BUFFER_WIDTH{ 640 };
 constexpr INT FRAME_BUFFER_HEIGHT{ 480 };
+
+constexpr INT FRAME_BUFFER_WIDTH_QHD{ 2560 };
+constexpr INT FRAME_BUFFER_HEIGHT_QHD{ 1440 };
+
+constexpr INT FRAME_BUFFER_WIDTH_FHD{ 1980 };
+constexpr INT FRAME_BUFFER_HEIGHT_FHD{ 1080 };
 
 constexpr UINT RFR = 144;
 

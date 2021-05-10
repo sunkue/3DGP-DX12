@@ -12,8 +12,7 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 /// //////////////////////////////////
 
 GameFramework* GameFramework::mApp = nullptr;
-
-///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 GameFramework::GameFramework(HINSTANCE hInstance) :
 	mhInstance{ hInstance },
@@ -46,11 +45,6 @@ GameFramework::GameFramework(HINSTANCE hInstance) :
 }
 
 GameFramework::~GameFramework()
-{
-
-}
-
-void GameFramework::OnCreate()
 {
 
 }
@@ -141,9 +135,6 @@ bool GameFramework::InitMainWindow()
 	return true;
 }
 
-///////////////////////////////////////////////////////////////////
-
-
 bool GameFramework::InitDirect3D()
 {
 	CreateDirect3DDevice();
@@ -156,6 +147,11 @@ bool GameFramework::InitDirect3D()
 	BuildObjects();
 
 	return true;
+}
+
+void GameFramework::OnCreate()
+{
+	
 }
 
 void GameFramework::OnDestroy()
