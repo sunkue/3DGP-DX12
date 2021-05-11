@@ -471,8 +471,8 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_MENUCHAR:
 		return MAKELRESULT(0, MNC_CLOSE);
 	case WM_GETMINMAXINFO:
-		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = FRAME_BUFFER_WIDTH;
-		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = FRAME_BUFFER_HEIGHT;
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
+		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
 		return 0;
 	case WM_SIZE:
 		mWndClientWidth = LOWORD(lParam);
