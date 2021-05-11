@@ -4,15 +4,15 @@
 
 //////////////// init //////////////////////////////////
 
-GameTimer::GameTimer() :
-	mSampleCount{ 0 },
-	mCurrentFrameRate{ 0 },
-	mFramesPerSecond{ 0 },
-	mFPSTimeElapsed{ milliseconds::zero() },
-	mbStopped{ false },
-	mTimeElapsed{ milliseconds::zero() },
-	mTimePaused{ milliseconds::zero() },
-	mTimePlayed{ milliseconds::zero() }
+GameTimer::GameTimer()
+	:mSampleCount		{ 0 }
+	, mCurrentFrameRate	{ 0 }
+	, mFramesPerSecond	{ 0 }
+	, mFPSTimeElapsed	{ milliseconds::zero() }
+	, mbStopped			{ false }
+	, mTimeElapsed		{ milliseconds::zero() }
+	, mTimePaused		{ milliseconds::zero() }
+	, mTimePlayed		{ milliseconds::zero() }
 {
 	ResetTimePoints();
 	mFrameTimes.fill(milliseconds::zero());
@@ -33,8 +33,8 @@ void GameTimer::Tick(const milliseconds lockFPS)
 
 	while (timeElapsed < lockFPS)
 	{
-		mCurrentTime = steady_clock::now();
-		timeElapsed = duration_cast<milliseconds>(mCurrentTime - mLastTime);
+		mCurrentTime	= steady_clock::now();
+		timeElapsed		= duration_cast<milliseconds>(mCurrentTime - mLastTime);
 	}
 
 	mLastTime = mCurrentTime;
@@ -42,7 +42,7 @@ void GameTimer::Tick(const milliseconds lockFPS)
 	CaculateFrameStates(timeElapsed);
 
 	mTimePlayed += timeElapsed;
-	mTimePaused = mbStopped ? mTimePaused + timeElapsed : milliseconds::zero();
+	mTimePaused = mbStopped ? (mTimePaused + timeElapsed) : (milliseconds::zero());
 }
 
 size_t GameTimer::GetFrameRate(wchar_t* lpszString, const size_t characters)
@@ -71,7 +71,10 @@ void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
 {
 	if (abs(timeElapsed - mTimeElapsed) < 1s)
 	{
-		memmove(&mFrameTimes.at(1), mFrameTimes.data(), (mFrameTimes.max_size() - 1) * sizeof(milliseconds));
+		memmove(
+			  &mFrameTimes.at(1)
+			, mFrameTimes.data()
+			, (mFrameTimes.max_size() - 1) * sizeof(milliseconds));
 		mFrameTimes[0] = timeElapsed;
 		if (mSampleCount < mFrameTimes.max_size()) ++mSampleCount;
 	}
@@ -80,9 +83,9 @@ void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
 	mFPSTimeElapsed += timeElapsed;
 	if (1s < mFPSTimeElapsed)
 	{
-		mCurrentFrameRate = mFramesPerSecond;
-		mFramesPerSecond = 0;
-		mFPSTimeElapsed = milliseconds::zero();
+		mCurrentFrameRate	= mFramesPerSecond;
+		mFramesPerSecond	= 0;
+		mFPSTimeElapsed		= milliseconds::zero();
 	}
 
 	/* (mTimeElapsed) is average elapsed time for each (mSampleCount) frames */
@@ -93,16 +96,16 @@ void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
 
 _forceinline void GameTimer::ResetTimePoints()
 {
-	TimePoint now{ steady_clock::now() };
-	mBaseTime = now;
-	mLastTime = now;
-	mCurrentTime = now;
-	mStopTime = now;
+	TimePoint now	{ steady_clock::now() };
+	mBaseTime		= now;
+	mLastTime		= now;
+	mCurrentTime	= now;
+	mStopTime		= now;
 }
 
 _forceinline void GameTimer::ResetDurations()
 {
-	mTimeElapsed = milliseconds::zero();
-	mTimePlayed = milliseconds::zero();
-	mTimePaused = milliseconds::zero();
+	mTimeElapsed	= milliseconds::zero();
+	mTimePlayed		= milliseconds::zero();
+	mTimePaused		= milliseconds::zero();
 }

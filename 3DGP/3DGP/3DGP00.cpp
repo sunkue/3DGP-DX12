@@ -3,11 +3,10 @@
 
 
 int WINAPI WinMain(
-	_In_ HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPSTR cmdLine,
-	_In_ int nShowCmd
-)
+	_In_		HINSTANCE	hInstance,
+	_In_opt_	HINSTANCE	hPrevInstance,
+	_In_		LPSTR		cmdLine,
+	_In_		int			nShowCmd)
 {
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -16,15 +15,16 @@ int WINAPI WinMain(
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(cmdLine);
 
-	// 콘솔 창
+#ifdef _DEBUG	// 콘솔 창
 	{
 		AllocConsole();
 		FILE* file;
 		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stdout);
 		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stderr);
 	}
-
 	cout << "" << "\n";
+#endif // _DEBUG
+
 
 	try
 	{
@@ -44,7 +44,7 @@ int WINAPI WinMain(
 	}
 	catch (const exception* e)
 	{
-		cout << "( "<< e->what() <<" ) exception";
+		cout << "( " << e->what() << " ) exception";
 		return 0;
 	}
 

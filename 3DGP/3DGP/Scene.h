@@ -23,8 +23,8 @@ public:
 	void Render(ID3D12GraphicsCommandList* pD3dCommandList);
 
 private:
-	ComPtr<ID3D12RootSignature> mcomD3dGraphicsRootSignature;
-	ComPtr<ID3D12PipelineState> mcomD3dPipelineState;
+	ComPtr<ID3D12RootSignature>		mcomD3dGraphicsRootSignature;
+	ComPtr<ID3D12PipelineState>		mcomD3dPipelineState;
 
 };
 

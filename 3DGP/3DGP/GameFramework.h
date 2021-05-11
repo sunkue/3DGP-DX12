@@ -7,6 +7,11 @@
 class GameFramework
 {
 public:
+	static GameFramework* GetApp()	{ return APP; }
+private:
+	static GameFramework* APP;
+
+public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance);
 	virtual ~GameFramework();
@@ -24,7 +29,6 @@ public:
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	ATOM MyRegisterClass(HINSTANCE hInstance);
 
-	static GameFramework* GetApp() { return APP; }
 
 protected:
 	void ProcessInput();
@@ -51,50 +55,46 @@ protected:
 	void ChanegeFullScreenMode();
 
 protected:
-	static GameFramework* APP;
+	HWND		mhWnd;
+	HINSTANCE	mhInstance;
+
+	int			mWndClientWidth;
+	int			mWndClientHeight;
+
+	ComPtr<IDXGIFactory7>	mcomDxgiFactory;
+	ComPtr<IDXGISwapChain4>	mcomDxgiSwapChain;
+	ComPtr<ID3D12Device8>	mcomD3dDevice;
+
+	bool mbMssa4xEnable;
+
+	UINT	mMsaa4xQualityLevels;
+	UINT	mSwapChainBufferIndex;
+
+	array<ComPtr<ID3D12Resource>, 2>	mcomvD3dRenderTargetBuffers;
+	ComPtr<ID3D12DescriptorHeap>		mcomD3dRtvDescriptorHeap;
+	UINT								mRtvDescriptorIncrementSize;
+
+	ComPtr<ID3D12Resource>				mcomD3dDepthStencilBuffer;
+	ComPtr<ID3D12DescriptorHeap>		mcomD3dDsvDescriptorHeap;
+	UINT								mDsvDescriptorIncrementSize;
+
+	ComPtr<ID3D12CommandQueue>			mcomD3dCommandQueue;
+	ComPtr<ID3D12CommandAllocator>		mcomD3dCommandAllocator;
+	ComPtr<ID3D12GraphicsCommandList>	mcomD3dCommandList;
+
+	ComPtr<ID3D12PipelineState>			mcomD3dPipelineState;
+
+	ComPtr<ID3D12Fence>					mcomD3dFence;
+	array<UINT64, 2>					mFenceValues;
+	HANDLE								mhFenceEvent;
+
+	D3D12_VIEWPORT						mD3dViewport;
+	D3D12_RECT							mD3dScissorRect;
 
 protected:
-	HWND mhWnd;
-	HINSTANCE mhInstance;
-
-	int mWndClientWidth;
-	int mWndClientHeight;
-
-	ComPtr<IDXGIFactory7> mcomDxgiFactory;
-	ComPtr<IDXGISwapChain4> mcomDxgiSwapChain;
-	ComPtr<ID3D12Device8> mcomD3dDevice;
-
-	bool mbMssa4xEnable{ false };
-
-	UINT mMsaa4xQualityLevels{ 0 };
-	static constexpr UINT mcexprSwapChainBuffers{ 2 };
-	UINT mSwapChainBufferIndex;
-
-	array<ComPtr<ID3D12Resource>, mcexprSwapChainBuffers> mcomvD3dRenderTargetBuffers;
-	ComPtr<ID3D12DescriptorHeap> mcomD3dRtvDescriptorHeap;
-	UINT mRtvDescriptorIncrementSize;
-
-	ComPtr<ID3D12Resource> mcomD3dDepthStencilBuffer;
-	ComPtr<ID3D12DescriptorHeap> mcomD3dDsvDescriptorHeap;
-	UINT mDsvDescriptorIncrementSize;
-
-	ComPtr<ID3D12CommandQueue> mcomD3dCommandQueue;
-	ComPtr<ID3D12CommandAllocator> mcomD3dCommandAllocator;
-	ComPtr<ID3D12GraphicsCommandList> mcomD3dCommandList;
-
-	ComPtr<ID3D12PipelineState> mcomD3dPipelineState;
-
-	ComPtr<ID3D12Fence> mcomD3dFence;
-	array<UINT64, mcexprSwapChainBuffers> mFenceValues;
-	HANDLE mhFenceEvent;
-
-	D3D12_VIEWPORT mD3dViewport;
-	D3D12_RECT mD3dScissorRect;
-
-protected:
-	GameTimer mGameTimer;
-	shared_ptr<Scene> mScene;
-	array<wchar_t, 50> mStrFrameRate;
+	GameTimer					mGameTimer;
+	shared_ptr<Scene>			mScene;
+	array<wchar_t, 50>			mStrFrameRate;
 
 };
 
