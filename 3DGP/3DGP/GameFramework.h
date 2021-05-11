@@ -42,7 +42,7 @@ protected:
 	void CreateCommandQueueAndList();
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
-	void SetViewprtScissorRect();
+	void SetViewportScissorRect();
 
 	void BuildObjects();
 	void ReleaseObjects();

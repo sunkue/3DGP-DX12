@@ -220,9 +220,9 @@ void GameFramework::CreateDirect3DDevice()
 
 	mhFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	SetViewprtScissorRect();
+	SetViewportScissorRect();
 }
-void GameFramework::SetViewprtScissorRect(){
+void GameFramework::SetViewportScissorRect(){
 	mD3dViewport.TopLeftX = 0;
 	mD3dViewport.TopLeftY = 0;
 	mD3dViewport.Width = static_cast<float>(mWndClientWidth);
@@ -397,7 +397,7 @@ void GameFramework::ChanegeFullScreenMode()
 
 	mSwapChainBufferIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
 
-	SetViewprtScissorRect();
+	SetViewportScissorRect();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
 }

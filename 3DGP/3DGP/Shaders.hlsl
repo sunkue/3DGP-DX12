@@ -61,6 +61,7 @@ float4 PSMain(float4 input : SV_POSITION) : SV_TARGET
 	float4 color = float4(1.0f, 1.0f, 0.0f, 1.0f);
 	if (input.y > 100.0f)color.b = 1.0f;
 	color.r = input.x / FRAME_BUFFER_WIDTH;
-
+	if (input.x < 100.0f)color.g = 0.0f;
+	
 	return color;
 }
