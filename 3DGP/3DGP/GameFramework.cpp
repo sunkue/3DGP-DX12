@@ -424,12 +424,13 @@ void GameFramework::ReleaseObjects()
 
 void GameFramework::ChanegeFullScreenMode()
 {
+	WaitForGpuComplete();
+
 	BOOL bFullScreenNow{ false };
 	ThrowIfFailed(mcomDxgiSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
 	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
-	//WaitForGpuComplete();
 
-	/*
+	
 	mcomD3dRtvDescriptorHeap->Release();
 	mcomD3dDsvDescriptorHeap->Release();
 	CreateRtvAndDsvDescriptorHeaps();
@@ -463,7 +464,6 @@ void GameFramework::ChanegeFullScreenMode()
 	SetViewportScissorRect();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-	*/
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,6 +505,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 			mResolutionIndex = (static_cast<size_t>(mResolutionIndex) + 1) % mResolutionOptions.size();		
 			WaitForGpuComplete();
 			LoadSceneResolutionDependentResources();
+			cout << mWndClientWidth << '/' << mWndClientHeight << '\n';
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -559,65 +560,13 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
 		return 0;
 	case WM_SIZE:
-		if (mScene)
-		{
-			Beep(500, 50);
-			RECT clientRect = {};
-			GetClientRect(hWnd, &clientRect);
-			OnSizeChanged(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, wParam == SIZE_MINIMIZED);
-		}
+		mWndClientWidth = LOWORD(lParam);
+		mWndClientHeight = HIWORD(lParam);
+		return 0;
 	case WM_ACTIVATE:
 	default:return DefWindowProc(hWnd, messageID, wParam, lParam);
 	}
 	assert(0);
-}
-
-void GameFramework::OnSizeChanged(UINT width, UINT height, bool minimized)
-{
-	// Determine if the swap buffers and other resources need to be resized or not.
-	if ((width != mWndClientWidth || height != mWndClientHeight) && !minimized)
-	{
-		// Flush all current GPU commands.
-		WaitForGpuComplete();
-
-		// Release the resources holding references to the swap chain (requirement of
-		// IDXGISwapChain::ResizeBuffers) and reset the frame fence values to the
-		// current fence value.
-		for (UINT n = 0; n < FrameCount; n++)
-		{
-			mcomvD3dRenderTargetBuffers[n].Reset();
-			mFenceValues[n] = mFenceValues[mFrameIndex];
-		}
-
-		// Resize the swap chain to the desired dimensions.
-		DXGI_SWAP_CHAIN_DESC desc = {};
-		mcomDxgiSwapChain->GetDesc(&desc);
-		ThrowIfFailed(mcomDxgiSwapChain->ResizeBuffers(FrameCount, width, height, desc.BufferDesc.Format, desc.Flags));
-
-		// Reset the frame index to the current back buffer index.
-		mFrameIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
-
-		// Update the width, height, and aspect ratio member variables.
-		UpdateForSizeChange(width, height);
-
-		LoadSizeDependentResources();
-	}
-}
-
-
-void GameFramework::UpdateForSizeChange(UINT clientWidth, UINT clientHeight)
-{
-	mWndClientWidth = clientWidth;
-	mWndClientHeight = clientHeight;
-	mAspectRatio = static_cast<float>(clientWidth) / static_cast<float>(clientHeight);
-}
-
-
-void GameFramework::LoadSizeDependentResources()
-{
-	SetViewportScissorRect();
-
-	CreateRenderTargetViews();
 }
 
 void GameFramework::ProcessInput()

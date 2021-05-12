@@ -17,7 +17,7 @@ private:
 	};
 	static constexpr array<Resolution, 8> mResolutionOptions{
 		  Resolution{800u , 600u}
-		, Resolution{1200u, 900u}
+		, Resolution{1200u, 900u }
 		, Resolution{1280u, 720u}
 		, Resolution{1920u, 1080u}
 		, Resolution{1920u, 1200u}
@@ -63,15 +63,13 @@ protected:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 	void SetViewportScissorRect();
+
 	void BuildObjects();
 	void ReleaseObjects();
 
 protected:
 	void ChanegeFullScreenMode();
 	void LoadSceneResolutionDependentResources();
-	void OnSizeChanged(UINT width, UINT height, bool minimized);
-	void LoadSizeDependentResources();
-	void UpdateForSizeChange(UINT clientWidth, UINT clientHeight);
 
 protected:
 	HWND		mhWnd;
@@ -79,7 +77,6 @@ protected:
 
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;
-	float			mAspectRatio;
 
 	ComPtr<IDXGIFactory7>	mcomDxgiFactory;
 	ComPtr<IDXGISwapChain4>	mcomDxgiSwapChain;
