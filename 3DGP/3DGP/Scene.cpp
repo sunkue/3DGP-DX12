@@ -132,10 +132,10 @@ void Scene::ReleaseObjects()
 ///////////////////////////////////////////////////
 
 bool Scene::OnProcessingMouseMessage(
-	  HWND hWnd
-	, UINT messageID
-	, WPARAM wParam
-	, LPARAM lParam)
+	  HWND		hWnd
+	, UINT		messageID
+	, WPARAM	wParam
+	, LPARAM	lParam)
 {
 	return false;
 };

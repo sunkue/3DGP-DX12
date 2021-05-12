@@ -100,16 +100,12 @@ float4 UFO(float4 input)
 float4 focus(float4 input)
 {
 	float4 color = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//color.rgb = distance(float2(0.0f, 0.0f), input.xy / float2(W, H));
-	//color.rgb = length(input.xy / float2(W, H));
-	//color.rgb = distance(float2(0.0f, 0.0f), (input.xy / float2(W, H) - 0.5f)); 
-	color.rgb = length(input.xy / float2(W, H));
-	//color.rgb = distance(float2(0.5f, 0.5f), input.xy / float2(W, H));
+	color.rgb = distance(float2(0.5f, 0.5f), input.xy / float2(W, H));
 	return color;
 }
 
 
 float4 PSMain(float4 input : SV_POSITION) : SV_TARGET
 {
-	return UFO(input);
+	return hundred(input);
 }
