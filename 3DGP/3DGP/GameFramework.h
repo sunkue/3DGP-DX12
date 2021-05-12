@@ -11,23 +11,6 @@ public:
 private:
 	static GameFramework* APP;
 
-	struct Resolution {
-		UINT Width;
-		UINT Height;
-	};
-	static constexpr array<Resolution, 8> mResolutionOptions{
-		  Resolution{800u , 600u}
-		, Resolution{1200u, 900u }
-		, Resolution{1280u, 720u}
-		, Resolution{1920u, 1080u}
-		, Resolution{1920u, 1200u}
-		, Resolution{2560u, 1440u}
-		, Resolution{3440u, 1440u}
-		, Resolution{3840u, 2160u}
-	};
-	
-	UINT mResolutionIndex;
-
 public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance);
@@ -45,6 +28,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	ATOM MyRegisterClass(HINSTANCE hInstance);
+
 
 protected:
 	void ProcessInput();
@@ -69,52 +53,43 @@ protected:
 
 protected:
 	void ChanegeFullScreenMode();
-	void OnSizeChange(UINT width, UINT height, bool minimized);
-	void UpdateForSizeChange(UINT clientWidth, UINT clientHeight);
-	void LoadSizeDependentResources();
-	void LoadSceneResolutionDependentResources();
-	void SetWindowBounds(int left, int top, int right, int bottom);
+
 protected:
 	HWND		mhWnd;
 	HINSTANCE	mhInstance;
 
-	UINT		mWndClientWidth;
-	UINT		mWndClientHeight;
-	float		mAspecRatio;
-	RECT		mWindowBounds;
+	int			mWndClientWidth;
+	int			mWndClientHeight;
+
 	ComPtr<IDXGIFactory7>	mcomDxgiFactory;
 	ComPtr<IDXGISwapChain4>	mcomDxgiSwapChain;
 	ComPtr<ID3D12Device8>	mcomD3dDevice;
 
-	bool		mbMssa4xEnable;
-	bool		mbFullScreen;
+	bool mbMssa4xEnable;
 
-	UINT		mMsaa4xQualityLevels;
-	UINT		mFrameIndex;
+	UINT	mMsaa4xQualityLevels;
+	UINT	mSwapChainBufferIndex;
 
-	static constexpr UINT						FrameCount{ 2 };
+	array<ComPtr<ID3D12Resource>, 2>	mcomvD3dRenderTargetBuffers;
+	ComPtr<ID3D12DescriptorHeap>		mcomD3dRtvDescriptorHeap;
+	UINT								mRtvDescriptorIncrementSize;
 
-	array<ComPtr<ID3D12Resource>, FrameCount>	mcomvD3dRenderTargetBuffers;
-	ComPtr<ID3D12DescriptorHeap>				mcomD3dRtvDescriptorHeap;
-	UINT										mRtvDescriptorIncrementSize;
+	ComPtr<ID3D12Resource>				mcomD3dDepthStencilBuffer;
+	ComPtr<ID3D12DescriptorHeap>		mcomD3dDsvDescriptorHeap;
+	UINT								mDsvDescriptorIncrementSize;
 
-	ComPtr<ID3D12Resource>						mcomD3dDepthStencilBuffer;
-	ComPtr<ID3D12DescriptorHeap>				mcomD3dDsvDescriptorHeap;
-	UINT										mDsvDescriptorIncrementSize;
+	ComPtr<ID3D12CommandQueue>			mcomD3dCommandQueue;
+	ComPtr<ID3D12CommandAllocator>		mcomD3dCommandAllocator;
+	ComPtr<ID3D12GraphicsCommandList>	mcomD3dCommandList;
 
-	ComPtr<ID3D12CommandQueue>					mcomD3dCommandQueue;
-	ComPtr<ID3D12CommandAllocator>				mcomD3dCommandAllocator;
-	ComPtr<ID3D12GraphicsCommandList>			mcomD3dCommandList;
+	ComPtr<ID3D12PipelineState>			mcomD3dPipelineState;
 
-	ComPtr<ID3D12PipelineState>					mcomD3dPipelineState;
+	ComPtr<ID3D12Fence>					mcomD3dFence;
+	array<UINT64, 2>					mFenceValues;
+	HANDLE								mhFenceEvent;
 
-	ComPtr<ID3D12Fence>							mcomD3dFence;
-	array<UINT64, FrameCount>					mFenceValues;
-	HANDLE										mhFenceEvent;
-
-	D3D12_VIEWPORT								mD3dViewport;
-	D3D12_RECT									mD3dScissorRect;
-
+	D3D12_VIEWPORT						mD3dViewport;
+	D3D12_RECT							mD3dScissorRect;
 
 protected:
 	GameTimer					mGameTimer;
