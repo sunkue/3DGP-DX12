@@ -88,15 +88,12 @@ float4 UFO(float4 input)
 	color.g += input.y / H;
 
 	if (length(input.xy) > 1000.0f)
-	{
+	{	
 		color.b -= length(float2(W * 2, H)) / 10000.0f;
-		color.r += sin(input.y - H / 1000.0f) * (length(input.xy) / 1000.0f);
-		color.g += sin(input.x - W / 1000.0f) * (length(input.xy) / 1000.0f);
+		color.r += sin(input.y - H / 1000.0f) * (length(input.xy)/1000.0f);
+		color.g += sin(input.x - W / 1000.0f) * (length(input.xy)/1000.0f);
 	}
 
-	if (input.x % 100 < 2 || input.y % 100 < 2)
-		color.rgb = 1.0f;
-	
 	return color;
 }
 

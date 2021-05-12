@@ -11,22 +11,6 @@ public:
 private:
 	static GameFramework* APP;
 
-	struct Resolution {
-		UINT Width;
-		UINT Height;
-	};
-	static constexpr array<Resolution, 8> mResolutionOptions{
-		  Resolution{800u , 600u}
-		, Resolution{1200u, 900u }
-		, Resolution{1280u, 720u}
-		, Resolution{1920u, 1080u}
-		, Resolution{1920u, 1200u}
-		, Resolution{2560u, 1440u}
-		, Resolution{3440u, 1440u}
-		, Resolution{3840u, 2160u}
-	};
-
-	UINT mResolutionIndex;
 public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance);
@@ -69,26 +53,24 @@ protected:
 
 protected:
 	void ChanegeFullScreenMode();
-	void LoadSceneResolutionDependentResources();
 
 protected:
 	HWND		mhWnd;
 	HINSTANCE	mhInstance;
 
-	UINT			mWndClientWidth;
-	UINT			mWndClientHeight;
+	int			mWndClientWidth;
+	int			mWndClientHeight;
 
 	ComPtr<IDXGIFactory7>	mcomDxgiFactory;
 	ComPtr<IDXGISwapChain4>	mcomDxgiSwapChain;
 	ComPtr<ID3D12Device8>	mcomD3dDevice;
 
-	bool	mbMssa4xEnable;
+	bool mbMssa4xEnable;
+
 	UINT	mMsaa4xQualityLevels;
+	UINT	mSwapChainBufferIndex;
 
-	static size_t constexpr FrameCount{ 2 };
-	UINT	mFrameIndex;
-
-	array<ComPtr<ID3D12Resource>, FrameCount>	mcomvD3dRenderTargetBuffers;
+	array<ComPtr<ID3D12Resource>, 2>	mcomvD3dRenderTargetBuffers;
 	ComPtr<ID3D12DescriptorHeap>		mcomD3dRtvDescriptorHeap;
 	UINT								mRtvDescriptorIncrementSize;
 
@@ -103,7 +85,7 @@ protected:
 	ComPtr<ID3D12PipelineState>			mcomD3dPipelineState;
 
 	ComPtr<ID3D12Fence>					mcomD3dFence;
-	array<UINT64, FrameCount>			mFenceValues;
+	array<UINT64, 2>					mFenceValues;
 	HANDLE								mhFenceEvent;
 
 	D3D12_VIEWPORT						mD3dViewport;
