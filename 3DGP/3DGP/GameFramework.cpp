@@ -430,6 +430,14 @@ void GameFramework::ChanegeFullScreenMode()
 	ThrowIfFailed(mcomDxgiSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
 	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
 
+	static UINT ResolIndex{ mResolutionOptions.size() - 1 };
+	
+	UINT temp = ResolIndex;
+	ResolIndex = mResolutionIndex;
+	mResolutionIndex = temp;
+
+	mWndClientWidth		= mResolutionOptions.at(mResolutionIndex).Width;
+	mWndClientHeight	= mResolutionOptions.at(mResolutionIndex).Height;
 	
 	mcomD3dRtvDescriptorHeap->Release();
 	mcomD3dDsvDescriptorHeap->Release();
@@ -505,7 +513,6 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 			mResolutionIndex = (static_cast<size_t>(mResolutionIndex) + 1) % mResolutionOptions.size();		
 			WaitForGpuComplete();
 			LoadSceneResolutionDependentResources();
-			cout << mWndClientWidth << '/' << mWndClientHeight << '\n';
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -547,9 +554,6 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_MOUSEMOVE:
 		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
 		return 0;
-	case WM_ENTERSIZEMOVE:
-	case WM_EXITSIZEMOVE:
-		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
@@ -558,10 +562,6 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_GETMINMAXINFO:
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
-		return 0;
-	case WM_SIZE:
-		mWndClientWidth = LOWORD(lParam);
-		mWndClientHeight = HIWORD(lParam);
 		return 0;
 	case WM_ACTIVATE:
 	default:return DefWindowProc(hWnd, messageID, wParam, lParam);
