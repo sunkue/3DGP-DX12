@@ -78,6 +78,12 @@ protected:
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;
 
+	UINT			mWndInitialWidth;
+	UINT			mWndInitialHeight;
+
+	UINT			mDesktopWidth;
+	UINT			mDesktopHeight;
+
 	ComPtr<IDXGIFactory7>	mcomDxgiFactory;
 	ComPtr<IDXGISwapChain4>	mcomDxgiSwapChain;
 	ComPtr<ID3D12Device8>	mcomD3dDevice;

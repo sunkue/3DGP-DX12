@@ -20,6 +20,8 @@ GameFramework::GameFramework(HINSTANCE hInstance)
 	, mResolutionIndex				{ 2 }
 	, mWndClientWidth				{ mResolutionOptions.at(mResolutionIndex).Width }
 	, mWndClientHeight				{ mResolutionOptions.at(mResolutionIndex).Height }
+	, mWndInitialWidth				{ mWndClientWidth }
+	, mWndInitialHeight				{ mWndClientHeight }
 	, mcomDxgiFactory				{ nullptr }
 	, mcomD3dDevice					{ nullptr }
 	, mcomDxgiSwapChain				{ nullptr }
@@ -142,6 +144,13 @@ bool GameFramework::InitMainWindow()
 		return false;
 	}
 
+	// 데스크탑 해상도를 받아온다
+	HWND hDesktop = GetDesktopWindow();
+	RECT rDesktopRect;
+	GetWindowRect(hDesktop, &rDesktopRect);
+	mDesktopWidth = rDesktopRect.right;
+	mDesktopHeight = rDesktopRect.bottom;
+	
 	ShowWindow(mhWnd, SW_SHOW);
 	UpdateWindow(mhWnd);
 
@@ -430,14 +439,13 @@ void GameFramework::ChanegeFullScreenMode()
 	ThrowIfFailed(mcomDxgiSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
 	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
 
-	static UINT ResolIndex{ mResolutionOptions.size() - 1 };
-	
-	UINT temp = ResolIndex;
-	ResolIndex = mResolutionIndex;
-	mResolutionIndex = temp;
-
-	mWndClientWidth		= mResolutionOptions.at(mResolutionIndex).Width;
-	mWndClientHeight	= mResolutionOptions.at(mResolutionIndex).Height;
+	mWndClientWidth = mWndInitialWidth;
+	mWndClientHeight = mWndInitialHeight;
+	if (!bFullScreenNow)
+	{
+		mWndClientHeight =		mDesktopHeight;
+		mWndClientWidth =		mDesktopWidth;
+	}
 	
 	mcomD3dRtvDescriptorHeap->Release();
 	mcomD3dDsvDescriptorHeap->Release();
