@@ -108,5 +108,5 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 	
-	return input.color;
+	return UFO(input.position);
 }
