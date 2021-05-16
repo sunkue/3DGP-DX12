@@ -1,35 +1,17 @@
 /////////////////////////////////////////
 struct VS_INPUT
 {
-	float3 postion : POSITION;
-	float4 color : COLOR;
+	float3 postion	: POSITION;
+	float4 color	: COLOR;
+	uint ID			: SV_VertexID;
 };
 
 struct VS_OUTPUT
 {
-	float4 position : SV_Position;
-	float4 color : COLOR;
+	float4 position	: SV_POSITION;
+	float4 color	: COLOR;
 };
 //////////////////////////////////////
-float4 tri(uint vertexID)
-{
-	float3 output = float3(0.0f, 0.0f, 0.0f);
-	switch (vertexID)
-	{
-		case 0:
-			output = float3(+0.0f, +0.5f, +0.5f);
-			break;
-		case 1:
-			output = float3(+0.5f, -0.5f, +0.5f);
-			break;
-		case 2:
-			output = float3(-0.5f, -0.5f, +0.5f);
-			break;
-		default:
-			break;
-	}
-	return float4(output, 1.0f);
-}
 
 float4 full(uint vertexID)
 {
@@ -60,13 +42,11 @@ float4 full(uint vertexID)
 	return float4(output, 1.0f);
 }
 ///////////////////////////////////////
-VS_OUTPUT VSMain(uint vertexID : SV_VertexID)
+VS_OUTPUT VSMain(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	//output.position = float4(input.postion, 1.0f);
-	//output.color = input.color;
-	output.position = full(vertexID);
-	output.color = full(vertexID);
+	output.position = float4(input.postion, 1.0f);
+	output.color = input.color;
 	return output;
 }
 /////////////////////////////////////////
@@ -126,5 +106,7 @@ float4 focus(float4 input)
 /////////////////////////////////////////
 float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
-	return float4(1.0, 0.0, 1.0, 0.5);
+	float4 output = input.color;
+	
+	return input.color;
 }

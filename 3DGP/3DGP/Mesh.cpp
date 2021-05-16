@@ -34,7 +34,6 @@ void Mesh::ReleaseUploadBuffers()
 void Mesh::Render(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
-	commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
 	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
 	commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
 }
@@ -46,19 +45,23 @@ TriangleMesh::TriangleMesh(
 	, ID3D12GraphicsCommandList* commandList)
 	: Mesh{ device , commandList }
 {
-	constexpr UINT VC{ 3 };
+	constexpr UINT VC{ 6 };
 	mVerticesCount = VC;
 	mStride = sizeof(DiffusedVertex);
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	DiffusedVertex vertices[VC] 
+	
+	DiffusedVertex vertices[VC]
 	{
-		  { 0.0f,  0.5f, 0.0f,	XMFLOAT4A{Colors::Red}}
-		, { 0.5f, -0.5f, 0.0f,	XMFLOAT4A{Colors::Green}}
-		, {-0.5f, -0.5f, 0.0f,	XMFLOAT4A{Colors::Blue}}
+		  { XMFLOAT3A{ -1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		, { XMFLOAT3A{ +1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		, { XMFLOAT3A{ +1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		, { XMFLOAT3A{ -1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		, { XMFLOAT3A{ +1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		, { XMFLOAT3A{ -1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
 	};
-
-	UINT bufferSize{ mStride * mVerticesCount };
+	
+	UINT bufferSize{ mStride * VC };
 	mVertexBuffer = CreateBufferResource(
 		  device
 		, commandList

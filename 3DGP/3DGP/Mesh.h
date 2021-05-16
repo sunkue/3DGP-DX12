@@ -5,9 +5,9 @@ class Vertex
 public:
 	Vertex() : mxmf3Position{ 0.0f,0.0f,0.0f } {}
 	Vertex(float x, float y, float z) : mxmf3Position{ x,y,z } {}
-	Vertex(XMFLOAT3 pos) : mxmf3Position{ pos.x,pos.y,pos.z } {}
-	Vertex(XMFLOAT3A pos) : mxmf3Position{ pos } {}
-	virtual ~Vertex() {}
+	Vertex(XMFLOAT3 pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
+	Vertex(XMFLOAT3A pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
+	~Vertex() {}
 
 protected:
 	XMFLOAT3A mxmf3Position;

@@ -37,10 +37,10 @@ D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0
 		, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex)
 		, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
-
+	
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc;
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = INPUT_ELEMENT_DESCS_COUNT;
@@ -93,9 +93,7 @@ D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(
 	OutputErrorMessage(comD3dErrorBlob.Get(), cout);
 	ThrowIfFailed(hResult);
 
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
-	d3dShaderByteCode.BytecodeLength	= (*shaderBlob)->GetBufferSize();
-	d3dShaderByteCode.pShaderBytecode	= (*shaderBlob)->GetBufferPointer();
+	CD3DX12_SHADER_BYTECODE d3dShaderByteCode{ *shaderBlob };
 	return d3dShaderByteCode;
 }
 
