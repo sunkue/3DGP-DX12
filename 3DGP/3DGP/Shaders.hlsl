@@ -1,6 +1,16 @@
+/////////////////////////////////////////
+struct VS_INPUT
+{
+	float3 postion : POSITION;
+	float4 color : COLOR;
+};
 
-
-
+struct VS_OUTPUT
+{
+	float4 position : SV_Position;
+	float4 color : COLOR;
+};
+//////////////////////////////////////
 float4 tri(uint vertexID)
 {
 	float3 output = float3(0.0f, 0.0f, 0.0f);
@@ -49,15 +59,15 @@ float4 full(uint vertexID)
 	}
 	return float4(output, 1.0f);
 }
-
-float4 VSMain(uint vertexID : SV_VertexID) : SV_POSITION
+///////////////////////////////////////
+VS_OUTPUT VSMain(VS_INPUT input)
 {
-	return full(vertexID);
+	VS_OUTPUT output;
+	output.position = float4(input.postion, 1.0f);
+	output.color = input.color;
+	return output;
 }
-
-
-
-
+/////////////////////////////////////////
 #define W	640.0f
 #define H	480.0f
 
@@ -111,8 +121,8 @@ float4 focus(float4 input)
 	return color;
 }
 
-
-float4 PSMain(float4 input : SV_POSITION) : SV_TARGET
+/////////////////////////////////////////
+float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
-	return UFO(input);
+	return input.color;
 }

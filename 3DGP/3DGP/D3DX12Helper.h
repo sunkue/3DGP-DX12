@@ -1,4 +1,5 @@
 #pragma once
+
 #include <comdef.h>
 #include <ostream>
 
@@ -46,6 +47,7 @@ public:
 };
 
 #define SAFE_RELEASE(p) if (p) (p)->Release()
+#define SAFE_ADDREF(p) if (p) (p)->AddRef()
 
 #ifndef ThrowIfFailed
 #define ThrowIfFailed(x)                                              \

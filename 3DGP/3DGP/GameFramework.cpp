@@ -22,25 +22,25 @@ GameFramework::GameFramework(HINSTANCE hInstance)
 	, mWndClientHeight				{ mResolutionOptions.at(mResolutionIndex).Height }
 	, mWndInitialWidth				{ mWndClientWidth }
 	, mWndInitialHeight				{ mWndClientHeight }
-	, mcomDxgiFactory				{ nullptr }
-	, mcomD3dDevice					{ nullptr }
-	, mcomDxgiSwapChain				{ nullptr }
-	, mFrameIndex			{ 0 }
-	, mcomD3dRtvDescriptorHeap		{ nullptr }
+	, mFactory						{ nullptr }
+	, mDevice						{ nullptr }
+	, mSwapChain					{ nullptr }
+	, mFrameIndex					{ 0 }
+	, mRtvDescriptorHeap			{ nullptr }
 	, mRtvDescriptorIncrementSize	{ 0 }
-	, mcomD3dDepthStencilBuffer		{ nullptr }
-	, mcomD3dDsvDescriptorHeap		{ nullptr }
+	, mDepthStencilBuffer			{ nullptr }
+	, mDsvDescriptorHeap			{ nullptr }
 	, mDsvDescriptorIncrementSize	{ 0 }
-	, mcomD3dCommandQueue			{ nullptr }
-	, mcomD3dCommandAllocator		{ nullptr }
-	, mcomD3dCommandList			{ nullptr }
-	, mcomD3dPipelineState			{ nullptr }
-	, mcomD3dFence					{ nullptr }
+	, mCommandQueue					{ nullptr }
+	, mCommandAllocator				{ nullptr }
+	, mCommandList					{ nullptr }
+	, mPipelineState				{ nullptr }
+	, mFence						{ nullptr }
 	, mFenceValues					{ 0 }
 	, mhFenceEvent					{ nullptr }
-	, mD3dViewport					{ 0 }
-	, mD3dScissorRect				{ 0 }
-	, mcomvD3dRenderTargetBuffers	{ nullptr }
+	, mViewport						{ 0 }
+	, mScissorRect					{ 0 }
+	, mRenderTargetBuffers			{ nullptr }
 	, mGameTimer					{}
 	, mScene						{ nullptr }
 {
@@ -186,7 +186,7 @@ void GameFramework::OnDestroy()
 
 	CloseHandle(mhFenceEvent);
 
-	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(FALSE, NULL));
+	ThrowIfFailed(mSwapChain->SetFullscreenState(FALSE, NULL));
 
 	APP = nullptr;
 
@@ -210,21 +210,21 @@ void GameFramework::CreateDirect3DDevice()
 	}
 #endif // _DEBUG
 
-	ThrowIfFailed(CreateDXGIFactory2(DXGIFactoryFlags, IID_PPV_ARGS(mcomDxgiFactory.GetAddressOf())));
+	ThrowIfFailed(CreateDXGIFactory2(DXGIFactoryFlags, IID_PPV_ARGS(mFactory.GetAddressOf())));
 
 	ComPtr<IDXGIAdapter1> comD3dAdapter{};
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != mcomDxgiFactory->EnumAdapters1(i, comD3dAdapter.GetAddressOf()); ++i)
+	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != mFactory->EnumAdapters1(i, comD3dAdapter.GetAddressOf()); ++i)
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		comD3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)continue;
-		if (SUCCEEDED(D3D12CreateDevice(comD3dAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(mcomD3dDevice.GetAddressOf()))))break;
+		if (SUCCEEDED(D3D12CreateDevice(comD3dAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(mDevice.GetAddressOf()))))break;
 	}
 
 	if (nullptr == comD3dAdapter.Get())
 	{
-		mcomDxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(comD3dAdapter.GetAddressOf()));
-		D3D12CreateDevice(comD3dAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mcomD3dDevice.GetAddressOf()));
+		mFactory->EnumWarpAdapter(IID_PPV_ARGS(comD3dAdapter.GetAddressOf()));
+		D3D12CreateDevice(comD3dAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(mDevice.GetAddressOf()));
 	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels{};
@@ -232,7 +232,7 @@ void GameFramework::CreateDirect3DDevice()
 	d3dMsaaQualityLevels.SampleCount		= 4;
 	d3dMsaaQualityLevels.Flags				= D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	d3dMsaaQualityLevels.NumQualityLevels	= 0;
-	mcomD3dDevice->CheckFeatureSupport(
+	mDevice->CheckFeatureSupport(
 		  D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS
 		, &d3dMsaaQualityLevels
 		, sizeof(decltype(d3dMsaaQualityLevels)));
@@ -240,10 +240,10 @@ void GameFramework::CreateDirect3DDevice()
 	mbMssa4xEnable = (1 < mMsaa4xQualityLevels) ? (true) : (false);
 
 	constexpr UINT64 FENCE_INIT_VALUE{ 0 };
-	ThrowIfFailed(mcomD3dDevice->CreateFence(
+	ThrowIfFailed(mDevice->CreateFence(
 		  FENCE_INIT_VALUE
 		, D3D12_FENCE_FLAG_NONE
-		, IID_PPV_ARGS(mcomD3dFence.GetAddressOf())));
+		, IID_PPV_ARGS(mFence.GetAddressOf())));
 	mFenceValues.fill(FENCE_INIT_VALUE);
 
 	mhFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -272,15 +272,15 @@ void GameFramework::SetViewportScissorRect()
 		y = viewHeightRatio / viewWidthRatio;
 	}
 
-	mD3dViewport.TopLeftX = mWndClientWidth * (1.0f - x) / 2.0f;
-	mD3dViewport.TopLeftY = mWndClientHeight * (1.0f - y) / 2.0f;
-	mD3dViewport.Width = x * mWndClientWidth;
-	mD3dViewport.Height = y * mWndClientHeight;
+	mViewport.TopLeftX = mWndClientWidth * (1.0f - x) / 2.0f;
+	mViewport.TopLeftY = mWndClientHeight * (1.0f - y) / 2.0f;
+	mViewport.Width = x * mWndClientWidth;
+	mViewport.Height = y * mWndClientHeight;
 
-	mD3dScissorRect.left = static_cast<LONG>(mD3dViewport.TopLeftX);
-	mD3dScissorRect.right = static_cast<LONG>(mD3dViewport.TopLeftX + mD3dViewport.Width);
-	mD3dScissorRect.top = static_cast<LONG>(mD3dViewport.TopLeftY);
-	mD3dScissorRect.bottom = static_cast<LONG>(mD3dViewport.TopLeftY + mD3dViewport.Height);
+	mScissorRect.left = static_cast<LONG>(mViewport.TopLeftX);
+	mScissorRect.right = static_cast<LONG>(mViewport.TopLeftX + mViewport.Width);
+	mScissorRect.top = static_cast<LONG>(mViewport.TopLeftY);
+	mScissorRect.bottom = static_cast<LONG>(mViewport.TopLeftY + mViewport.Height);
 	
 }
 
@@ -290,22 +290,22 @@ void GameFramework::CreateCommandQueueAndList()
 	d3dCommandQueueDesc.Flags	= D3D12_COMMAND_QUEUE_FLAG_NONE;
 	d3dCommandQueueDesc.Type	= D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-	ThrowIfFailed(mcomD3dDevice->CreateCommandQueue(
+	ThrowIfFailed(mDevice->CreateCommandQueue(
 		  &d3dCommandQueueDesc
-		, IID_PPV_ARGS(mcomD3dCommandQueue.GetAddressOf())));
+		, IID_PPV_ARGS(mCommandQueue.GetAddressOf())));
 
-	ThrowIfFailed(mcomD3dDevice->CreateCommandAllocator(
+	ThrowIfFailed(mDevice->CreateCommandAllocator(
 		  D3D12_COMMAND_LIST_TYPE_DIRECT
-		, IID_PPV_ARGS(mcomD3dCommandAllocator.GetAddressOf())));
+		, IID_PPV_ARGS(mCommandAllocator.GetAddressOf())));
 
-	ThrowIfFailed(mcomD3dDevice->CreateCommandList(
+	ThrowIfFailed(mDevice->CreateCommandList(
 		  0
 		, D3D12_COMMAND_LIST_TYPE_DIRECT
-		, mcomD3dCommandAllocator.Get()
+		, mCommandAllocator.Get()
 		, nullptr
-		, IID_PPV_ARGS(mcomD3dCommandList.GetAddressOf())));
+		, IID_PPV_ARGS(mCommandList.GetAddressOf())));
 
-	ThrowIfFailed(mcomD3dCommandList->Close());
+	ThrowIfFailed(mCommandList->Close());
 }
 
 void GameFramework::CreateSwapChain()
@@ -322,7 +322,7 @@ void GameFramework::CreateSwapChain()
 	dxgiSwapChainDesc.SampleDesc.Count		= (mbMssa4xEnable) ? (4) : (1);
 	dxgiSwapChainDesc.SampleDesc.Quality	= (mbMssa4xEnable) ? (mMsaa4xQualityLevels - 1) : (0);
 	dxgiSwapChainDesc.BufferUsage			= DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	dxgiSwapChainDesc.BufferCount			= static_cast<UINT>(mcomvD3dRenderTargetBuffers.size());
+	dxgiSwapChainDesc.BufferCount			= static_cast<UINT>(mRenderTargetBuffers.size());
 	dxgiSwapChainDesc.SwapEffect			= DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	dxgiSwapChainDesc.Flags					= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator		= RFR;
@@ -331,13 +331,13 @@ void GameFramework::CreateSwapChain()
 	dxgiSwapChainDesc.OutputWindow			= mhWnd;
 	dxgiSwapChainDesc.Windowed				= true;
 
-	ThrowIfFailed(mcomDxgiFactory->CreateSwapChain(
-		  mcomD3dCommandQueue.Get()
+	ThrowIfFailed(mFactory->CreateSwapChain(
+		  mCommandQueue.Get()
 		, &dxgiSwapChainDesc
-		, reinterpret_cast<IDXGISwapChain**>(mcomDxgiSwapChain.GetAddressOf())));
-	mFrameIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
+		, reinterpret_cast<IDXGISwapChain**>(mSwapChain.GetAddressOf())));
+	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
 
-	ThrowIfFailed(mcomDxgiFactory->MakeWindowAssociation(mhWnd, DXGI_MWA_NO_ALT_ENTER));
+	ThrowIfFailed(mFactory->MakeWindowAssociation(mhWnd, DXGI_MWA_NO_ALT_ENTER));
 
 #ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE
 	CreateRenderTargetViews();
@@ -347,31 +347,31 @@ void GameFramework::CreateSwapChain()
 void GameFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc{};
-	d3dDescriptorHeapDesc.NumDescriptors	= static_cast<UINT>(mcomvD3dRenderTargetBuffers.size());
+	d3dDescriptorHeapDesc.NumDescriptors	= static_cast<UINT>(mRenderTargetBuffers.size());
 	d3dDescriptorHeapDesc.Type				= D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	d3dDescriptorHeapDesc.Flags				= D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask			= 0;
-	ThrowIfFailed(mcomD3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(
 		  &d3dDescriptorHeapDesc
-		, IID_PPV_ARGS(mcomD3dRtvDescriptorHeap.GetAddressOf())));
-	mRtvDescriptorIncrementSize				= mcomD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		, IID_PPV_ARGS(mRtvDescriptorHeap.GetAddressOf())));
+	mRtvDescriptorIncrementSize				= mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	d3dDescriptorHeapDesc.NumDescriptors	= 1;
 	d3dDescriptorHeapDesc.Type				= D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	ThrowIfFailed(mcomD3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(mDevice->CreateDescriptorHeap(
 		  &d3dDescriptorHeapDesc
-		, IID_PPV_ARGS(mcomD3dDsvDescriptorHeap.GetAddressOf())));
-	mDsvDescriptorIncrementSize = mcomD3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		, IID_PPV_ARGS(mDsvDescriptorHeap.GetAddressOf())));
+	mDsvDescriptorIncrementSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
 void GameFramework::CreateRenderTargetViews()
 {
-	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
-	for (UINT i = 0; i < mcomvD3dRenderTargetBuffers.size(); ++i)
+	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
+	for (UINT i = 0; i < mRenderTargetBuffers.size(); ++i)
 	{
-		ThrowIfFailed(mcomDxgiSwapChain->GetBuffer(i, IID_PPV_ARGS(mcomvD3dRenderTargetBuffers.at(i).GetAddressOf())));
-		mcomD3dDevice->CreateRenderTargetView(
-			  mcomvD3dRenderTargetBuffers.at(i).Get()
+		ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mRenderTargetBuffers.at(i).GetAddressOf())));
+		mDevice->CreateRenderTargetView(
+			  mRenderTargetBuffers.at(i).Get()
 			, nullptr
 			, d3dRtvCPUDescriptorHandle);
 		d3dRtvCPUDescriptorHandle.Offset(1, mRtvDescriptorIncrementSize);
@@ -405,23 +405,29 @@ void GameFramework::CreateDepthStencilView()
 	d3dClearValue.DepthStencil.Depth		= 1.0f;
 	d3dClearValue.DepthStencil.Stencil		= 0;
 
-	ThrowIfFailed(mcomD3dDevice->CreateCommittedResource(
+	ThrowIfFailed(mDevice->CreateCommittedResource(
 		  &d3dHeapPropertices
 		, D3D12_HEAP_FLAG_NONE
 		, &d3dResourceDesc
 		, D3D12_RESOURCE_STATE_DEPTH_WRITE
 		, &d3dClearValue
-		, IID_PPV_ARGS(mcomD3dDepthStencilBuffer.GetAddressOf())));
+		, IID_PPV_ARGS(mDepthStencilBuffer.GetAddressOf())));
 
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mcomD3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
-	mcomD3dDevice->CreateDepthStencilView(mcomD3dDepthStencilBuffer.Get(), nullptr, d3dDsvCPUDescriptorHandle);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
+	mDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, d3dDsvCPUDescriptorHandle);
 }
 
 void GameFramework::BuildObjects()
 {
+	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
 	mScene = make_shared<Scene>();
-	if (mScene)mScene->BuildObjects(mcomD3dDevice.Get());
-
+	assert(mScene);
+	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
+	mCommandList->Close();
+	ExecuteComandLists();
+	WaitForGpuComplete();
+	assert(mScene);
+	mScene->ReleaseUploadBuffers();
 	mGameTimer.Reset();
 }
 
@@ -436,8 +442,8 @@ void GameFramework::ChanegeFullScreenMode()
 	WaitForGpuComplete();
 
 	BOOL bFullScreenNow{ false };
-	ThrowIfFailed(mcomDxgiSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
-	ThrowIfFailed(mcomDxgiSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
+	ThrowIfFailed(mSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
+	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
 
 	mWndClientWidth = mWndInitialWidth;
 	mWndClientHeight = mWndInitialHeight;
@@ -447,12 +453,12 @@ void GameFramework::ChanegeFullScreenMode()
 		mWndClientWidth =		mDesktopWidth;
 	}
 	
-	mcomD3dRtvDescriptorHeap->Release();
-	mcomD3dDsvDescriptorHeap->Release();
+	mRtvDescriptorHeap.Reset();
+	mDsvDescriptorHeap.Reset();
 	CreateRtvAndDsvDescriptorHeaps();
 
-	for (auto& RT : mcomvD3dRenderTargetBuffers)RT->Release();
-	mcomD3dDepthStencilBuffer->Release();
+	for (auto& RT : mRenderTargetBuffers)RT.Reset();
+	mDepthStencilBuffer.Reset();
 
 	DXGI_MODE_DESC dxgiTargetParameters;
 	dxgiTargetParameters.RefreshRate.Numerator		= RFR;
@@ -463,19 +469,19 @@ void GameFramework::ChanegeFullScreenMode()
 	dxgiTargetParameters.Scaling			= DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering	= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	
-	ThrowIfFailed(mcomDxgiSwapChain->ResizeTarget(&dxgiTargetParameters));
+	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
 
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-	ThrowIfFailed(mcomDxgiSwapChain->GetDesc(&dxgiSwapChainDesc));
+	ThrowIfFailed(mSwapChain->GetDesc(&dxgiSwapChainDesc));
 	dxgiSwapChainDesc.Windowed = !bFullScreenNow;
-	ThrowIfFailed(mcomDxgiSwapChain->ResizeBuffers(
-		  static_cast<UINT>(mcomvD3dRenderTargetBuffers.size())
+	ThrowIfFailed(mSwapChain->ResizeBuffers(
+		  static_cast<UINT>(mRenderTargetBuffers.size())
 		, mWndClientWidth
 		, mWndClientHeight
 		, dxgiSwapChainDesc.BufferDesc.Format
 		, dxgiSwapChainDesc.Flags));
 
-	mFrameIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
+	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
 
 	SetViewportScissorRect();
 	CreateRenderTargetViews();
@@ -536,11 +542,11 @@ void GameFramework::LoadSceneResolutionDependentResources()
 {
 	// Set up the scene viewport and scissor rect to match the current scene rendering resolution.
 	{
-		mD3dViewport.Width = static_cast<float>(mResolutionOptions[mResolutionIndex].Width);
-		mD3dViewport.Height = static_cast<float>(mResolutionOptions[mResolutionIndex].Height);
+		mViewport.Width = static_cast<float>(mResolutionOptions[mResolutionIndex].Width);
+		mViewport.Height = static_cast<float>(mResolutionOptions[mResolutionIndex].Height);
 
-		mD3dScissorRect.right = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Width);
-		mD3dScissorRect.bottom = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Height);
+		mScissorRect.right = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Width);
+		mScissorRect.bottom = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Height);
 	}
 
 	// Update post-process viewport and scissor rectangle.
@@ -589,64 +595,64 @@ void GameFramework::AnimateObjects()
 
 void GameFramework::PopulateCommandList()
 {
-	ThrowIfFailed(mcomD3dCommandAllocator->Reset());
-	ThrowIfFailed(mcomD3dCommandList->Reset(mcomD3dCommandAllocator.Get(), nullptr));
+	ThrowIfFailed(mCommandAllocator->Reset());
+	ThrowIfFailed(mCommandList->Reset(mCommandAllocator.Get(), nullptr));
 
-	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mcomvD3dRenderTargetBuffers.at(mFrameIndex).Get(),
+	D3D12_RESOURCE_BARRIER RB{ CD3DX12_RESOURCE_BARRIER::Transition(mRenderTargetBuffers.at(mFrameIndex).Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
-	mcomD3dCommandList->ResourceBarrier(1, &RB);
+	mCommandList->ResourceBarrier(1, &RB);
 
-	mcomD3dCommandList->RSSetViewports(1, &mD3dViewport);
-	mcomD3dCommandList->RSSetScissorRects(1, &mD3dScissorRect);
+	mCommandList->RSSetViewports(1, &mViewport);
+	mCommandList->RSSetScissorRects(1, &mScissorRect);
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mcomD3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mcomD3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
 	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
-	mcomD3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, Colors::LightSeaGreen, 0, nullptr);
-	mcomD3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	mCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, Colors::LightSeaGreen, 0, nullptr);
+	mCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
-	mcomD3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
+	mCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
 
-	if (mScene)mScene->Render(mcomD3dCommandList.Get());
+	if (mScene)mScene->Render(mCommandList.Get());
 
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	mcomD3dCommandList->ResourceBarrier(1, &RB);
+	mCommandList->ResourceBarrier(1, &RB);
 
-	ThrowIfFailed(mcomD3dCommandList->Close());
+	ThrowIfFailed(mCommandList->Close());
 }
 
 void GameFramework::WaitForGpuComplete()
 {
 	const UINT64 Fence{ ++mFenceValues.at(mFrameIndex) };
-	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
-	if (mcomD3dFence->GetCompletedValue() < Fence)
+	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), Fence));
+	if (mFence->GetCompletedValue() < Fence)
 	{
-		ThrowIfFailed(mcomD3dFence->SetEventOnCompletion(Fence, mhFenceEvent));
+		ThrowIfFailed(mFence->SetEventOnCompletion(Fence, mhFenceEvent));
 		WaitForSingleObject(mhFenceEvent, INFINITE);
 	}
 }
 
 void GameFramework::MoveToNextFrame()
 {
-	mFrameIndex = mcomDxgiSwapChain->GetCurrentBackBufferIndex();
+	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
 
 	const UINT64 Fence{ ++mFenceValues.at(mFrameIndex) };
-	ThrowIfFailed(mcomD3dCommandQueue->Signal(mcomD3dFence.Get(), Fence));
+	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), Fence));
 
-	if (mcomD3dFence->GetCompletedValue() < Fence)
+	if (mFence->GetCompletedValue() < Fence)
 	{
-		ThrowIfFailed(mcomD3dFence->SetEventOnCompletion(Fence, mhFenceEvent));
+		ThrowIfFailed(mFence->SetEventOnCompletion(Fence, mhFenceEvent));
 		WaitForSingleObject(mhFenceEvent, INFINITE);
 	}
 }
 
 void GameFramework::ExecuteComandLists()
 {
-	ID3D12CommandList* comD3dCommandLists[]{ mcomD3dCommandList.Get() };
-	mcomD3dCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
+	ID3D12CommandList* comD3dCommandLists[]{ mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(comD3dCommandLists), comD3dCommandLists);
 }
 
 void GameFramework::ShowFPS()
@@ -674,7 +680,7 @@ void GameFramework::FrameAdvance()
 #ifdef _WITH_SYNCH_SWAPCHAIN
 	ThrowIfFailed(mcomDxgiSwapChain->Present(1, 0));
 #else
-	ThrowIfFailed(mcomDxgiSwapChain->Present(0, 0));
+	ThrowIfFailed(mSwapChain->Present(0, 0));
 #endif // _WITH_SYNCH_SWAPCHAIN
 #endif // _WITH_PRESENT_PARAMETERS
 	MoveToNextFrame();

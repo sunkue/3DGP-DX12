@@ -1,16 +1,16 @@
 #pragma once
 
+class Shader;
+
 class Scene
 {
 public:
 	Scene();
 	~Scene();
 
-	void CreateGraphicsRootSignature(ID3D12Device* pD3dDevice);
-	void CreateGraphicsPipelineState(ID3D12Device* pD3dDevice);
-
-	void BuildObjects(ID3D12Device* pD3dDevice);
+	void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	void ReleaseObjects();
+	void ReleaseUploadBuffers();
 
 public:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -18,13 +18,14 @@ public:
 
 	bool ProcessInput();
 	void AnimateObjects(milliseconds timeElapsed);
+	void Render(ID3D12GraphicsCommandList* commandList);
 
-	void PrepareRender(ID3D12GraphicsCommandList* pD3dCommandList);
-	void Render(ID3D12GraphicsCommandList* pD3dCommandList);
+	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
+	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
 
-private:
-	ComPtr<ID3D12RootSignature>		mcomD3dGraphicsRootSignature;
-	ComPtr<ID3D12PipelineState>		mcomD3dPipelineState;
+protected:
+	vector<Shader*>					mShaders;
+	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 
 };
 

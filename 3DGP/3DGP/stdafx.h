@@ -52,6 +52,7 @@ using Microsoft::WRL::ComPtr;
 
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
+#include "ResourceHelper.h"
 
 using namespace std;
 using namespace std::chrono;
