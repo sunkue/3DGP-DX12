@@ -60,11 +60,13 @@ float4 full(uint vertexID)
 	return float4(output, 1.0f);
 }
 ///////////////////////////////////////
-VS_OUTPUT VSMain(VS_INPUT input)
+VS_OUTPUT VSMain(uint vertexID : SV_VertexID)
 {
 	VS_OUTPUT output;
-	output.position = float4(input.postion, 1.0f);
-	output.color = input.color;
+	//output.position = float4(input.postion, 1.0f);
+	//output.color = input.color;
+	output.position = full(vertexID);
+	output.color = full(vertexID);
 	return output;
 }
 /////////////////////////////////////////
@@ -124,5 +126,5 @@ float4 focus(float4 input)
 /////////////////////////////////////////
 float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
-	return input.color;
+	return float4(1.0, 0.0, 1.0, 0.5);
 }

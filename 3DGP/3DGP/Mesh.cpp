@@ -34,6 +34,7 @@ void Mesh::ReleaseUploadBuffers()
 void Mesh::Render(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
+	commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
 	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
 	commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
 }

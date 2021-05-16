@@ -103,5 +103,5 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 void Scene::Render(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
-	commandList->DrawInstanced(6, 1, 0, 0);
+	for (auto& sh : mShaders)sh->Render(commandList);
 };

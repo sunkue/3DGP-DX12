@@ -112,7 +112,7 @@ void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignatu
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC PSDesc{};
 	PSDesc.pRootSignature = rootSignature;
 	PSDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
-	PSDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	PSDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);	
 	PSDesc.RasterizerState		= CreateRasterizerState();
 	PSDesc.BlendState			= CreateBlendState();
 	PSDesc.DepthStencilState	= CreateDepthStencilState();
@@ -123,7 +123,6 @@ void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignatu
 	PSDesc.RTVFormats[0]		= DXGI_FORMAT_R8G8B8A8_UNORM;
 	PSDesc.DSVFormat			= DXGI_FORMAT_D24_UNORM_S8_UINT;
 	PSDesc.SampleDesc.Count		= 1;
-
 	ThrowIfFailed(device->CreateGraphicsPipelineState(
 		  &PSDesc
 		, IID_PPV_ARGS(mPipelineStates[0].GetAddressOf())));
@@ -133,6 +132,7 @@ void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignatu
 }
 
 //////////////////////////////////////
+
 void Shader::BuildObjects(
 	  ID3D12Device* device
 	, ID3D12GraphicsCommandList* commandList
