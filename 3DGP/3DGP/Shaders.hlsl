@@ -63,6 +63,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	VS_OUTPUT output;
 	
 	output.position = WVP(input.position);
+
 	output.color = input.color;
 	
 	return output;
@@ -115,6 +116,5 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 	
-	//return UFO(input.position);
 	return output;
 }

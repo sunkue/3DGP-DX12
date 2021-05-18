@@ -41,7 +41,6 @@ GameFramework::GameFramework(HINSTANCE hInstance)
 	, mGameTimer					{}
 	, mScene						{ nullptr }
 {
-	APP = this;
 }
 
 GameFramework::~GameFramework()
@@ -65,10 +64,6 @@ int GameFramework::Run()
 				DispatchMessage(&msg);
 			}
 		}
-		else
-		{
-			FrameAdvance();
-		}
 	}
 
 	OnDestroy();
@@ -80,6 +75,10 @@ bool GameFramework::Initialize()
 {
 	if (!InitMainWindow())return false;
 	if (!InitDirect3D())return false;
+	APP = this;
+#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+	ChanegeFullScreenMode();
+#endif
 	return true;
 }
 
@@ -106,6 +105,13 @@ ATOM GameFramework::MyRegisterClass(HINSTANCE hInstance)
 
 bool GameFramework::InitMainWindow()
 {
+	// 데스크탑 해상도를 받아온다
+	HWND hDesktop = GetDesktopWindow();
+	RECT rDesktopRect;
+	GetWindowRect(hDesktop, &rDesktopRect);
+	mWndClientWidth = rDesktopRect.right;
+	mWndClientHeight = rDesktopRect.bottom;
+
 	if (!MyRegisterClass(mhInstance))
 	{
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);
@@ -140,18 +146,10 @@ bool GameFramework::InitMainWindow()
 	{
 		return false;
 	}
-
-	// 데스크탑 해상도를 받아온다
-	HWND hDesktop = GetDesktopWindow();
-	RECT rDesktopRect;
-	GetWindowRect(hDesktop, &rDesktopRect);
 	
 	ShowWindow(mhWnd, SW_SHOW);
 	UpdateWindow(mhWnd);
 
-#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
-	ChanegeFullScreenMode();
-#endif
 	return true;
 }
 
@@ -299,9 +297,7 @@ void GameFramework::CreateSwapChain()
 
 	ThrowIfFailed(mFactory->MakeWindowAssociation(mhWnd, DXGI_MWA_NO_ALT_ENTER));
 
-#ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE
 	CreateRenderTargetViews();
-#endif
 }
 
 void GameFramework::CreateRtvAndDsvDescriptorHeaps()
@@ -426,14 +422,20 @@ void GameFramework::ChanegeFullScreenMode()
 	dxgiTargetParameters.Scaling			= DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering	= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	mSwapChain->ResizeTarget(&dxgiTargetParameters);
-	for (auto& RT : mRenderTargetBuffers) RT->Release();
+
+	for (auto& RT : mRenderTargetBuffers) RT.Reset();
+	
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	mSwapChain->GetDesc(&dxgiSwapChainDesc);
-	mSwapChain->ResizeBuffers(FrameCount, mWndClientWidth,
-		mWndClientHeight, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+	mSwapChain->ResizeBuffers(
+		  FrameCount
+		, mWndClientWidth
+		, mWndClientHeight
+		, dxgiSwapChainDesc.BufferDesc.Format
+		, dxgiSwapChainDesc.Flags);
 	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
+	
 	CreateRenderTargetViews();
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,10 +507,11 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
 		return 0;
-	case WM_ACTIVATE:
-	default:return DefWindowProc(hWnd, messageID, wParam, lParam);
+	case WM_PAINT:
+		if (APP)FrameAdvance();
+		return 0;
 	}
-	assert(0);
+	return DefWindowProc(hWnd, messageID, wParam, lParam);
 }
 
 void GameFramework::ProcessInput()
@@ -602,11 +605,7 @@ void GameFramework::FrameAdvance()
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters{};
 	ThrowIfFailed(mcomDxgiSwapChain->Present1(0, 0, &dxgiPresentParameters));
 #else
-#ifdef _WITH_SYNCH_SWAPCHAIN
-	ThrowIfFailed(mcomDxgiSwapChain->Present(1, 0));
-#else
-	ThrowIfFailed(mSwapChain->Present(0, 0));
-#endif // _WITH_SYNCH_SWAPCHAIN
+	mSwapChain->Present(1, 0);
 #endif // _WITH_PRESENT_PARAMETERS
 	MoveToNextFrame();
 
