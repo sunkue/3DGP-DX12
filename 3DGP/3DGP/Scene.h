@@ -1,6 +1,7 @@
 #pragma once
 
-class Shader;
+class GameObject;
+class Camera;
 
 class Scene
 {
@@ -10,7 +11,6 @@ public:
 
 	void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	void ReleaseObjects();
-	void ReleaseUploadBuffers();
 
 public:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -18,13 +18,15 @@ public:
 
 	bool ProcessInput();
 	void AnimateObjects(milliseconds timeElapsed);
-	void Render(ID3D12GraphicsCommandList* commandList);
+	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
+	
+	void ReleaseUploadBuffers();
 
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
 
 protected:
-	vector<Shader*>					mShaders;
+	vector<GameObject*>					mObjects;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 
 };

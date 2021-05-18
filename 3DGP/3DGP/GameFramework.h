@@ -1,8 +1,10 @@
 #pragma once
 
 #include "GameTimer.h"
-#include "Scene.h"
 #include "3DGP00.h"
+
+class Camera;
+class Scene;
 
 class GameFramework
 {
@@ -15,18 +17,7 @@ private:
 		UINT Width;
 		UINT Height;
 	};
-	static constexpr array<Resolution, 8> mResolutionOptions{
-		  Resolution{800u , 600u}
-		, Resolution{1200u, 900u }
-		, Resolution{1280u, 720u}
-		, Resolution{1920u, 1080u}
-		, Resolution{1920u, 1200u}
-		, Resolution{2560u, 1440u}
-		, Resolution{3440u, 1440u}
-		, Resolution{3840u, 2160u}
-	};
-
-	UINT mResolutionIndex;
+	
 public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance);
@@ -62,14 +53,12 @@ protected:
 	void CreateCommandQueueAndList();
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
-	void SetViewportScissorRect();
 
 	void BuildObjects();
 	void ReleaseObjects();
 
 protected:
 	void ChanegeFullScreenMode();
-	void LoadSceneResolutionDependentResources();
 
 protected:
 	HWND		mhWnd;
@@ -77,12 +66,6 @@ protected:
 
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;
-
-	UINT			mWndInitialWidth;
-	UINT			mWndInitialHeight;
-
-	UINT			mDesktopWidth;
-	UINT			mDesktopHeight;
 
 	ComPtr<IDXGIFactory7>	mFactory;
 	ComPtr<IDXGISwapChain4>	mSwapChain;
@@ -112,12 +95,10 @@ protected:
 	array<UINT64, FrameCount>			mFenceValues;
 	HANDLE								mhFenceEvent;
 
-	D3D12_VIEWPORT						mViewport;
-	D3D12_RECT							mScissorRect;
-
 protected:
 	GameTimer					mGameTimer;
 	shared_ptr<Scene>			mScene;
+	shared_ptr<Camera>			mCamera;
 	array<wchar_t, 50>			mStrFrameRate;
 
 };

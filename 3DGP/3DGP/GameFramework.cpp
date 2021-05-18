@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "Camera.h"
+#include "Scene.h"
 #include "GameFramework.h"
 
 LRESULT CALLBACK
@@ -17,11 +19,8 @@ GameFramework* GameFramework::APP = nullptr;
 GameFramework::GameFramework(HINSTANCE hInstance)
 	: mhInstance					{ hInstance }
 	, mhWnd							{ nullptr }
-	, mResolutionIndex				{ 2 }
-	, mWndClientWidth				{ mResolutionOptions.at(mResolutionIndex).Width }
-	, mWndClientHeight				{ mResolutionOptions.at(mResolutionIndex).Height }
-	, mWndInitialWidth				{ mWndClientWidth }
-	, mWndInitialHeight				{ mWndClientHeight }
+	, mWndClientWidth				{ WIDTH }
+	, mWndClientHeight				{ HEIGHT }
 	, mFactory						{ nullptr }
 	, mDevice						{ nullptr }
 	, mSwapChain					{ nullptr }
@@ -38,8 +37,6 @@ GameFramework::GameFramework(HINSTANCE hInstance)
 	, mFence						{ nullptr }
 	, mFenceValues					{ 0 }
 	, mhFenceEvent					{ nullptr }
-	, mViewport						{ 0 }
-	, mScissorRect					{ 0 }
 	, mRenderTargetBuffers			{ nullptr }
 	, mGameTimer					{}
 	, mScene						{ nullptr }
@@ -114,7 +111,7 @@ bool GameFramework::InitMainWindow()
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);
 		return false;
 	}
-
+	
 	RECT rc{ 0, 0, static_cast<LONG>(mWndClientWidth), static_cast<LONG>(mWndClientHeight) };
 	DWORD dwStyle{ 0
 		| WS_OVERLAPPED 
@@ -148,8 +145,6 @@ bool GameFramework::InitMainWindow()
 	HWND hDesktop = GetDesktopWindow();
 	RECT rDesktopRect;
 	GetWindowRect(hDesktop, &rDesktopRect);
-	mDesktopWidth = rDesktopRect.right;
-	mDesktopHeight = rDesktopRect.bottom;
 	
 	ShowWindow(mhWnd, SW_SHOW);
 	UpdateWindow(mhWnd);
@@ -247,41 +242,6 @@ void GameFramework::CreateDirect3DDevice()
 	mFenceValues.fill(FENCE_INIT_VALUE);
 
 	mhFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-	SetViewportScissorRect();
-}
-
-void GameFramework::SetViewportScissorRect() 
-{
-	float viewWidthRatio = static_cast<float>(mResolutionOptions[mResolutionIndex].Width) / mWndClientWidth;
-	float viewHeightRatio = static_cast<float>(mResolutionOptions[mResolutionIndex].Height) / mWndClientHeight;
-
-	float x = 1.0f;
-	float y = 1.0f;
-
-	if (viewWidthRatio < viewHeightRatio)
-	{
-		// The scaled image's height will fit to the viewport's height and 
-		// its width will be smaller than the viewport's width.
-		x = viewWidthRatio / viewHeightRatio;
-	}
-	else
-	{
-		// The scaled image's width will fit to the viewport's width and 
-		// its height may be smaller than the viewport's height.
-		y = viewHeightRatio / viewWidthRatio;
-	}
-
-	mViewport.TopLeftX = mWndClientWidth * (1.0f - x) / 2.0f;
-	mViewport.TopLeftY = mWndClientHeight * (1.0f - y) / 2.0f;
-	mViewport.Width = x * mWndClientWidth;
-	mViewport.Height = y * mWndClientHeight;
-
-	mScissorRect.left = static_cast<LONG>(mViewport.TopLeftX);
-	mScissorRect.right = static_cast<LONG>(mViewport.TopLeftX + mViewport.Width);
-	mScissorRect.top = static_cast<LONG>(mViewport.TopLeftY);
-	mScissorRect.bottom = static_cast<LONG>(mViewport.TopLeftY + mViewport.Height);
-	
 }
 
 void GameFramework::CreateCommandQueueAndList()
@@ -419,15 +379,27 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::BuildObjects()
 {
+	UINT W{ mWndClientWidth };
+	UINT H{ mWndClientHeight };
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
+	mCamera = make_shared<Camera>();
+	mCamera->SetViewport(0, 0, W, H, 0.0f, 1.0f);
+	mCamera->SetScissorRect(0, 0, W, H);
+	mCamera->GenerateProjectionMatrix(90.0f, static_cast<float>(W) / H, 1.0f, 500.0f);
+	mCamera->GenerateViewMatrix(
+		  XMFLOAT3{ 0.0f,0.0f,-2.0f }
+		, XMFLOAT3{ 0.0f,0.0f,0.0f }
+		, XMFLOAT3{ 0.0f,1.0f,0.0f });
+
 	mScene = make_shared<Scene>();
-	assert(mScene);
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
+
 	mCommandList->Close();
 	ExecuteComandLists();
 	WaitForGpuComplete();
-	assert(mScene);
+
 	mScene->ReleaseUploadBuffers();
+
 	mGameTimer.Reset();
 }
 
@@ -444,48 +416,6 @@ void GameFramework::ChanegeFullScreenMode()
 	BOOL bFullScreenNow{ false };
 	ThrowIfFailed(mSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
 	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
-
-	mWndClientWidth = mWndInitialWidth;
-	mWndClientHeight = mWndInitialHeight;
-	if (!bFullScreenNow)
-	{
-		mWndClientHeight =		mDesktopHeight;
-		mWndClientWidth =		mDesktopWidth;
-	}
-	
-	mRtvDescriptorHeap.Reset();
-	mDsvDescriptorHeap.Reset();
-	CreateRtvAndDsvDescriptorHeaps();
-
-	for (auto& RT : mRenderTargetBuffers)RT.Reset();
-	mDepthStencilBuffer.Reset();
-
-	DXGI_MODE_DESC dxgiTargetParameters;
-	dxgiTargetParameters.RefreshRate.Numerator		= RFR;
-	dxgiTargetParameters.RefreshRate.Denominator	= 1;
-	dxgiTargetParameters.Format				= DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiTargetParameters.Width				= mWndClientWidth;
-	dxgiTargetParameters.Height				= mWndClientHeight;
-	dxgiTargetParameters.Scaling			= DXGI_MODE_SCALING_UNSPECIFIED;
-	dxgiTargetParameters.ScanlineOrdering	= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	
-	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
-
-	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-	ThrowIfFailed(mSwapChain->GetDesc(&dxgiSwapChainDesc));
-	dxgiSwapChainDesc.Windowed = !bFullScreenNow;
-	ThrowIfFailed(mSwapChain->ResizeBuffers(
-		  static_cast<UINT>(mRenderTargetBuffers.size())
-		, mWndClientWidth
-		, mWndClientHeight
-		, dxgiSwapChainDesc.BufferDesc.Format
-		, dxgiSwapChainDesc.Flags));
-
-	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
-
-	SetViewportScissorRect();
-	CreateRenderTargetViews();
-	CreateDepthStencilView();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -523,11 +453,6 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_F1:
 			cout << "µµ¿ò¸» : \n";
 			break;
-		case VK_F8:
-			mResolutionIndex = (static_cast<size_t>(mResolutionIndex) + 1) % mResolutionOptions.size();		
-			WaitForGpuComplete();
-			LoadSceneResolutionDependentResources();
-			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
 			break;
@@ -536,21 +461,6 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		break;
 	default:break;
 	}
-}
-
-void GameFramework::LoadSceneResolutionDependentResources() 
-{
-	// Set up the scene viewport and scissor rect to match the current scene rendering resolution.
-	{
-		mViewport.Width = static_cast<float>(mResolutionOptions[mResolutionIndex].Width);
-		mViewport.Height = static_cast<float>(mResolutionOptions[mResolutionIndex].Height);
-
-		mScissorRect.right = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Width);
-		mScissorRect.bottom = static_cast<LONG>(mResolutionOptions[mResolutionIndex].Height);
-	}
-
-	// Update post-process viewport and scissor rectangle.
-	SetViewportScissorRect();
 }
 
 LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam)
@@ -602,9 +512,6 @@ void GameFramework::PopulateCommandList()
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mCommandList->ResourceBarrier(1, &RB);
 
-	mCommandList->RSSetViewports(1, &mViewport);
-	mCommandList->RSSetScissorRects(1, &mScissorRect);
-
 	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
@@ -615,7 +522,7 @@ void GameFramework::PopulateCommandList()
 
 	mCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
 
-	if (mScene)mScene->Render(mCommandList.Get());
+	if (mScene)mScene->Render(mCommandList.Get(), mCamera.get());
 
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

@@ -1,18 +1,28 @@
+
+//////////////////////////////////////
+cbuffer cbGameObjectInfo : register(b0)
+{
+	matrix worldMat : packoffset(c0);
+}
+
+cbuffer cbCameraInfo : register(b1)
+{
+	matrix viewMat : packoffset(c0);
+	matrix projMat : packoffset(c4);
+}
 /////////////////////////////////////////
 struct VS_INPUT
 {
-	float3 postion	: POSITION;
-	float4 color	: COLOR;
-	uint ID			: SV_VertexID;
+	float3 position : POSITION;
+	float4 color : COLOR;
 };
 
 struct VS_OUTPUT
 {
-	float4 position	: SV_POSITION;
-	float4 color	: COLOR;
+	float4 position : SV_POSITION;
+	float4 color : COLOR;
 };
 //////////////////////////////////////
-
 float4 full(uint vertexID)
 {
 	float3 output = float3(0.0f, 0.0f, 0.0f);
@@ -41,12 +51,20 @@ float4 full(uint vertexID)
 	}
 	return float4(output, 1.0f);
 }
+
+float4 WVP(float3 position)
+{
+	return mul(mul(mul(float4(position, 1.0f)
+	, worldMat), viewMat), projMat);
+}
 ///////////////////////////////////////
-VS_OUTPUT VSMain(VS_INPUT input)
+VS_OUTPUT VSDiffused(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	output.position = float4(input.postion, 1.0f);
+	
+	output.position = float4(input.position,1.0f);
 	output.color = input.color;
+	
 	return output;
 }
 /////////////////////////////////////////
@@ -92,21 +110,11 @@ float4 UFO(float4 input)
 	return color;
 }
 
-float4 focus(float4 input)
-{
-	float4 color = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//color.rgb = distance(float2(0.0f, 0.0f), input.xy / float2(W, H));
-	//color.rgb = length(input.xy / float2(W, H));
-	//color.rgb = distance(float2(0.0f, 0.0f), (input.xy / float2(W, H) - 0.5f)); 
-	color.rgb = length(input.xy / float2(W, H));
-	//color.rgb = distance(float2(0.5f, 0.5f), input.xy / float2(W, H));
-	return color;
-}
-
 /////////////////////////////////////////
-float4 PSMain(VS_OUTPUT input) : SV_TARGET
+float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 	
-	return UFO(input.position);
+	//return UFO(input.position);
+	return float4(1.0f,0.0f,1.0f,0.5f);
 }

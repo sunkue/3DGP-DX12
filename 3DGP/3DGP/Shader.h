@@ -1,6 +1,12 @@
 #pragma once
 
+#include "Camera.h"
 #include "GameObject.h"
+
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4A mxmf44World;
+};
 
 class Shader
 {
@@ -27,21 +33,29 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob);
 	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
 	
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) { }
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList) { }
-	virtual void ReleaseShaderVariables() { }
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+	virtual void ReleaseShaderVariables();
 	
-	virtual void ReleaseUploadBuffers();
-	
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context = nullptr);
-	virtual void AnimateObjects(milliseconds timeElapsed);
-	virtual void ReleaseObjects();
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world);
 	
 	virtual void PrepareRender(ID3D12GraphicsCommandList* commandList);
-	virtual void Render(ID3D12GraphicsCommandList* commandList);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 
 protected:
-	vector<GameObject*> mObjects;
 	vector<ComPtr<ID3D12PipelineState>> mPipelineStates;
+};
+
+class DiffusedShader : public Shader
+{
+public:
+	DiffusedShader();
+	virtual ~DiffusedShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
 };
 

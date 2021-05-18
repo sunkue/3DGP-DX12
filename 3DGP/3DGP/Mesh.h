@@ -7,7 +7,6 @@ public:
 	Vertex(float x, float y, float z) : mxmf3Position{ x,y,z } {}
 	Vertex(XMFLOAT3 pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
 	Vertex(XMFLOAT3A pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
-	~Vertex() {}
 
 protected:
 	XMFLOAT3A mxmf3Position;
@@ -32,7 +31,6 @@ public:
 	DiffusedVertex(XMFLOAT3 pos, XMFLOAT4A diffuse)
 		: Vertex{ pos }
 		, mxmf4Diffuse{ diffuse } {}
-	~DiffusedVertex() {}
 
 protected:
 	XMFLOAT4A mxmf4Diffuse;

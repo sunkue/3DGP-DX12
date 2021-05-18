@@ -32,29 +32,17 @@ D3D12_BLEND_DESC Shader::CreateBlendState()
 
 D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 {
-	constexpr UINT INPUT_ELEMENT_DESCS_COUNT{ 2 };
-	D3D12_INPUT_ELEMENT_DESC* inputElementDescs = new D3D12_INPUT_ELEMENT_DESC[INPUT_ELEMENT_DESCS_COUNT]
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0
-		, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex)
-		, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
-	};
-	
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc;
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = INPUT_ELEMENT_DESCS_COUNT;
-	return inputLayoutDesc;
+	return D3D12_INPUT_LAYOUT_DESC{ nullptr,0 };
 }
 
 D3D12_SHADER_BYTECODE Shader::CreateVertexShader(ID3D10Blob** shaderBlob)
 {
-	return CompileShaderFromFile(const_cast<WCHAR*>(L"Shaders.hlsl"), "VSMain", "vs_5_1", shaderBlob);
+	return CD3DX12_SHADER_BYTECODE{ nullptr,0 };
 }
 
 D3D12_SHADER_BYTECODE Shader::CreatePixelShader(ID3D10Blob** shaderBlob)
 {
-	return CompileShaderFromFile(const_cast<WCHAR*>(L"Shaders.hlsl"), "PSMain", "ps_5_1", shaderBlob);
+	return CD3DX12_SHADER_BYTECODE{ nullptr,0 };
 }
 
 D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(
@@ -91,6 +79,7 @@ D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(
 		, shaderBlob
 		, comD3dErrorBlob.GetAddressOf());
 	OutputErrorMessage(comD3dErrorBlob.Get(), cout);
+	
 	ThrowIfFailed(hResult);
 
 	CD3DX12_SHADER_BYTECODE d3dShaderByteCode{ *shaderBlob };
@@ -101,8 +90,8 @@ D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(
 
 void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
 {
-	assert(mPipelineStates.empty());
-	mPipelineStates.emplace_back();
+	assert(!mPipelineStates.empty());
+
 
 	ComPtr<ID3DBlob> pd3dVertexShaderBlob;
 	ComPtr<ID3DBlob> pd3dPixelShaderBlob;
@@ -131,32 +120,26 @@ void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignatu
 
 //////////////////////////////////////
 
-void Shader::BuildObjects(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, void* context)
+void Shader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	TriangleMesh* triangleMesh{ new TriangleMesh{device,commandList} };
-	assert(mObjects.empty());
-	mObjects.emplace_back();
-	mObjects[0] = new GameObject();
-	mObjects[0]->SetMesh(triangleMesh);
+
 }
 
-void Shader::ReleaseObjects()
+void Shader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	for (auto& obj : mObjects)delete obj;
-	mObjects.clear();
+
 }
 
-void Shader::AnimateObjects(milliseconds timeElapsed)
+void Shader::UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world)
 {
-	for (auto& obj : mObjects)obj->Animate(timeElapsed);
+	static XMFLOAT4X4A w;
+	XMStoreFloat4x4A(&w, XMMatrixTranspose(XMLoadFloat4x4A(world)));
+	commandList->SetGraphicsRoot32BitConstants(0, 16, &w, 0);
 }
 
-void Shader::ReleaseUploadBuffers()
+void Shader::ReleaseShaderVariables()
 {
-	for (auto& obj : mObjects)obj->ReleaseUploadBuffers();
+
 }
 
 void Shader::PrepareRender(ID3D12GraphicsCommandList* commandList)
@@ -164,8 +147,52 @@ void Shader::PrepareRender(ID3D12GraphicsCommandList* commandList)
 	commandList->SetPipelineState(mPipelineStates[0].Get());
 }
 
-void Shader::Render(ID3D12GraphicsCommandList* commandList)
+void Shader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender(commandList);
-	for (auto& obj : mObjects)obj->Render(commandList);
+}
+
+///////////////////////////////////////////////////
+
+DiffusedShader::DiffusedShader()
+{
+
+}
+
+DiffusedShader::~DiffusedShader()
+{
+
+}
+
+D3D12_INPUT_LAYOUT_DESC DiffusedShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount = 2;
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs = 
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE DiffusedShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1",shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE DiffusedShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1",shaderBlob);
+}
+
+void DiffusedShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
 }

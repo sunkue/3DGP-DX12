@@ -15,11 +15,31 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
+	CD3DX12_ROOT_PARAMETER RootParameters[2];
+
+	CD3DX12_ROOT_PARAMETER::InitAsConstants(
+		  RootParameters[0]
+		, 16
+		, 0
+		, 0
+		, D3D12_SHADER_VISIBILITY_VERTEX);
+	CD3DX12_ROOT_PARAMETER::InitAsConstants(
+		RootParameters[1]
+		, 32
+		, 1
+		, 0
+		, D3D12_SHADER_VISIBILITY_VERTEX);
+	
 	D3D12_ROOT_SIGNATURE_FLAGS RSFlags{
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT };
+		  D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS
+	};
 	CD3DX12_ROOT_SIGNATURE_DESC RSDesc{
-		  0
-		, nullptr
+		   _countof(RootParameters)
+		, RootParameters
 		, 0
 		, nullptr
 		, RSFlags };
@@ -44,28 +64,30 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
-	assert(mShaders.empty());
-	Shader* shader = new Shader;
+	assert(mObjects.empty());
+	TriangleMesh* mesh = new TriangleMesh(device, commandList);
+	RotatingObject* RO = new RotatingObject();
+	RO->SetMesh(mesh);
+
+	DiffusedShader* shader = new DiffusedShader();
 	shader->CreateShader(device, mGraphicsRootSignature.Get());
-	shader->BuildObjects(device, commandList);
-	shader->AddRef();
-	mShaders.push_back(shader);
+	shader->CreateShaderVariables(device, commandList);
+
+	RO->SetShader(shader);
+
+	mObjects.push_back(RO);
 };
 
 void Scene::ReleaseObjects()
 {
 	mGraphicsRootSignature.Reset();
-	for (auto& sh : mShaders) {
-		sh->ReleaseShaderVariables();
-		sh->ReleaseObjects();
-		sh->Release();
-	}
-	mShaders.clear();
+	for (auto& obj : mObjects)delete obj;
+	mObjects.clear();
 };
 
 void Scene::ReleaseUploadBuffers()
 {
-	for (auto& sh : mShaders)sh->ReleaseUploadBuffers();	
+	for (auto& obj : mObjects)obj->ReleaseUploadBuffers();
 }
 
 ///////////////////////////////////////////////////
@@ -97,11 +119,16 @@ bool Scene::ProcessInput()
 
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
-	for (auto& sh : mShaders)sh->AnimateObjects(timeElapsed);
+	for (auto& obj : mObjects)obj->Animate(timeElapsed);
 };
 
-void Scene::Render(ID3D12GraphicsCommandList* commandList)
+void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
+	assert(camera);
+	camera->SetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
-	for (auto& sh : mShaders)sh->Render(commandList);
+	camera->UpdateShaderVariables(commandList);
+	for (auto& obj : mObjects)obj->Render(commandList, camera);
 };
+
+
