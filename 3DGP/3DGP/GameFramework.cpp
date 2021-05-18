@@ -14,8 +14,9 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 GameFramework* GameFramework::APP = nullptr;
 ///////////////////////////////////////////////////////////////////////////////////////
 
-GameFramework::GameFramework(HINSTANCE hInstance)
+GameFramework::GameFramework(HINSTANCE hInstance, int showCmd)
 	: mhInstance					{ hInstance }
+	, mShowCmd						{ showCmd }
 	, mhWnd							{ nullptr }
 	, mWndClientWidth				{ 0 }
 	, mWndClientHeight				{ 0 }
@@ -145,7 +146,7 @@ bool GameFramework::InitMainWindow()
 		return false;
 	}
 	
-	ShowWindow(mhWnd, SW_SHOW);
+	ShowWindow(mhWnd, mShowCmd);
 	UpdateWindow(mhWnd);
 
 	return true;

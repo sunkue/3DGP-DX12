@@ -15,7 +15,7 @@ private:
 	
 public:
 	GameFramework() = default;
-	GameFramework(HINSTANCE hInstance);
+	GameFramework(HINSTANCE hInstance, int showCmd);
 	virtual ~GameFramework();
 	void OnCreate();
 	void OnDestroy();
@@ -58,6 +58,7 @@ protected:
 protected:
 	HWND		mhWnd;
 	HINSTANCE	mhInstance;
+	int			mShowCmd;
 
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;

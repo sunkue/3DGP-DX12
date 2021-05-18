@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 
 _Use_decl_annotations_
-int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int showCmd)
 {
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -17,7 +17,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
 
 	try
 	{
-		GameFramework application{ hInstance };
+		GameFramework application{ hInstance, showCmd };
 
 		if (!application.Initialize())
 		{
