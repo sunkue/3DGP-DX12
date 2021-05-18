@@ -1,30 +1,19 @@
 ﻿#include "stdafx.h"
 #include "GameFramework.h"
 
-
-int WINAPI WinMain(
-	_In_		HINSTANCE	hInstance,
-	_In_opt_	HINSTANCE	hPrevInstance,
-	_In_		LPSTR		cmdLine,
-	_In_		int			nShowCmd)
+_Use_decl_annotations_
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
 {
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif // _DEBUG
-
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(cmdLine);
-
-#ifdef _DEBUG	// 콘솔 창
 	{
 		AllocConsole();
 		FILE* file;
 		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stdout);
 		_tfreopen_s(&file, _T("CONOUT$"), _T("w"), stderr);
 	}
-	cout << "" << "\n";
+	cout << "2016182024 wmwwmmm@naver.com 윤선규" << "\n";
 #endif // _DEBUG
-
 
 	try
 	{
