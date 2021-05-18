@@ -111,7 +111,7 @@ bool GameFramework::InitMainWindow()
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);
 		return false;
 	}
-	
+
 	RECT rc{ 0, 0, static_cast<LONG>(mWndClientWidth), static_cast<LONG>(mWndClientHeight) };
 	DWORD dwStyle{ 0
 		| WS_OVERLAPPED 

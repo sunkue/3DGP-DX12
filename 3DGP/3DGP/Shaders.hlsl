@@ -62,7 +62,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 {
 	VS_OUTPUT output;
 	
-	output.position = float4(input.position,1.0f);
+	output.position = WVP(input.position);
 	output.color = input.color;
 	
 	return output;
