@@ -6,8 +6,6 @@
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
-	// before CreateWindow returns, and thus before mhMainWnd is valid.
 	return GameFramework::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
 }
 
@@ -19,8 +17,8 @@ GameFramework* GameFramework::APP = nullptr;
 GameFramework::GameFramework(HINSTANCE hInstance)
 	: mhInstance					{ hInstance }
 	, mhWnd							{ nullptr }
-	, mWndClientWidth				{ WIDTH }
-	, mWndClientHeight				{ HEIGHT }
+	, mWndClientWidth				{ 0 }
+	, mWndClientHeight				{ 0 }
 	, mFactory						{ nullptr }
 	, mDevice						{ nullptr }
 	, mSwapChain					{ nullptr }
