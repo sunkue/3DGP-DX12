@@ -59,8 +59,8 @@ using TimePoint = steady_clock::time_point;
 
 constexpr UINT RFR = 144;
 
-#define WIDTH	1280
-#define HEIGHT	720
+#define WIDTH	640
+#define HEIGHT	480
 
 /*
 	목표 일주일 3챕터, 8주

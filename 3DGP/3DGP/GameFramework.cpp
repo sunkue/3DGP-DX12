@@ -150,7 +150,7 @@ bool GameFramework::InitMainWindow()
 	UpdateWindow(mhWnd);
 
 #ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
-	ChangeSwapChainState();
+	ChanegeFullScreenMode();
 #endif
 	return true;
 }
@@ -416,6 +416,24 @@ void GameFramework::ChanegeFullScreenMode()
 	BOOL bFullScreenNow{ false };
 	ThrowIfFailed(mSwapChain->GetFullscreenState(&bFullScreenNow, nullptr));
 	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
+
+	DXGI_MODE_DESC dxgiTargetParameters;
+	dxgiTargetParameters.Format		= DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiTargetParameters.Width		= mWndClientWidth;
+	dxgiTargetParameters.Height		= mWndClientHeight;
+	dxgiTargetParameters.RefreshRate.Numerator		= RFR;
+	dxgiTargetParameters.RefreshRate.Denominator	= 1;
+	dxgiTargetParameters.Scaling			= DXGI_MODE_SCALING_UNSPECIFIED;
+	dxgiTargetParameters.ScanlineOrdering	= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	mSwapChain->ResizeTarget(&dxgiTargetParameters);
+	for (auto& RT : mRenderTargetBuffers) RT->Release();
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	mSwapChain->GetDesc(&dxgiSwapChainDesc);
+	mSwapChain->ResizeBuffers(FrameCount, mWndClientWidth,
+		mWndClientHeight, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
+	CreateRenderTargetViews();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

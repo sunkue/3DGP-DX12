@@ -12,11 +12,6 @@ public:
 	static GameFramework* GetApp()	{ return APP; }
 private:
 	static GameFramework* APP;
-
-	struct Resolution {
-		UINT Width;
-		UINT Height;
-	};
 	
 public:
 	GameFramework() = default;

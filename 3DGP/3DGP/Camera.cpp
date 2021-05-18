@@ -25,10 +25,10 @@ void Camera::SetViewport(
 	, float minZ = 0.0f
 	, float maxZ = 1.0f)
 {
-	mViewport.TopLeftX = xTopLeft;
-	mViewport.TopLeftY = yTopLeft;
-	mViewport.Width = width;
-	mViewport.Height = height;
+	mViewport.TopLeftX = static_cast<float>(xTopLeft);
+	mViewport.TopLeftY = static_cast<float>(yTopLeft);
+	mViewport.Width = static_cast<float>(width);
+	mViewport.Height = static_cast<float>(height);
 	mViewport.MinDepth = minZ;
 	mViewport.MaxDepth = maxZ;
 }
@@ -49,14 +49,9 @@ void Camera::SetViewportScissorRect(ID3D12GraphicsCommandList* commandList)
 
 void Camera::CreateShaderVariables(
 	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandlist)
+	, ID3D12GraphicsCommandList* commandList)
 {
-	XMFLOAT4X4A view;
-	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mxmf44View)));
-	commandlist->SetGraphicsRoot32BitConstants(1, 16, &view, 0);
-	XMFLOAT4X4A proj;
-	XMStoreFloat4x4A(&proj, XMMatrixTranspose(XMLoadFloat4x4A(&mxmf44Projection)));
-	commandlist->SetGraphicsRoot32BitConstants(1, 16, &view, 16);
+
 }
 
 void Camera::GenerateViewMatrix(XMFLOAT3 pos, XMFLOAT3 lookAt, XMFLOAT3 up)
@@ -71,13 +66,17 @@ void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 	XMStoreFloat4x4A(&mxmf44Projection, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
 }
 
+void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	XMFLOAT4X4A view;
+	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mxmf44View)));
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &view, 0);
+	XMFLOAT4X4A proj;
+	XMStoreFloat4x4A(&proj, XMMatrixTranspose(XMLoadFloat4x4A(&mxmf44Projection)));
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &proj, 16);
+}
+
 void Camera::ReleaseShaderVariables()
 {
 
 }
-
-void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commadList)
-{
-
-}
-

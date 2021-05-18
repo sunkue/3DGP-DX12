@@ -127,14 +127,15 @@ void Shader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandLi
 
 void Shader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-
+	assert(false);
 }
 
 void Shader::UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world)
 {
-	static XMFLOAT4X4A w;
+	XMFLOAT4X4A w;
 	XMStoreFloat4x4A(&w, XMMatrixTranspose(XMLoadFloat4x4A(world)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &w, 0);
+	
 }
 
 void Shader::ReleaseShaderVariables()
@@ -182,13 +183,13 @@ D3D12_INPUT_LAYOUT_DESC DiffusedShader::CreateInputLayout()
 D3D12_SHADER_BYTECODE DiffusedShader::CreateVertexShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1",shaderBlob);
+		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1", shaderBlob);
 }
 
 D3D12_SHADER_BYTECODE DiffusedShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1",shaderBlob);
+		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1", shaderBlob);
 }
 
 void DiffusedShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)

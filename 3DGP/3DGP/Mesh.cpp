@@ -45,7 +45,7 @@ TriangleMesh::TriangleMesh(
 	, ID3D12GraphicsCommandList* commandList)
 	: Mesh{ device , commandList }
 {
-	constexpr UINT VC{ 6 };
+	constexpr UINT VC{ 3 };
 	mVerticesCount = VC;
 	mStride = sizeof(DiffusedVertex);
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -53,12 +53,9 @@ TriangleMesh::TriangleMesh(
 	
 	DiffusedVertex vertices[VC]
 	{
-		  { XMFLOAT3A{ -1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
-		, { XMFLOAT3A{ +1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
-		, { XMFLOAT3A{ +1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
-		, { XMFLOAT3A{ -1.0f, +1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
-		, { XMFLOAT3A{ +1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
-		, { XMFLOAT3A{ -1.0f, -1.0f, 0.0f }, XMFLOAT4A{ Colors::DarkGoldenrod }}
+		  { XMFLOAT3A{  0.0f, +0.5f, 0.0f }, XMFLOAT4A{ Colors::Red }}
+		, { XMFLOAT3A{ +0.5f, -0.5f, 0.0f }, XMFLOAT4A{ Colors::Green }}
+		, { XMFLOAT3A{ -0.5f, -0.5f, 0.0f }, XMFLOAT4A{ Colors::Blue }}
 	};
 	
 	UINT bufferSize{ mStride * VC };

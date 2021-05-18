@@ -116,5 +116,5 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 	float4 output = input.color;
 	
 	//return UFO(input.position);
-	return float4(1.0f,0.0f,1.0f,0.5f);
+	return output;
 }

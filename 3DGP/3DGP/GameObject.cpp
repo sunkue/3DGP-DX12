@@ -60,7 +60,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender();
 	if (mShader) {
-		mShader->UpdateShaderVariables(commandList);
+		mShader->UpdateShaderVariable(commandList, &mxmf44World);
 		mShader->Render(commandList, camera);
 	}
 	if (mMesh)mMesh->Render(commandList);
