@@ -127,7 +127,7 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	assert(camera);
-	camera->SetViewportScissorRect(commandList);
+	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
 	for (auto& obj : mObjects)obj->Render(commandList, camera);

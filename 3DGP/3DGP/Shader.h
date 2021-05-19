@@ -22,25 +22,23 @@ private:
 	int mReferences;
 
 public:
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+	virtual void ReleaseShaderVariables();
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world);
+
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
+
+protected:
+	virtual D3D12_SHADER_BYTECODE	CreatePixelShader(ID3DBlob** ShaderBlob);
+	virtual D3D12_SHADER_BYTECODE	CreateVertexShader(ID3DBlob** ShaderBlob);
+	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob);
 	virtual D3D12_INPUT_LAYOUT_DESC	CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC	CreateRasterizerState();
 	virtual D3D12_BLEND_DESC		CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
-	
-	virtual D3D12_SHADER_BYTECODE	CreateVertexShader(ID3DBlob** ShaderBlob);
-	virtual D3D12_SHADER_BYTECODE	CreatePixelShader(ID3DBlob** ShaderBlob);
-	
-	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob);
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
-	
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
-	virtual void ReleaseShaderVariables();
-	
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world);
-	
 	virtual void PrepareRender(ID3D12GraphicsCommandList* commandList);
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 
 protected:
 	vector<ComPtr<ID3D12PipelineState>> mPipelineStates;
@@ -52,10 +50,11 @@ public:
 	DiffusedShader();
 	virtual ~DiffusedShader();
 
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
+protected:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
 
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
 };
 

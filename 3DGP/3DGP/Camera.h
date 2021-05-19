@@ -25,7 +25,7 @@ public:
 	void SetViewport(int xTopLeft, int yTopLeft, int width, int height
 		, float minZ = 0.0f, float maxZ = 1.0f);
 	void SetScissorRect(UINT xLeft, UINT yTop, UINT xRight, UINT yBottom);
-	virtual void SetViewportScissorRect(ID3D12GraphicsCommandList* commandList);
+	virtual void RSSetViewportScissorRect(ID3D12GraphicsCommandList* commandList);
 
 protected:
 	XMFLOAT4X4A mxmf44View;

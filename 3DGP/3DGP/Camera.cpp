@@ -41,7 +41,7 @@ void Camera::SetScissorRect(UINT xLeft, UINT yTop, UINT xRight, UINT yBottom)
 	mScissorRect.bottom = yBottom;
 }
 
-void Camera::SetViewportScissorRect(ID3D12GraphicsCommandList* commandList)
+void Camera::RSSetViewportScissorRect(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->RSSetViewports(1, &mViewport);
 	commandList->RSSetScissorRects(1, &mScissorRect);

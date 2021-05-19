@@ -17,22 +17,19 @@ public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance, int showCmd);
 	virtual ~GameFramework();
-	void OnCreate();
-	void OnDestroy();
 	bool Initialize();
-	bool InitMainWindow();
-	bool InitDirect3D();
-
-public:
 	int Run();
-	void FrameAdvance();
-	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	ATOM MyRegisterClass(HINSTANCE hInstance);
-
 
 protected:
+	void OnCreate();
+	void OnDestroy();
+	bool InitDirect3D();
+	bool InitMainWindow();
+	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	void FrameAdvance();
+	ATOM MyRegisterClass(HINSTANCE hInstance);
 	void ProcessInput();
 	void AnimateObjects();
 	void PopulateCommandList();
