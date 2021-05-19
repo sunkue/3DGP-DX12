@@ -10,23 +10,29 @@ Mesh::Mesh(
 	, mOffset{ 0 }
 	, mStride{ 0 }
 	, mVerticesCount{ 0 }
+	, mIndicesCount{ 0 }
+	, mStartIndex{ 0 }
+	, mBaseVertex{ 0 }
 	, mReferences{ 0 }
 	, mPrimitiveToplogy{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST }
 	, mVertexBuffer{ nullptr }
 	, mVertexUploadBuffer{ nullptr }
+	, mIndexBuffer{ nullptr }
+	, mIndexUploadBuffer{ nullptr}
 	, mVertexBufferView{}
+	, mIndexBufferView{}
 {
 
 }
 
 Mesh::~Mesh()
 {
-
 }
 
 void Mesh::ReleaseUploadBuffers()
 {
 	mVertexUploadBuffer.Reset();
+	mIndexUploadBuffer.Reset();
 }
 
 ////////////////////////////////////////////////
@@ -35,7 +41,11 @@ void Mesh::Render(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
 	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
-	commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
+	if (mIndexBuffer) {
+		commandList->IASetIndexBuffer(&mIndexBufferView);
+		commandList->DrawIndexedInstanced(mIndicesCount, 1, 0, 0, 0);
+	}
+	else commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
 }
 
 /////////////////////////////////////////////////////
@@ -86,61 +96,21 @@ CubeMeshDiffused::CubeMeshDiffused(
 	, float width, float height, float depth)
 	: Mesh(device, commandList)
 {
-	mVerticesCount = 36;
+	// 개노가다 우씨,, 오브젝트 리더 만들자.
+	mVerticesCount = 8;
 	mStride = sizeof(DiffusedVertex);
 	float x = width  * 0.5f;
 	float y = height * 0.5f;
 	float z = depth	 * 0.5f;
-	// 개노가다 우씨,, 오브젝트 리더 만들자.
-	DiffusedVertex vertices[36]{
-		// f1
+	DiffusedVertex vertices[]{
 		 {-x, +y ,-z, RandomColor()}
 		,{+x, +y ,-z, RandomColor()}
-		,{+x, -y ,-z, RandomColor()}
-		// f2
-		,{-x, +y ,-z, RandomColor()}
-		,{+x, -y ,-z, RandomColor()}
-		,{-x, -y ,-z, RandomColor()}
-		// u1
-		,{-x, +y ,+z, RandomColor()}
-		,{+x, +y ,+z, RandomColor()}
-		,{+x, +y ,-z, RandomColor()}
-		// u2
-		,{-x, +y ,+z, RandomColor()}
-		,{+x, +y ,-z, RandomColor()}
-		,{-x, +y ,-z, RandomColor()}
-		// b1
-		,{-x, -y ,+z, RandomColor()}
-		,{+x, -y ,+z, RandomColor()}
-		,{+x, +y ,+z, RandomColor()}
-		// b2
-		,{-x, -y ,+z, RandomColor()}
 		,{+x, +y ,+z, RandomColor()}
 		,{-x, +y ,+z, RandomColor()}
-		// d1
 		,{-x, -y ,-z, RandomColor()}
 		,{+x, -y ,-z, RandomColor()}
 		,{+x, -y ,+z, RandomColor()}
-		// d2
-		,{-x, -y ,-z, RandomColor()}
-		,{+x, -y ,+z, RandomColor()}
 		,{-x, -y ,+z, RandomColor()}
-		// l1
-		,{-x, +y ,+z, RandomColor()}
-		,{-x, +y ,-z, RandomColor()}
-		,{-x, -y ,-z, RandomColor()}
-		// l2
-		,{-x, +y ,+z, RandomColor()}
-		,{-x, -y ,-z, RandomColor()}
-		,{-x, -y ,+z, RandomColor()}
-		// r1
-		,{+x, +y ,-z, RandomColor()}
-		,{+x, +y ,+z, RandomColor()}
-		,{+x, -y ,+z, RandomColor()}
-		// r2
-		,{+x, +y ,-z, RandomColor()}
-		,{+x, -y ,+z, RandomColor()}
-		,{+x, -y ,-z, RandomColor()}
 	};
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
@@ -154,6 +124,34 @@ CubeMeshDiffused::CubeMeshDiffused(
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
+
+	mIndicesCount = 36;
+	UINT indices[]{
+		 3,1,0
+		,2,1,3
+		,0,5,4
+		,1,5,0
+		,3,4,7
+		,0,4,3
+		,1,6,5
+		,2,6,1
+		,2,7,6
+		,3,7,2
+		,6,4,5
+		,7,4,6
+	};
+	bufferSize = sizeof(UINT) * mIndicesCount;
+	mIndexBuffer = CreateBufferResource(
+		  device
+		, commandList
+		, indices
+		, bufferSize
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_INDEX_BUFFER
+		, mIndexUploadBuffer.GetAddressOf());
+	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
+	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	mIndexBufferView.SizeInBytes = bufferSize;
 }
 
 CubeMeshDiffused::~CubeMeshDiffused()

@@ -59,13 +59,18 @@ public:
 protected:
 	ComPtr<ID3D12Resource>	mVertexBuffer;
 	ComPtr<ID3D12Resource>	mVertexUploadBuffer;
+	ComPtr<ID3D12Resource>	mIndexBuffer;
+	ComPtr<ID3D12Resource>	mIndexUploadBuffer;
 	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW	 mIndexBufferView;
 	D3D12_PRIMITIVE_TOPOLOGY mPrimitiveToplogy;
-	UINT mSlot;
 	UINT mVerticesCount;
+	UINT mIndicesCount;
+	UINT mStartIndex;
+	int  mBaseVertex;
+	UINT mSlot;
 	UINT mStride;
 	UINT mOffset;
-
 };
 
 class TriangleMesh : public Mesh

@@ -13,7 +13,8 @@ Shader::~Shader()
 D3D12_RASTERIZER_DESC Shader::CreateRasterizerState()
 {
 	CD3DX12_RASTERIZER_DESC RET{ CD3DX12_DEFAULT {} };
-	RET.CullMode = D3D12_CULL_MODE_NONE;
+	RET.CullMode = D3D12_CULL_MODE_BACK;
+	RET.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	return RET;
 }
 
