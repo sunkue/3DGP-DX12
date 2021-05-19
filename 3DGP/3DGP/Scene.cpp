@@ -64,8 +64,10 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
+
 	assert(mObjects.empty());
-	TriangleMesh* mesh = new TriangleMesh(device, commandList);
+	CubeMeshDiffused* mesh = new CubeMeshDiffused(device, commandList
+		, 12.0f, 12.0f, 12.0f);
 	RotatingObject* RO = new RotatingObject();
 	RO->SetMesh(mesh);
 

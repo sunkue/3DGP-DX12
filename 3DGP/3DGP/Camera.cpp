@@ -22,8 +22,8 @@ void Camera::SetViewport(
 	, int yTopLeft
 	, int width
 	, int height
-	, float minZ = 0.0f
-	, float maxZ = 1.0f)
+	, float minZ
+	, float maxZ)
 {
 	mViewport.TopLeftX = static_cast<float>(xTopLeft);
 	mViewport.TopLeftY = static_cast<float>(yTopLeft);

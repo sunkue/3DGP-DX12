@@ -12,7 +12,9 @@ Shader::~Shader()
 
 D3D12_RASTERIZER_DESC Shader::CreateRasterizerState()
 {
-	return CD3DX12_RASTERIZER_DESC{ CD3DX12_DEFAULT {} };
+	CD3DX12_RASTERIZER_DESC RET{ CD3DX12_DEFAULT {} };
+	RET.CullMode = D3D12_CULL_MODE_NONE;
+	return RET;
 }
 
 D3D12_DEPTH_STENCIL_DESC Shader::CreateDepthStencilState()

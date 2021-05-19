@@ -49,6 +49,7 @@ using Microsoft::WRL::ComPtr;
 #include <array>
 #include <cassert>
 #include <fstream>
+#include <random>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
@@ -56,9 +57,27 @@ using Microsoft::WRL::ComPtr;
 using namespace std;
 using namespace std::chrono;
 using TimePoint = steady_clock::time_point;
-
 constexpr UINT RFR = 144;
 
+
+class RANDOM
+{
+public:
+	random_device rd;
+	default_random_engine dre{ rd() };
+	uniform_real_distribution<float> urd{ 0.0f,1.0f };
+	float operator()()
+	{
+		return urd(dre);
+	}
+};
+
+extern RANDOM Rand;
+
+inline XMVECTORF32 RandomColor()
+{
+	return { Rand(),Rand(),Rand(),1.0f };
+}
 /*
 	목표 일주일 3챕터, 8주
 

@@ -23,7 +23,7 @@ public:
 	void GenerateProjectionMatrix(float fov, float aspect, float n, float f);
 	
 	void SetViewport(int xTopLeft, int yTopLeft, int width, int height
-		, float minZ, float maxZ);
+		, float minZ = 0.0f, float maxZ = 1.0f);
 	void SetScissorRect(UINT xLeft, UINT yTop, UINT xRight, UINT yBottom);
 	virtual void SetViewportScissorRect(ID3D12GraphicsCommandList* commandList);
 

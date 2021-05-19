@@ -22,6 +22,9 @@ public:
 	DiffusedVertex(float x, float y, float z, XMFLOAT4A diffuse)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ diffuse } {}
+	DiffusedVertex(float x, float y, float z, XMVECTORF32 diffuse)
+		: Vertex{ x,y,z }
+		, mxmf4Diffuse{ diffuse } {}
 	DiffusedVertex(float x, float y, float z, float r, float g, float b, float a)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ r,g,b,a } {}
@@ -70,4 +73,12 @@ class TriangleMesh : public Mesh
 public:
 	TriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	virtual ~TriangleMesh();
+};
+
+class CubeMeshDiffused : public Mesh
+{
+public:
+	CubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
+		, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
+	virtual ~CubeMeshDiffused();
 };
