@@ -81,8 +81,8 @@ inline XMVECTORF32 RandomColor()
 /*
 	목표 일주일 3챕터, 8주
 
-	현재 chapter 6 / 따라하기 10
+	현재 chapter 6 / 따라하기 11
 
-	05/19
+	05/20
    ~06/21
 */
