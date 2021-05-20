@@ -44,11 +44,11 @@ protected:
 	vector<ComPtr<ID3D12PipelineState>> mPipelineStates;
 };
 
-class DiffusedShader : public Shader
+class PlayerShader : public Shader
 {
 public:
-	DiffusedShader();
-	virtual ~DiffusedShader();
+	PlayerShader();
+	virtual ~PlayerShader();
 
 	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
 protected:
@@ -58,3 +58,26 @@ protected:
 
 };
 
+class ObjectsShader : public Shader
+{
+public:
+	ObjectsShader();
+	virtual ~ObjectsShader();
+
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void AnimateObjects(milliseconds timeElapsed);
+	virtual void ReleaseObjects();
+	virtual void ReleaseUploadBuffers();
+
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) override;
+
+protected:
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+	
+protected:
+	vector<shared_ptr<GameObject>> mObjects;
+
+};

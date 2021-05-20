@@ -14,7 +14,6 @@ D3D12_RASTERIZER_DESC Shader::CreateRasterizerState()
 {
 	CD3DX12_RASTERIZER_DESC RET{ CD3DX12_DEFAULT {} };
 	RET.CullMode = D3D12_CULL_MODE_BACK;
-	RET.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	return RET;
 }
 
@@ -158,17 +157,17 @@ void Shader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 ///////////////////////////////////////////////////
 
-DiffusedShader::DiffusedShader()
+PlayerShader::PlayerShader()
 {
 
 }
 
-DiffusedShader::~DiffusedShader()
+PlayerShader::~PlayerShader()
 {
 
 }
 
-D3D12_INPUT_LAYOUT_DESC DiffusedShader::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC PlayerShader::CreateInputLayout()
 {
 	constexpr UINT InputElemDescsCount = 2;
 	D3D12_INPUT_ELEMENT_DESC* InputElemDescs = 
@@ -183,20 +182,116 @@ D3D12_INPUT_LAYOUT_DESC DiffusedShader::CreateInputLayout()
 	return InputLayoutDesc;
 }
 
-D3D12_SHADER_BYTECODE DiffusedShader::CreateVertexShader(ID3DBlob** shaderBlob)
+D3D12_SHADER_BYTECODE PlayerShader::CreateVertexShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
 		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1", shaderBlob);
 }
 
-D3D12_SHADER_BYTECODE DiffusedShader::CreatePixelShader(ID3DBlob** shaderBlob)
+D3D12_SHADER_BYTECODE PlayerShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
 		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1", shaderBlob);
 }
 
-void DiffusedShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+void PlayerShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
 {
 	mPipelineStates.emplace_back();
 	Shader::CreateShader(device, rootSignature);
+}
+
+///////////////////////////////////////////////////
+
+ObjectsShader::ObjectsShader()
+{
+
+}
+
+ObjectsShader::~ObjectsShader()
+{
+
+}
+
+D3D12_INPUT_LAYOUT_DESC ObjectsShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount = 2;
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE ObjectsShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE ObjectsShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1", shaderBlob);
+}
+
+void ObjectsShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
+}
+
+void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,12.0f,12.0f,12.0f} };
+	int xCount{ 10 };
+	int yCount{ 10 };
+	int zCount{ 10 };
+	int i{ 0 };
+	mObjects.reserve(
+		  (static_cast<size_t>(xCount) * 2 + 1) 
+		* (static_cast<size_t>(yCount) * 2 + 1)
+		* (static_cast<size_t>(zCount) * 2 + 1));
+	float xPitch = 12.0f * 2.5f;
+	float yPitch = 12.0f * 2.5f;
+	float zPitch = 12.0f * 2.5f;
+	shared_ptr<RotatingObject> rotatingObj;
+	for (int x = -xCount; x <= xCount; ++x) {
+		for (int y = -yCount; y <= yCount; ++y) {
+			for (int z = -zCount; z <= zCount; ++z) {
+				rotatingObj = make_shared<RotatingObject>();
+				rotatingObj->SetMesh(cubeMesh);
+				rotatingObj->SetPosition(xPitch * x, yPitch * y, zPitch * z);
+				rotatingObj->SetRotationAxis(XMFLOAT3A(0.0f, 1.0f, 0.0f));
+				rotatingObj->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
+				mObjects.push_back(rotatingObj);
+			}
+		}
+	}
+	CreateShaderVariables(device, commandList);
+}
+
+void ObjectsShader::ReleaseObjects()
+{
+	mObjects.clear();
+}
+
+void ObjectsShader::AnimateObjects(milliseconds timeElapsed)
+{
+	for (const auto& obj : mObjects)obj->Animate(timeElapsed);
+}
+
+void ObjectsShader::ReleaseUploadBuffers()
+{
+	for (const auto& obj : mObjects)obj->ReleaseUploadBuffers();
+}
+
+void ObjectsShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
+{
+	Shader::Render(commandList, camera);
+	for (const auto& obj : mObjects)obj->Render(commandList, camera);
 }

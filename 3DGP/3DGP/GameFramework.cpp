@@ -382,7 +382,7 @@ void GameFramework::BuildObjects()
 	mCamera->SetScissorRect(0, 0, W, H);
 	mCamera->GenerateProjectionMatrix(90.0f, static_cast<float>(W) / H, 1.0f, 500.0f);
 	mCamera->GenerateViewMatrix(
-		  XMFLOAT3{ 0.0f,15.0f,-25.0f }
+		  XMFLOAT3{ 0.0f,10.0f,-150.0f }
 		, XMFLOAT3{ 0.0f,0.0f,0.0f }
 		, XMFLOAT3{ 0.0f,1.0f,0.0f });
 

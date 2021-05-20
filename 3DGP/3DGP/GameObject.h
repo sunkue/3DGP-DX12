@@ -20,17 +20,35 @@ private:
 
 public:
 	void ReleaseUploadBuffers();
-
+	
 	virtual void SetMesh(Mesh* mesh);
 	virtual void SetShader(Shader* shader);
 
 	virtual void Animate(milliseconds timeElapsed);
 
-	virtual void PrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 
+protected:
+	virtual void PrepareRender();
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+	virtual void ReleaseShaderVariables();
+
 public:
-	void Rotate(XMFLOAT3A* xmf3Axis, float angle);
+	XMFLOAT3A GetPosition()	const;
+	XMFLOAT3A GetLook() const;
+	XMFLOAT3A GetUp() const;
+	XMFLOAT3A GetRight() const;
+	
+	void SetPosition(float x, float y, float z);
+	void SetPosition(XMFLOAT3A position);
+
+	void MoveRight(float distance = 1.0f);
+	void MoveUp(float distance = 1.0f);
+	void MoveFoward(float distance = 1.0f);
+
+	void RotateByAxis(const XMFLOAT3A* xmf3Axis, const float angle);
+	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 
 protected:
 	XMFLOAT4X4A	mxmf44World;

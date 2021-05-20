@@ -65,31 +65,25 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 {
 	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
 
-	assert(mObjects.empty());
-	CubeMeshDiffused* mesh = new CubeMeshDiffused(device, commandList
-		, 12.0f, 12.0f, 12.0f);
-	RotatingObject* RO = new RotatingObject();
-	RO->SetMesh(mesh);
-
-	DiffusedShader* shader = new DiffusedShader();
-	shader->CreateShader(device, mGraphicsRootSignature.Get());
-	shader->CreateShaderVariables(device, commandList);
-
-	RO->SetShader(shader);
-
-	mObjects.push_back(RO);
+	assert(mShaders.empty());
+	mShaders.emplace_back();
+	mShaders[0].CreateShader(device, mGraphicsRootSignature.Get());
+	mShaders[0].BuildObjects(device, commandList);
 };
 
 void Scene::ReleaseObjects()
 {
 	mGraphicsRootSignature.Reset();
-	for (auto& obj : mObjects)delete obj;
-	mObjects.clear();
+	for (auto& shader : mShaders)
+	{
+		shader.ReleaseShaderVariables();
+		shader.ReleaseObjects();
+	}
 };
 
 void Scene::ReleaseUploadBuffers()
 {
-	for (auto& obj : mObjects)obj->ReleaseUploadBuffers();
+	for (auto& shader : mShaders)shader.ReleaseUploadBuffers();
 }
 
 ///////////////////////////////////////////////////
@@ -121,7 +115,7 @@ bool Scene::ProcessInput()
 
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
-	for (auto& obj : mObjects)obj->Animate(timeElapsed);
+	for (auto& shader : mShaders)shader.AnimateObjects(timeElapsed);
 };
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
@@ -130,7 +124,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
-	for (auto& obj : mObjects)obj->Render(commandList, camera);
+	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 
 

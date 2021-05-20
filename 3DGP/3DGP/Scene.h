@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Shader.h"
+
 class GameObject;
 class Camera;
 
@@ -26,7 +28,7 @@ protected:
 	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
 
 protected:
-	vector<GameObject*>					mObjects;
+	vector<ObjectsShader>			mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 
 };
