@@ -24,7 +24,7 @@ public:
 	virtual void SetMesh(Mesh* mesh);
 	virtual void SetShader(Shader* shader);
 
-	virtual void Animate(milliseconds timeElapsed);
+	virtual void Animate(const milliseconds timeElapsed);
 
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 

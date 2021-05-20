@@ -119,7 +119,7 @@ XMFLOAT3A GameObject::GetRight() const
 	return right;
 }
 
-void GameObject::MoveRight(const float distance)
+void GameObject::MoveRight(float distance)
 {
 	XMFLOAT3A pos = GetPosition();
 	XMFLOAT3A right = GetRight();
@@ -127,7 +127,7 @@ void GameObject::MoveRight(const float distance)
 	SetPosition(pos);
 }
 
-void GameObject::MoveUp(const float distance)
+void GameObject::MoveUp(float distance)
 {
 	XMFLOAT3A pos = GetPosition();
 	XMFLOAT3A up = GetUp();
@@ -135,7 +135,7 @@ void GameObject::MoveUp(const float distance)
 	SetPosition(pos);
 }
 
-void GameObject::MoveFoward(const float distance)
+void GameObject::MoveFoward(float distance)
 {
 	XMFLOAT3A pos = GetPosition();
 	XMFLOAT3A look = GetLook();

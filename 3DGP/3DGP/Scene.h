@@ -17,7 +17,7 @@ public:
 public:
 	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 	void ReleaseUploadBuffers();
-	void AnimateObjects(milliseconds timeElapsed);
+	void AnimateObjects(const milliseconds timeElapsed);
 	
 protected:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
