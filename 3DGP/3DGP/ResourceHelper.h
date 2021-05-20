@@ -15,12 +15,14 @@ ID3D12Resource* CreateBufferResource(
 #include <iostream>
 #include <regex>
 #include <fstream>
+#include <string_view>
+#include <filesystem>
 
 using namespace std;
 
 bool ReadObj(string_view fileName) {
-	ifstream objFile{ "bugatti.obj" };
-	if (!objFile) { cout << "noFile\n"; return false; }
+	ifstream objFile{ fileName };
+	if (!objFile) { cout << "there is no[" << fileName << "]\n"; return false; }
 	regex vertexPattern{ R"(^(v|vn|vt)\s(-?\d*.\d*)\s(-?\d*.\d*)\s(-?\d*.\d*)$)" };
 	regex fragmentPattern{ R"(^f\s(\d*)/(\d*)/(\d*)\s(\d*)/(\d*)/(\d*)\s(\d*)/(\d*)/(\d*)(\s(\d*)/(\d*)/(\d*))?$)" };
 	vector<string> mismatch;
