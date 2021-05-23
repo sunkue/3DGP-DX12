@@ -59,6 +59,8 @@ protected:
 
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;
+	float			mAspectRatio;
+	
 
 	ComPtr<IDXGIFactory7>	mFactory;
 	ComPtr<IDXGISwapChain4>	mSwapChain;

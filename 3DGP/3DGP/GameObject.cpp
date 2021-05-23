@@ -67,9 +67,9 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	if (mMesh)mMesh->Render(commandList);
 }
 
-void GameObject::RotateByAxis(const XMFLOAT3A* axis, const float angle)
+void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
 {
-	XMMATRIX rotate{ XMMatrixRotationAxis(XMLoadFloat3A(axis),XMConvertToRadians(angle)) };
+	XMMATRIX rotate{ XMMatrixRotationAxis(axis,XMConvertToRadians(angle)) };
 	XMStoreFloat4x4A(&mxmf44World, rotate * XMLoadFloat4x4A(&mxmf44World));
 }
 
@@ -86,60 +86,56 @@ void GameObject::SetPosition(float x, float y, float z)
 	mxmf44World._43 = z;
 }
 
-void GameObject::SetPosition(XMFLOAT3A position)
+void GameObject::SetPosition(FXMVECTOR position)
 {
-	SetPosition(position.x, position.y, position.z);
+	SetPosition(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
 }
 
-XMFLOAT3A GameObject::GetPosition()	const
+XMVECTOR GameObject::GetPosition()	const
 {
-	XMFLOAT3A pos{ mxmf44World._41,mxmf44World._42,mxmf44World._43 };
-	XMStoreFloat3A(&pos, XMVector3Normalize(XMLoadFloat3A(&pos)));
-	return pos;
+	XMVECTOR pos{ XMVectorSet(mxmf44World._41,mxmf44World._42,mxmf44World._43,1.0f) };
+	return XMVector3Normalize(pos);
 }
 
-XMFLOAT3A GameObject::GetLook() const
+XMVECTOR GameObject::GetLook() const
 {
-	XMFLOAT3A look{ mxmf44World._31,mxmf44World._32,mxmf44World._33 };
-	XMStoreFloat3A(&look, XMVector3Normalize(XMLoadFloat3A(&look)));
-	return look;
+	XMVECTOR look{ XMVectorSet(mxmf44World._31,mxmf44World._32,mxmf44World._33,0.0f) };
+	return XMVector3Normalize(look);
 }
 
-XMFLOAT3A GameObject::GetUp() const
+XMVECTOR GameObject::GetUp() const
 {
-	XMFLOAT3A up{ mxmf44World._21,mxmf44World._22,mxmf44World._23 };
-	XMStoreFloat3A(&up, XMVector3Normalize(XMLoadFloat3A(&up)));
-	return up;
+	XMVECTOR up{ XMVectorSet(mxmf44World._21,mxmf44World._22,mxmf44World._23,0.0f) };
+	return XMVector3Normalize(up);
 }
 
-XMFLOAT3A GameObject::GetRight() const
+XMVECTOR GameObject::GetRight() const
 {
-	XMFLOAT3A right{ mxmf44World._21,mxmf44World._22,mxmf44World._23 };
-	XMStoreFloat3A(&right, XMVector3Normalize(XMLoadFloat3A(&right)));
-	return right;
+	XMVECTOR right{ XMVectorSet(mxmf44World._21,mxmf44World._22,mxmf44World._23,0.0f) };
+	return XMVector3Normalize(right);
 }
 
 void GameObject::MoveRight(float distance)
 {
-	XMFLOAT3A pos = GetPosition();
-	XMFLOAT3A right = GetRight();
-	XMStoreFloat3(&pos, XMLoadFloat3(&pos) + XMLoadFloat3(&right) * distance);
+	XMVECTOR pos = GetPosition();
+	XMVECTOR right = GetRight();
+	pos += right * distance;
 	SetPosition(pos);
 }
 
 void GameObject::MoveUp(float distance)
 {
-	XMFLOAT3A pos = GetPosition();
-	XMFLOAT3A up = GetUp();
-	XMStoreFloat3(&pos, XMLoadFloat3(&pos) + XMLoadFloat3(&up) * distance);
+	XMVECTOR pos = GetPosition();
+	XMVECTOR up = GetUp();
+	pos += up * distance;
 	SetPosition(pos);
 }
 
 void GameObject::MoveFoward(float distance)
 {
-	XMFLOAT3A pos = GetPosition();
-	XMFLOAT3A look = GetLook();
-	XMStoreFloat3(&pos, XMLoadFloat3(&pos) + XMLoadFloat3(&look) * distance);
+	XMVECTOR pos = GetPosition();
+	XMVECTOR look = GetLook();
+	pos += look * distance;
 	SetPosition(pos);
 }
 
@@ -164,7 +160,7 @@ void GameObject::ReleaseShaderVariables()
 
 RotatingObject::RotatingObject()
 {
-	mxmf3RotationAxis = XMFLOAT3A(0.0f, 1.0f, 0.0f);
+	mxmf3RotationAxis = XMFLOAT3A{ 0.0f, 1.0f, 0.0f };
 	mRotationSpeed = 90.0f;
 }
 
@@ -175,6 +171,6 @@ RotatingObject::~RotatingObject()
 
 void RotatingObject::Animate(milliseconds timeElapsed)
 {
-	RotateByAxis(&mxmf3RotationAxis, mRotationSpeed * timeElapsed.count() / 1000.0f);
+	RotateByAxis(XMLoadFloat3A(&mxmf3RotationAxis), mRotationSpeed * timeElapsed.count() / 1000.0f);
 }
 

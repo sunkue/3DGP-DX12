@@ -266,7 +266,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 				rotatingObj = make_shared<RotatingObject>();
 				rotatingObj->SetMesh(cubeMesh);
 				rotatingObj->SetPosition(xPitch * x, yPitch * y, zPitch * z);
-				rotatingObj->SetRotationAxis(XMFLOAT3A(0.0f, 1.0f, 0.0f));
+				rotatingObj->SetRotationAxis({ 0.0f, 1.0f, 0.0f });
 				rotatingObj->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
 				mObjects.push_back(rotatingObj);
 			}

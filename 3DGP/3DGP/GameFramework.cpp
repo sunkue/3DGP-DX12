@@ -20,6 +20,7 @@ GameFramework::GameFramework(HINSTANCE hInstance, int showCmd)
 	, mhWnd							{ nullptr }
 	, mWndClientWidth				{ 0 }
 	, mWndClientHeight				{ 0 }
+	, mAspectRatio					{ 0.0f }
 	, mFactory						{ nullptr }
 	, mDevice						{ nullptr }
 	, mSwapChain					{ nullptr }
@@ -110,7 +111,7 @@ bool GameFramework::InitMainWindow()
 	GetWindowRect(hDesktop, &rDesktopRect);
 	mWndClientWidth = rDesktopRect.right;
 	mWndClientHeight = rDesktopRect.bottom;
-
+	mAspectRatio = rDesktopRect.right / rDesktopRect.bottom;
 	if (!MyRegisterClass(mhInstance))
 	{
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);
@@ -271,7 +272,7 @@ void GameFramework::CreateSwapChain()
 	GetClientRect(mhWnd, &rcClient);
 	mWndClientWidth		= rcClient.right - rcClient.left;
 	mWndClientHeight	= rcClient.bottom - rcClient.top;
-
+	mAspectRatio = mWndClientWidth / mWndClientHeight;
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
 	dxgiSwapChainDesc.BufferDesc.Width		= mWndClientWidth;
 	dxgiSwapChainDesc.BufferDesc.Height		= mWndClientHeight;
@@ -382,9 +383,9 @@ void GameFramework::BuildObjects()
 	mCamera->SetScissorRect(0, 0, W, H);
 	mCamera->GenerateProjectionMatrix(90.0f, static_cast<float>(W) / H, 1.0f, 500.0f);
 	mCamera->GenerateViewMatrix(
-		  XMFLOAT3{ 0.0f,10.0f,-150.0f }
-		, XMFLOAT3{ 0.0f,0.0f,0.0f }
-		, XMFLOAT3{ 0.0f,1.0f,0.0f });
+		  XMVectorSet(0.0f, 10.0f, -150.0f, 0.0f)
+		, XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f)
+		, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 
 	mScene = make_shared<Scene>();
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());

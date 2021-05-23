@@ -11,7 +11,7 @@ struct CB_GAMEOBJECT_INFO
 class Shader
 {
 public:
-	Shader() : mReferences{ 0 } {}
+	explicit Shader() : mReferences{ 0 } {}
 	virtual ~Shader();
 
 public:
@@ -61,7 +61,7 @@ protected:
 class ObjectsShader : public Shader
 {
 public:
-	ObjectsShader();
+	explicit ObjectsShader();
 	virtual ~ObjectsShader();
 
 	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);

@@ -35,19 +35,19 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 public:
-	XMFLOAT3A GetPosition()	const;
-	XMFLOAT3A GetLook() const;
-	XMFLOAT3A GetUp() const;
-	XMFLOAT3A GetRight() const;
+	XMVECTOR XM_CALLCONV GetPosition()	const;
+	XMVECTOR XM_CALLCONV GetLook() const;
+	XMVECTOR XM_CALLCONV GetUp() const;
+	XMVECTOR XM_CALLCONV GetRight() const;
 	
 	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3A position);
+	void XM_CALLCONV SetPosition(FXMVECTOR position);
 
 	void MoveRight(float distance = 1.0f);
 	void MoveUp(float distance = 1.0f);
 	void MoveFoward(float distance = 1.0f);
 
-	void RotateByAxis(const XMFLOAT3A* xmf3Axis, const float angle);
+	void XM_CALLCONV RotateByAxis(const FXMVECTOR xmf3Axis, const float angle);
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 
 protected:
@@ -69,7 +69,7 @@ private:
 
 public:
 	void SetRotationSpeed(float rotationSpeed) { mRotationSpeed = rotationSpeed; }
-	void SetRotationAxis(XMFLOAT3A rotationAxis) { mxmf3RotationAxis = rotationAxis; }
+	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mxmf3RotationAxis, rotationAxis); }
 	
 	virtual void Animate(milliseconds timeElapsed);
 

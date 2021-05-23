@@ -3,35 +3,33 @@
 class Vertex
 {
 public:
-	Vertex() : mxmf3Position{ 0.0f,0.0f,0.0f } {}
-	Vertex(float x, float y, float z) : mxmf3Position{ x,y,z } {}
-	Vertex(XMFLOAT3 pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
-	Vertex(XMFLOAT3A pos)	: mxmf3Position{ pos.x,pos.y,pos.z } {}
+	Vertex() : mPosition{ 0.0f,0.0f,0.0f } {}
+	Vertex(float x, float y, float z) : mPosition{ x,y,z } {}
+	explicit Vertex(XMFLOAT3A pos)	: mPosition{ pos.x,pos.y,pos.z } {}
 
 protected:
-	XMFLOAT3A mxmf3Position;
+	XMFLOAT3A mPosition;
 };
 
 class DiffusedVertex : public Vertex
 {
 public:
 	DiffusedVertex() : mxmf4Diffuse{ 0.0f,0.0f,0.0f,0.0f } {}
-	DiffusedVertex(float x, float y, float z, XMFLOAT4 diffuse)
-		: Vertex{ x,y,z }
-		, mxmf4Diffuse{ diffuse.x,diffuse.y,diffuse.z,diffuse.w } {}
 	DiffusedVertex(float x, float y, float z, XMFLOAT4A diffuse)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ diffuse } {}
 	DiffusedVertex(float x, float y, float z, XMVECTORF32 diffuse)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ diffuse } {}
+	DiffusedVertex(float x, float y, float z, FXMVECTOR diffuse)
+		: Vertex{ x,y,z }
+	{
+		XMStoreFloat4A(&mxmf4Diffuse, diffuse);
+	}
 	DiffusedVertex(float x, float y, float z, float r, float g, float b, float a)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ r,g,b,a } {}
-	DiffusedVertex(XMFLOAT3 pos, XMFLOAT4 diffuse)
-		: Vertex{ pos }
-		, mxmf4Diffuse{ diffuse.x,diffuse.y,diffuse.z,diffuse.w } {}
-	DiffusedVertex(XMFLOAT3 pos, XMFLOAT4A diffuse)
+	DiffusedVertex(XMFLOAT3A pos, XMFLOAT4A diffuse)
 		: Vertex{ pos }
 		, mxmf4Diffuse{ diffuse } {}
 
@@ -76,7 +74,7 @@ protected:
 class TriangleMesh : public Mesh
 {
 public:
-	TriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	explicit TriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	virtual ~TriangleMesh();
 };
 
@@ -86,4 +84,12 @@ public:
 	CubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
 		, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
 	virtual ~CubeMeshDiffused();
+};
+
+class AirplaneMeshDiffused : public Mesh
+{
+public:
+	AirplaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
+		, float width = 20.0f, float height = 20.0f, float depth = 4.0f, XMVECTORF32 color = Colors::BlueViolet);
+	virtual ~AirplaneMeshDiffused();
 };
