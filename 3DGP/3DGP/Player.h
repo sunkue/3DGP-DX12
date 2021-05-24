@@ -36,19 +36,21 @@ public:
 	Camera* GetCamera()const { return mCamera.get(); }
 	void SetCamera(Camera* camera) { mCamera = make_shared<Camera>(camera); }
 
-	void Move(BYTE direction, float distance, bool velocity = false);
-	void XM_CALLCONV Move(FXMVECTOR shift, bool veloticy = false);
+	void Move(BYTE direction, float distance, bool updateVelocity = false);
+	void XM_CALLCONV Move(FXMVECTOR shift, bool updateVelocity = false);
 	void Move(float xOffset = 0.0f, float yOffset = 0.0f, float zOffset = 0.0f);
 
 	void Rotate(float x, float y, float z);
 	void Update(milliseconds timeElapsed);
 
-	virtual void PlayerUpdateCallback(milliseconds timeElapsed){}
+	virtual void PlayerUpdateCallback(milliseconds timeElapsed) {}
 	void SetPlayerUpdateContext(LPVOID context) { mPlayerUpdateContext = context; }
-	
-	virtual void CreateShaderVariables(ID3D12GraphicsCommandList* commandList);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+	virtual void CameraUpdateCallback(milliseconds timeElapsed) {}
+	void SetUpdateCallback(LPVOID context) { mCameraUpdateContext = context; }
+
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseShaderVariables()override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
 
 	Camera* ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode);
 	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed) { return nullptr; }

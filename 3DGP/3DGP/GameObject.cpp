@@ -10,7 +10,7 @@ GameObject::GameObject()
 	, mShader{ nullptr }
 	, mReferences{ 0 }
 {
-	XMStoreFloat4x4A(&mxmf44World, XMMatrixIdentity());
+	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
 }
 
 GameObject::~GameObject()
@@ -61,7 +61,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	PrepareRender();
 	UpdateShaderVariables(commandList);
 	if (mShader) {
-		mShader->UpdateShaderVariable(commandList, &mxmf44World);
+		mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}
 	if (mMesh)mMesh->Render(commandList);
@@ -70,20 +70,20 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
 {
 	XMMATRIX rotate{ XMMatrixRotationAxis(axis,XMConvertToRadians(angle)) };
-	XMStoreFloat4x4A(&mxmf44World, rotate * XMLoadFloat4x4A(&mxmf44World));
+	XMStoreFloat4x4A(&mWorldMat, rotate * XMLoadFloat4x4A(&mWorldMat));
 }
 
 void GameObject::RotateByPYR(float pitch, float yaw, float roll)
 {
 	XMMATRIX rotate{ XMMatrixRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll)) };
-	XMStoreFloat4x4A(&mxmf44World, rotate * XMLoadFloat4x4A(&mxmf44World));
+	XMStoreFloat4x4A(&mWorldMat, rotate * XMLoadFloat4x4A(&mWorldMat));
 }
 
 void GameObject::SetPosition(float x, float y, float z)
 {
-	mxmf44World._41 = x;
-	mxmf44World._42 = y;
-	mxmf44World._43 = z;
+	mWorldMat._41 = x;
+	mWorldMat._42 = y;
+	mWorldMat._43 = z;
 }
 
 void GameObject::SetPosition(FXMVECTOR position)
@@ -93,25 +93,25 @@ void GameObject::SetPosition(FXMVECTOR position)
 
 XMVECTOR GameObject::GetPosition()	const
 {
-	XMVECTOR pos{ XMVectorSet(mxmf44World._41,mxmf44World._42,mxmf44World._43,1.0f) };
+	XMVECTOR pos{ XMVectorSet(mWorldMat._41,mWorldMat._42,mWorldMat._43,1.0f) };
 	return XMVector3Normalize(pos);
 }
 
 XMVECTOR GameObject::GetLook() const
 {
-	XMVECTOR look{ XMVectorSet(mxmf44World._31,mxmf44World._32,mxmf44World._33,0.0f) };
+	XMVECTOR look{ XMVectorSet(mWorldMat._31,mWorldMat._32,mWorldMat._33,0.0f) };
 	return XMVector3Normalize(look);
 }
 
 XMVECTOR GameObject::GetUp() const
 {
-	XMVECTOR up{ XMVectorSet(mxmf44World._21,mxmf44World._22,mxmf44World._23,0.0f) };
+	XMVECTOR up{ XMVectorSet(mWorldMat._21,mWorldMat._22,mWorldMat._23,0.0f) };
 	return XMVector3Normalize(up);
 }
 
 XMVECTOR GameObject::GetRight() const
 {
-	XMVECTOR right{ XMVectorSet(mxmf44World._21,mxmf44World._22,mxmf44World._23,0.0f) };
+	XMVECTOR right{ XMVectorSet(mWorldMat._21,mWorldMat._22,mWorldMat._23,0.0f) };
 	return XMVector3Normalize(right);
 }
 
@@ -147,7 +147,7 @@ void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsComma
 void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMFLOAT4X4A world;
-	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mxmf44World)));
+	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
 }
 

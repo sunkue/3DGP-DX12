@@ -51,7 +51,7 @@ public:
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 
 protected:
-	XMFLOAT4X4A	mxmf44World;
+	XMFLOAT4X4A	mWorldMat;
 	Mesh*	mMesh;
 	Shader*	mShader;
 

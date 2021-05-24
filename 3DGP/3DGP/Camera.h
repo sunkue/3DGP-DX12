@@ -46,16 +46,15 @@ public:
 	virtual void RSSetViewportScissorRect(ID3D12GraphicsCommandList* commandList);
 
 public:
-	void SetPlayer(Player* player)	{ mPlayer = make_shared<Player>(player); }
-	Player* GetPlayer()const { return mPlayer.get(); }
-
+	void SetPlayer(Player* player)	{ mPlayer = player; }
+	Player* GetPlayer()const { return mPlayer; }
 	void SetMode(CAMERA_MODE mode) { mMode = mode; }
 	CAMERA_MODE GetMode()const { return mMode; }
 
 	void XM_CALLCONV SetPosition(FXMVECTOR position) { XMStoreFloat3A(&mPosition, position); }
 	FXMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3A(&mPosition); }
 
-	virtual void XM_CALLCONV SetLookAt(FXMVECTOR focusAt) { XMStoreFloat3A(&mLookAt, focusAt); }
+	virtual void XM_CALLCONV SetLookAt(FXMVECTOR lookAt) { XMStoreFloat3A(&mLookAt, lookAt); }
 	FXMVECTOR XM_CALLCONV GetLookAt()const { return XMLoadFloat3A(&mLookAt); }
 
 	FXMVECTOR XM_CALLCONV GetRightVector()const { return XMLoadFloat3A(&mRightV); }
@@ -78,7 +77,8 @@ public:
 	D3D12_RECT GetScissorRect()const { return mScissorRect; }
 	
 	virtual void XM_CALLCONV Move(FXMVECTOR shift) { XMStoreFloat3A(&mPosition, XMLoadFloat3A(&mPosition) + shift); }
-	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f);
+	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) { assert(0); };
+	virtual void XM_CALLCONV Update(XMVECTOR lookAt, milliseconds timeElapsed) { assert(0); };
 
 	void XM_CALLCONV RotateByMat(FXMMATRIX rotateMat) {
 		XMStoreFloat3A(&mRightV, XMVector3TransformNormal(XMLoadFloat3A(&mRightV), rotateMat));
@@ -118,7 +118,7 @@ protected:
 	D3D12_VIEWPORT mViewport;
 	D3D12_RECT mScissorRect;
 
-	shared_ptr<Player> mPlayer;
+	Player* mPlayer;
 };
 
 

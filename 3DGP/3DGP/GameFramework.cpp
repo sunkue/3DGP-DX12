@@ -75,7 +75,6 @@ bool GameFramework::Initialize()
 {
 	if (!InitMainWindow())return false;
 	if (!InitDirect3D())return false;
-	APP = this;
 #ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
 	ChanegeFullScreenMode();
 #endif
@@ -161,7 +160,7 @@ bool GameFramework::InitDirect3D()
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	CreateDepthStencilView();
-
+	APP = this;
 	BuildObjects();
 
 	return true;
@@ -378,17 +377,12 @@ void GameFramework::BuildObjects()
 	UINT W{ mWndClientWidth };
 	UINT H{ mWndClientHeight };
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
-	mCamera = make_shared<Camera>();
-	mCamera->SetViewport(0, 0, W, H, 0.0f, 1.0f);
-	mCamera->SetScissorRect(0, 0, W, H);
-	mCamera->GenerateProjectionMatrix(90.0f, static_cast<float>(W) / H, 1.0f, 500.0f);
-	mCamera->GenerateViewMatrix(
-		  XMVectorSet(0.0f, 10.0f, -150.0f, 0.0f)
-		, XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f)
-		, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 
 	mScene = make_shared<Scene>();
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
+
+	mPlayer = make_shared<AirPlanePlayer>(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature());
+	mCamera = make_shared<Camera>(mPlayer->GetCamera());
 
 	mCommandList->Close();
 	ExecuteComandLists();
@@ -446,9 +440,12 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		SetCapture(hWnd);
+		GetCursorPos(&mOldCusorPos);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+		ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
 		break;
@@ -462,7 +459,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 {
 	switch (messageID)
 	{
-	case WM_KEYUP:
+	case WM_KEYDOWN:
 		switch (wParam)
 		{
 		case VK_ESCAPE:
@@ -471,10 +468,21 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_RETURN:
 			break;
 		case VK_F1:
-			cout << "µµ¿ò¸» : \n";
+		case VK_F2:
+		case VK_F3:
+			if (mPlayer)mCamera = make_shared<Camera>(mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed()));
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
+			break;
+		default:break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_F3:
+			Beep(500, 20);
 			break;
 		default:break;
 		}
@@ -516,7 +524,35 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 
 void GameFramework::ProcessInput()
 {
+	static UCHAR key[256];
+	BYTE dir{ 0 };
 
+	if (GetKeyboardState(key))
+	{
+		if (key[VK_UP] & 0xf0)dir |= DIR_FORWARD;
+		if (key[VK_DOWN] & 0xf0)dir |= DIR_BACKWARD;
+		if (key[VK_LEFT] & 0xf0)dir |= DIR_LEFT;
+		if (key[VK_RIGHT] & 0xf0)dir |= DIR_RIGHT;
+		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
+		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
+	}
+	float deltaX{ 0.0f };
+	float deltaY{ 0.0f };
+	POINT cursorPos;
+	if (GetCapture() == mhWnd) {
+		GetCursorPos(&cursorPos);
+		deltaX = static_cast<float>((cursorPos.x - mOldCusorPos.x) / 3.0f);
+		deltaY = static_cast<float>((cursorPos.y - mOldCusorPos.y) / 3.0f);
+		SetCursorPos(mOldCusorPos.x, mOldCusorPos.y);
+	}
+	if ((dir != 0) || (deltaX != 0.0f) || (deltaY != 0.0f)) {
+		if (deltaX || deltaY) {
+			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
+			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
+		}
+		if (dir)mPlayer->Move(dir, 50.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
+	}
+	mPlayer->Update(mGameTimer.GetTimeElapsed());
 }
 
 void GameFramework::AnimateObjects()
@@ -533,18 +569,20 @@ void GameFramework::PopulateCommandList()
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET) };
 	mCommandList->ResourceBarrier(1, &RB);
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle{ mRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvCPUDescH{ mRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescH{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
-	constexpr float pfClearColor[]{ 0.0f,0.125f,0.3f,1.0f };
-	mCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, Colors::LightSeaGreen, 0, nullptr);
-	mCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::LightSeaGreen, 0, nullptr);
+	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
-	mCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, true, &d3dDsvCPUDescriptorHandle);
+	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
 
 	if (mScene)mScene->Render(mCommandList.Get(), mCamera.get());
-
+#ifdef WITH_PLAYER_TOP
+	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+#endif // With_PLAYER_TOP
+	if (mPlayer)mPlayer->Render(mCommandList.Get(), mCamera.get());
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	mCommandList->ResourceBarrier(1, &RB);

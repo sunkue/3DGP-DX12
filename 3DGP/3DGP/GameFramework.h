@@ -1,15 +1,18 @@
 #pragma once
 
 #include "GameTimer.h"
+#include "Player.h"
 #include "3DGP00.h"
 
 class Camera;
 class Scene;
 
+
 class GameFramework
 {
 public:
 	static GameFramework* GetApp()	{ return APP; }
+
 private:
 	static GameFramework* APP;
 	
@@ -20,6 +23,9 @@ public:
 	bool Initialize();
 	int Run();
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	float GetAspectRatio()const { return mAspectRatio; }
+	UINT GetWidth()const { return mWndClientWidth; }
+	UINT GetHeight()const { return mWndClientHeight; }
 
 protected:
 	void OnCreate();
@@ -94,7 +100,8 @@ protected:
 	GameTimer					mGameTimer;
 	shared_ptr<Scene>			mScene;
 	shared_ptr<Camera>			mCamera;
+	shared_ptr<Player>			mPlayer;
+	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
-
 };
 

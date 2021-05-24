@@ -18,6 +18,7 @@ public:
 	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 	void ReleaseUploadBuffers();
 	void AnimateObjects(const milliseconds timeElapsed);
+	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
 	
 protected:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -25,7 +26,6 @@ protected:
 
 	bool ProcessInput();
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
-	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
 
 protected:
 	vector<ObjectsShader>			mShaders;

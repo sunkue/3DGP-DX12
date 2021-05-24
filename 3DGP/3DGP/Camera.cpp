@@ -272,6 +272,6 @@ void ThirdPersonCamera::SetLookAt(FXMVECTOR lookAt)
 	XMFLOAT4X4A lookAtMat;
 	XMStoreFloat4x4A(&lookAtMat, XMMatrixLookAtLH(GetPosition(), GetLookAt(), mPlayer->GetUpVector()));
 	mRightV = XMFLOAT3A{ lookAtMat._11,lookAtMat._21,lookAtMat._31 };
-	mUpV = XMFLOAT3A{ lookAtMat._12,lookAtMat._22,lookAtMat._32 };
-	mLookV = XMFLOAT3A{ lookAtMat._13,lookAtMat._23,lookAtMat._33 };
+	mUpV	= XMFLOAT3A{ lookAtMat._12,lookAtMat._22,lookAtMat._32 };
+	mLookV	= XMFLOAT3A{ lookAtMat._13,lookAtMat._23,lookAtMat._33 };
 }

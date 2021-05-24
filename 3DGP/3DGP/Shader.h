@@ -5,7 +5,7 @@
 
 struct CB_GAMEOBJECT_INFO
 {
-	XMFLOAT4X4A mxmf44World;
+	XMFLOAT4X4A mWorldMat;
 };
 
 class Shader
