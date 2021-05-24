@@ -55,8 +55,8 @@ public:
 	void XM_CALLCONV SetPosition(FXMVECTOR position) { XMStoreFloat3A(&mPosition, position); }
 	FXMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3A(&mPosition); }
 
-	virtual void XM_CALLCONV SetFocusAt(FXMVECTOR focusAt) { XMStoreFloat3A(&mFocusAt, focusAt); }
-	FXMVECTOR XM_CALLCONV GetLookAtPosition()const { return XMLoadFloat3A(&mFocusAt); }
+	virtual void XM_CALLCONV SetLookAt(FXMVECTOR focusAt) { XMStoreFloat3A(&mLookAt, focusAt); }
+	FXMVECTOR XM_CALLCONV GetLookAt()const { return XMLoadFloat3A(&mLookAt); }
 
 	FXMVECTOR XM_CALLCONV GetRightVector()const { return XMLoadFloat3A(&mRightV); }
 	FXMVECTOR XM_CALLCONV GetUpVector()const { return XMLoadFloat3A(&mUpV); }
@@ -105,7 +105,7 @@ protected:
 	CAMERA_MODE	mMode;
 
 	// 3인친용 소스
-	XMFLOAT3A mFocusAt;
+	XMFLOAT3A mLookAt;
 	XMFLOAT3A mOffset;
 
 	// 지연시간
@@ -147,5 +147,5 @@ public:
 	ThirdPersonCamera(Camera* camera);
 	virtual ~ThirdPersonCamera(){}
 	virtual void XM_CALLCONV Update(FXMVECTOR lookAt, milliseconds timeElapsed);
-	virtual void XM_CALLCONV SetFocusAt(FXMVECTOR lookAt)override;
+	virtual void XM_CALLCONV SetLookAt(FXMVECTOR lookAt)override;
 };

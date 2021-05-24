@@ -111,7 +111,7 @@ bool GameFramework::InitMainWindow()
 	GetWindowRect(hDesktop, &rDesktopRect);
 	mWndClientWidth = rDesktopRect.right;
 	mWndClientHeight = rDesktopRect.bottom;
-	mAspectRatio = rDesktopRect.right / rDesktopRect.bottom;
+	mAspectRatio = static_cast<float>(rDesktopRect.right) / rDesktopRect.bottom;
 	if (!MyRegisterClass(mhInstance))
 	{
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);
@@ -272,7 +272,7 @@ void GameFramework::CreateSwapChain()
 	GetClientRect(mhWnd, &rcClient);
 	mWndClientWidth		= rcClient.right - rcClient.left;
 	mWndClientHeight	= rcClient.bottom - rcClient.top;
-	mAspectRatio = mWndClientWidth / mWndClientHeight;
+	mAspectRatio = static_cast<float>(mWndClientWidth) / mWndClientHeight;
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
 	dxgiSwapChainDesc.BufferDesc.Width		= mWndClientWidth;
 	dxgiSwapChainDesc.BufferDesc.Height		= mWndClientHeight;

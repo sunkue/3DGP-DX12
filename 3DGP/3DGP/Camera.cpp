@@ -15,7 +15,7 @@ Camera::Camera()
 	, mRoll{ 0.0f }
 	, mOffset{ 0.0f,0.0f,0.0f }
 	, mTimeLag{ milliseconds::zero() }
-	, mFocusAt{ 0.0f,0.0f,0.0f }
+	, mLookAt{ 0.0f,0.0f,0.0f }
 	, mMode{ CAMERA_MODE::NO_CAMERA }
 {
 	XMStoreFloat4x4A(&mViewMat, XMMatrixIdentity());
@@ -95,13 +95,13 @@ void Camera::GenerateViewMatrix()
 {
 	XMStoreFloat4x4A(
 		  &mViewMat
-		, XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mFocusAt), XMLoadFloat3(&mUpV)));
+		, XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLookAt), XMLoadFloat3(&mUpV)));
 }
 
 void Camera::GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up)
 {
 	SetPosition(pos);
-	SetFocusAt(lookAt);
+	SetLookAt(lookAt);
 	XMStoreFloat3A(&mUpV, XMVector3Normalize(up));
 	GenerateViewMatrix();
 }
@@ -137,6 +137,7 @@ void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
+	/* 다렉은 행우선, 셰이더는 열우선 행렬. Transpose해주어야 함. */
 	XMFLOAT4X4A view;
 	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mViewMat)));
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &view, 0);
@@ -262,14 +263,14 @@ void ThirdPersonCamera::Update(FXMVECTOR lookAt, milliseconds timeElapsed)
 	if (length < 0.01f)distance = length;
 	if (0 < distance) {
 		SetPosition(XMVectorAdd(GetPosition(), dir * distance));
-		SetFocusAt(look);
+		SetLookAt(look);
 	}
 }
 
-void ThirdPersonCamera::SetFocusAt(FXMVECTOR lookAt)
+void ThirdPersonCamera::SetLookAt(FXMVECTOR lookAt)
 {
 	XMFLOAT4X4A lookAtMat;
-	XMStoreFloat4x4A(&lookAtMat, XMMatrixLookAtLH(GetPosition(), GetLookAtPosition(), mPlayer->GetUpVector()));
+	XMStoreFloat4x4A(&lookAtMat, XMMatrixLookAtLH(GetPosition(), GetLookAt(), mPlayer->GetUpVector()));
 	mRightV = XMFLOAT3A{ lookAtMat._11,lookAtMat._21,lookAtMat._31 };
 	mUpV = XMFLOAT3A{ lookAtMat._12,lookAtMat._22,lookAtMat._32 };
 	mLookV = XMFLOAT3A{ lookAtMat._13,lookAtMat._23,lookAtMat._33 };
