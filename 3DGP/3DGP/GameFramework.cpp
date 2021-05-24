@@ -39,7 +39,6 @@ GameFramework::GameFramework(HINSTANCE hInstance, int showCmd)
 	, mhFenceEvent					{ nullptr }
 	, mRenderTargetBuffers			{ nullptr }
 	, mGameTimer					{}
-	, mScene						{ nullptr }
 {
 }
 
@@ -378,11 +377,11 @@ void GameFramework::BuildObjects()
 	UINT H{ mWndClientHeight };
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
 
-	mScene = make_shared<Scene>();
+	mScene = new Scene();
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
-	mPlayer = make_shared<AirPlanePlayer>(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature());
-	mCamera = make_shared<Camera>(mPlayer->GetCamera());
+	mPlayer = new AirPlanePlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature());
+	mCamera = mPlayer->GetCamera();
 
 	mCommandList->Close();
 	ExecuteComandLists();
@@ -396,7 +395,7 @@ void GameFramework::BuildObjects()
 void GameFramework::ReleaseObjects()
 {
 	if (mScene)mScene->ReleaseObjects();
-	mScene.reset();
+	delete mScene;
 }
 
 void GameFramework::ChanegeFullScreenMode()
@@ -470,7 +469,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
-			if (mPlayer)mCamera = make_shared<Camera>(mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed()));
+			if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -482,7 +481,6 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		switch (wParam)
 		{
 		case VK_F3:
-			Beep(500, 20);
 			break;
 		default:break;
 		}
@@ -529,12 +527,12 @@ void GameFramework::ProcessInput()
 
 	if (GetKeyboardState(key))
 	{
-		if (key[VK_UP] & 0xf0)dir |= DIR_FORWARD;
-		if (key[VK_DOWN] & 0xf0)dir |= DIR_BACKWARD;
-		if (key[VK_LEFT] & 0xf0)dir |= DIR_LEFT;
-		if (key[VK_RIGHT] & 0xf0)dir |= DIR_RIGHT;
-		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
-		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
+		if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
+		if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
+		if (key[VK_LEFT]	& 0xf0)dir |= DIR_LEFT;
+		if (key[VK_RIGHT]	& 0xf0)dir |= DIR_RIGHT;
+		if (key[VK_SHIFT]	& 0xf0)dir |= DIR_UP;
+		if (key[VK_CONTROL]	& 0xf0)dir |= DIR_DOWN;
 	}
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };
@@ -578,11 +576,11 @@ void GameFramework::PopulateCommandList()
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
 
-	if (mScene)mScene->Render(mCommandList.Get(), mCamera.get());
+	if (mScene)mScene->Render(mCommandList.Get(), mCamera);
 #ifdef WITH_PLAYER_TOP
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 #endif // With_PLAYER_TOP
-	if (mPlayer)mPlayer->Render(mCommandList.Get(), mCamera.get());
+	if (mPlayer)mPlayer->Render(mCommandList.Get(), mCamera);
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	mCommandList->ResourceBarrier(1, &RB);

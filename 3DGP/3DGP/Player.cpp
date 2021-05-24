@@ -19,13 +19,14 @@ Player::Player()
 	, mRoll{ 0.0f }
 	, mPlayerUpdateContext{ nullptr }
 	, mCameraUpdateContext{ nullptr }
+	, mCamera{ nullptr }
 {
 }
 
 Player::~Player()
 {
 	ReleaseShaderVariables();
-	mCamera.reset();
+	delete mCamera;
 }
 
 void Player::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
@@ -169,7 +170,7 @@ void Player::Update(milliseconds timeElapsed)
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
 {
 	Camera* newCamera{ nullptr };
-	Camera* oldCamera{ mCamera.get() };
+	Camera* oldCamera{ GetCamera() };
 	switch (newCameraMode)
 	{
 	case CAMERA_MODE::NO_CAMERA:
@@ -205,8 +206,7 @@ Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCamer
 		newCamera->SetMode(newCameraMode);
 		newCamera->SetPlayer(this);
 	}
-	cout<<mCamera.use_count();
-	mCamera.reset();
+	delete mCamera;
 	return newCamera;
 }
 
@@ -236,7 +236,7 @@ AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* 
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
 	SetMesh(airplaneMesh);
-	mCamera = make_shared<Camera>(ChangeCamera(CAMERA_MODE::SPACESHIP, milliseconds::zero()));
+	SetCamera(ChangeCamera(CAMERA_MODE::SPACESHIP, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
 	PlayerShader* shader{ new PlayerShader() };
@@ -259,7 +259,7 @@ void AirPlanePlayer::PrepareRender()
 Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
 {
 	CAMERA_MODE currentCameraMode{ (mCamera) ? (mCamera->GetMode()) : (CAMERA_MODE::NO_CAMERA) };
-	if (currentCameraMode == newCameraMode)return mCamera.get();
+	if (currentCameraMode == newCameraMode)return mCamera;
 	GameFramework* app{ GameFramework::GetApp() };
 	UINT W{ app->GetWidth() };
 	UINT H{ app->GetHeight() };
@@ -270,7 +270,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		SetGravity({ 0.0f,0.0f,0.0f });
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
-		mCamera = make_shared<Camera>(Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode));
+		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(milliseconds::zero());
 		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
 		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
@@ -282,7 +282,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		SetGravity({ 0.0f,0.0f,0.0f });
 		SetMaxVelocityXZ(400.0f);
 		SetMaxVelocityY(400.0f);
-		mCamera = make_shared<Camera>(Player::ChangeCamera(CAMERA_MODE::SPACESHIP, currentCameraMode));
+		mCamera = Player::ChangeCamera(CAMERA_MODE::SPACESHIP, currentCameraMode);
 		mCamera->SetTimeLag(milliseconds::zero());
 		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
 		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
@@ -294,7 +294,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		SetGravity({ 0.0f,0.0f,0.0f });
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
-		mCamera = make_shared<Camera>(Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode));
+		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
 		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
@@ -305,5 +305,5 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
 	Update(timeElapsed);
 
-	return mCamera.get();
+	return mCamera;
 }

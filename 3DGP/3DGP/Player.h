@@ -33,8 +33,8 @@ public:
 	float GetYaw()const { return mYaw; }
 	float GetRoll()const { return mRoll; }
 
-	Camera* GetCamera()const { return mCamera.get(); }
-	void SetCamera(Camera* camera) { mCamera = make_shared<Camera>(camera); }
+	Camera* GetCamera()const { return mCamera; }
+	void SetCamera(Camera* camera) { mCamera = camera; }
 
 	void Move(BYTE direction, float distance, bool updateVelocity = false);
 	void XM_CALLCONV Move(FXMVECTOR shift, bool updateVelocity = false);
@@ -78,7 +78,7 @@ protected:
 	LPVOID mPlayerUpdateContext;
 	LPVOID mCameraUpdateContext;
 
-	shared_ptr<Camera> mCamera;
+	Camera* mCamera;
 
 };
 

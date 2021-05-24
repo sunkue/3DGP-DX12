@@ -98,9 +98,9 @@ protected:
 
 protected:
 	GameTimer					mGameTimer;
-	shared_ptr<Scene>			mScene;
-	shared_ptr<Camera>			mCamera;
-	shared_ptr<Player>			mPlayer;
+	Scene*						mScene;
+	Camera*						mCamera;
+	Player*						mPlayer;
 	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
 };
