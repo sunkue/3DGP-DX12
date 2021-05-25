@@ -8,7 +8,7 @@ Player::Player()
 	: mPosition{ 0.0f,0.0f,0.0f }
 	, mRightV{ 1.0f,0.0f,0.0 }
 	, mUpV{ 0.0f,1.0f,0.0f }
-	, mLookV{ 0.0f,1.0f,0.0f }
+	, mLookV{ 0.0f,0.0f,1.0f }
 	, mVelocity{ 0.0f,0.0f,0.0f }
 	, mGravity{ 0.0f,0.0f,0.0f }
 	, mMaxVelocityXZ{ 0.0f }
@@ -273,7 +273,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(milliseconds::zero());
 		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->GenerateProjectionMatrix(90.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 		mCamera->SetViewport(0, 0, W, H);
 		mCamera->SetScissorRect(0, 0, W, H);
 	}break;
@@ -285,7 +285,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		mCamera = Player::ChangeCamera(CAMERA_MODE::SPACESHIP, currentCameraMode);
 		mCamera->SetTimeLag(milliseconds::zero());
 		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 		mCamera->SetViewport(0, 0, W, H);
 		mCamera->SetScissorRect(0, 0, W, H);
 	}break;
@@ -297,7 +297,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->GenerateProjectionMatrix(90.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 		mCamera->SetViewport(0, 0, W, H);
 		mCamera->SetScissorRect(0, 0, W, H);
 	}break;

@@ -8,8 +8,8 @@ Camera::Camera()
 	, mScissorRect{ 0,0,0,0 }
 	, mPosition{ 0.0f,0.0f,0.0f }
 	, mRightV{ 1.0f,0.0f,0.0f }
-	, mLookV{ 0.0f,0.0f,1.0f }
 	, mUpV{ 0.0f,1.0f,0.0f }
+	, mLookV{ 0.0f,0.0f,1.0f }
 	, mPitch{ 0.0f }
 	, mYaw{ 0.0f }
 	, mRoll{ 0.0f }
