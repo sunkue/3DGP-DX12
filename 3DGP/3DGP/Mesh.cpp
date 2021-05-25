@@ -103,14 +103,14 @@ CubeMeshDiffused::CubeMeshDiffused(
 	float y = height * 0.5f;
 	float z = depth	 * 0.5f;
 	DiffusedVertex vertices[]{
-		 {-x, +y ,-z, RandomColor()}
-		,{+x, +y ,-z, RandomColor()}
-		,{+x, +y ,+z, RandomColor()}
-		,{-x, +y ,+z, RandomColor()}
-		,{-x, -y ,-z, RandomColor()}
-		,{+x, -y ,-z, RandomColor()}
-		,{+x, -y ,+z, RandomColor()}
-		,{-x, -y ,+z, RandomColor()}
+		 {-x, +y ,-z, Colors::Gray}
+		,{+x, +y ,-z, Colors::Red}
+		,{+x, +y ,+z, Colors::Red}
+		,{-x, +y ,+z, Colors::Blue}
+		,{-x, -y ,-z, Colors::ForestGreen}
+		,{+x, -y ,-z, Colors::ForestGreen}
+		,{+x, -y ,+z, Colors::GreenYellow}
+		,{-x, -y ,+z, Colors::GreenYellow}
 	};
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(

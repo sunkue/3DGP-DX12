@@ -95,7 +95,7 @@ void Camera::GenerateViewMatrix()
 {
 	XMStoreFloat4x4A(
 		  &mViewMat
-		, XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLookAt), XMLoadFloat3(&mUpV)));
+		, XMMatrixLookAtLH(XMLoadFloat3A(&mPosition), XMLoadFloat3A(&mLookAt), XMLoadFloat3A(&mUpV)));
 }
 
 void Camera::GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up)
@@ -137,6 +137,7 @@ void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
+	cout <<"POS x:"<< mPosition.x <<"\ty:"<< mPosition.y <<"\tz:"<< mPosition.z<<"\n";
 	/* 다렉은 행우선, 셰이더는 열우선 행렬. Transpose해주어야 함. */
 	XMFLOAT4X4A view;
 	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mViewMat)));

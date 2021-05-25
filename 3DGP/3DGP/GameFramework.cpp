@@ -107,9 +107,9 @@ bool GameFramework::InitMainWindow()
 	HWND hDesktop = GetDesktopWindow();
 	RECT rDesktopRect;
 	GetWindowRect(hDesktop, &rDesktopRect);
-	mWndClientWidth = rDesktopRect.right;
-	mWndClientHeight = rDesktopRect.bottom;
-	mAspectRatio = static_cast<float>(rDesktopRect.right) / rDesktopRect.bottom;
+	mWndClientWidth = rDesktopRect.right - rDesktopRect.left;
+	mWndClientHeight = rDesktopRect.bottom - rDesktopRect.top;
+	mAspectRatio = static_cast<float>(mWndClientWidth) / mWndClientHeight;
 	if (!MyRegisterClass(mhInstance))
 	{
 		MessageBox(0, L"RegisterClass Failed.", 0, 0);

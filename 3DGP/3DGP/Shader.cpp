@@ -265,9 +265,9 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 			for (int z = -zCount; z <= zCount; ++z) {
 				rotatingObj = make_shared<RotatingObject>();
 				rotatingObj->SetMesh(cubeMesh);
-				rotatingObj->SetPosition(xPitch * x, yPitch * y, zPitch * z);
+				rotatingObj->SetPosition(xPitch * x, yPitch * y + 20.0f, zPitch * z);
 				rotatingObj->SetRotationAxis({ 0.0f, 1.0f, 0.0f });
-				rotatingObj->SetRotationSpeed(0.01f * i++);
+				rotatingObj->SetRotationSpeed(30.00f);
 				mObjects.push_back(rotatingObj);
 			}
 		}
@@ -282,7 +282,8 @@ void ObjectsShader::ReleaseObjects()
 
 void ObjectsShader::AnimateObjects(milliseconds timeElapsed)
 {
-	for (const auto& obj : mObjects)obj->Animate(timeElapsed);
+	mObjects[mObjects.size()/2-1]->Animate(timeElapsed);
+	//for (const auto& obj : mObjects)obj->Animate(timeElapsed);
 }
 
 void ObjectsShader::ReleaseUploadBuffers()
