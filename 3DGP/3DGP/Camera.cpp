@@ -43,7 +43,7 @@ void Camera::ProbationPrevCamera(Camera* camera)
 		mRightV.y = 0.0f;
 		mLookV.y = 0.0f;
 		XMStoreFloat3A(&mRightV, XMVector3Normalize(XMLoadFloat3A(&mRightV)));
-		XMStoreFloat3A(&mLookV, XMVector3Normalize(XMLoadFloat3A(&mRightV)));
+		XMStoreFloat3A(&mLookV, XMVector3Normalize(XMLoadFloat3A(&mLookV)));
 	}
 }
 
@@ -137,7 +137,7 @@ void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	cout <<"POS x:"<< mPosition.x <<"\ty:"<< mPosition.y <<"\tz:"<< mPosition.z<<"\n";
+	//cout <<"POS x:"<< mPosition.x <<"\ty:"<< mPosition.y <<"\tz:"<< mPosition.z<<"\n";
 	/* 다렉은 행우선, 셰이더는 열우선 행렬. Transpose해주어야 함. */
 	XMFLOAT4X4A view;
 	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mViewMat)));
@@ -271,7 +271,7 @@ void ThirdPersonCamera::Update(FXMVECTOR lookAt, milliseconds timeElapsed)
 void ThirdPersonCamera::SetLookAt(FXMVECTOR lookAt)
 {
 	XMFLOAT4X4A lookAtMat;
-	XMStoreFloat4x4A(&lookAtMat, XMMatrixLookAtLH(GetPosition(), GetLookAt(), mPlayer->GetUpVector()));
+	XMStoreFloat4x4A(&lookAtMat, XMMatrixLookAtLH(GetPosition(), lookAt, mPlayer->GetUpVector()));
 	mRightV = XMFLOAT3A{ lookAtMat._11,lookAtMat._21,lookAtMat._31 };
 	mUpV	= XMFLOAT3A{ lookAtMat._12,lookAtMat._22,lookAtMat._32 };
 	mLookV	= XMFLOAT3A{ lookAtMat._13,lookAtMat._23,lookAtMat._33 };
