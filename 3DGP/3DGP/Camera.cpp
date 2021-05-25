@@ -258,7 +258,7 @@ void ThirdPersonCamera::Update(FXMVECTOR lookAt, milliseconds timeElapsed)
 	float length{ XMVectorGetX(XMVector3Length(dir)) };
 	dir = XMVector3Normalize(dir);
 
-	milliseconds timeLagScale = (mTimeLag == milliseconds::zero()) ? timeElapsed * (1s / mTimeLag) : 1000ms;
+	milliseconds timeLagScale = (mTimeLag.count()) ? timeElapsed * (1s / mTimeLag) : 1000ms;
 	float distance{ length * timeLagScale.count() / 1000 };
 	if (length < distance)distance = length;
 	if (length < 0.01f)distance = length;

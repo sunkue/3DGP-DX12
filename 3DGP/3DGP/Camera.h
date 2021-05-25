@@ -77,8 +77,8 @@ public:
 	D3D12_RECT GetScissorRect()const { return mScissorRect; }
 	
 	virtual void XM_CALLCONV Move(FXMVECTOR shift) { XMStoreFloat3A(&mPosition, XMLoadFloat3A(&mPosition) + shift); }
-	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) { assert(0); };
-	virtual void XM_CALLCONV Update(XMVECTOR lookAt, milliseconds timeElapsed) { assert(0); };
+	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) {};
+	virtual void XM_CALLCONV Update(XMVECTOR lookAt, milliseconds timeElapsed) {};
 
 	void XM_CALLCONV RotateByMat(FXMMATRIX rotateMat) {
 		XMStoreFloat3A(&mRightV, XMVector3TransformNormal(XMLoadFloat3A(&mRightV), rotateMat));
