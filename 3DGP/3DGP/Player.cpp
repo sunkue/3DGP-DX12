@@ -56,7 +56,6 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 	if (direction & DIR_LEFT	) shift -= GetRightVector() * distance;
 	if (direction & DIR_UP		) shift += GetUpVector() * distance;
 	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
-	cout << XMVectorGetZ(shift) << " ";
 	Move(shift, updateVelocity);
 }
 
@@ -140,29 +139,27 @@ void Player::Update(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity) * timeE));
 	float length{ sqrtf(mVelocity.x * mVelocity.x + mVelocity.z * mVelocity.z) };
-	float MaxVelocityXZ{ mMaxVelocityXZ * timeE };
+	//float MaxVelocityXZ{ mMaxVelocityXZ * timeE };
 	if (mMaxVelocityXZ < length)
 	{
-		mVelocity.x *= MaxVelocityXZ / length;
-		mVelocity.z *= MaxVelocityXZ / length;
+		mVelocity.x *= mMaxVelocityXZ / length;
+		mVelocity.z *= mMaxVelocityXZ / length;
 	}
-	float MaxVelocityY{ mMaxVelocityY * timeE };
+	
+	//float MaxVelocityY{ mMaxVelocityY * timeE };
 	length = sqrtf(mVelocity.y * mVelocity.y);
 	if (mMaxVelocityY < length)
 	{
-		mVelocity.y *= MaxVelocityY / length;
+		mVelocity.y *= mMaxVelocityY / length;
 	}
 	XMVECTOR vel{ GetVelocity() };
 	Move(vel * timeE);
-	cout << "sd";
-	cout << timeE;
 	if (mPlayerUpdateContext)PlayerUpdateCallback(timeElapsed);
 	CAMERA_MODE camMode{ mCamera->GetMode() };
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->Update(GetPosition(), timeElapsed); }
 	if (mCameraUpdateContext)CameraUpdateCallback(timeElapsed);
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition()); }
 	mCamera->RegenerateViewMatrix();
-
 	length = XMVectorGetX(XMVector3Length(vel));
 	float deceleration{ mFriction * timeE };
 	if (length < deceleration)deceleration = length;
@@ -294,8 +291,8 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	case CAMERA_MODE::THIRD_PERSON: {
 		SetFriction(250.0f);
 		SetGravity({ 0.0f,0.0f,0.0f });
-		SetMaxVelocityXZ(375.0f);
-		SetMaxVelocityY(1200.0f);
+		SetMaxVelocityXZ(125.0f);
+		SetMaxVelocityY(400.0f);
 		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
@@ -305,7 +302,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	}break;
 	}
 	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
-	Update(timeElapsed);
+	//Update(timeElapsed);
 
 	return mCamera;
 }

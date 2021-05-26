@@ -375,6 +375,7 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::BuildObjects()
 {
+	mGameTimer.Reset();
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
 
 	mScene = new Scene();
