@@ -53,7 +53,9 @@ private:
 public:
 	void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* commandList);
-
+	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
+	
 protected:
 	ComPtr<ID3D12Resource>	mVertexBuffer;
 	ComPtr<ID3D12Resource>	mVertexUploadBuffer;

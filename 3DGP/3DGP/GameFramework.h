@@ -15,7 +15,8 @@ public:
 
 private:
 	static GameFramework* APP;
-	
+	bool READY;
+
 public:
 	GameFramework() = default;
 	GameFramework(HINSTANCE hInstance, int showCmd);

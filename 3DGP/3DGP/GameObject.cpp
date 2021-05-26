@@ -67,6 +67,17 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	if (mMesh)mMesh->Render(commandList);
 }
 
+void GameObject::Render(
+	  ID3D12GraphicsCommandList* commandList
+	, Camera* camera
+	, UINT instanceCount
+	, D3D12_VERTEX_BUFFER_VIEW instancingBufferView)
+{
+	PrepareRender();
+	assert(mMesh);
+	mMesh->Render(commandList, instanceCount, instancingBufferView);
+}
+
 void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
 {
 	XMMATRIX rotate{ XMMatrixRotationAxis(axis,XMConvertToRadians(angle)) };

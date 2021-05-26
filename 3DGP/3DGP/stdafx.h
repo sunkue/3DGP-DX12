@@ -83,6 +83,6 @@ inline XMVECTORF32 RandomColor()
 
 	현재 chapter 6 / 따라하기 12
 
-	05/24
+	05/26
    ~06/21
 */

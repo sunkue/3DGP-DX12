@@ -56,6 +56,7 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 	if (direction & DIR_LEFT	) shift -= GetRightVector() * distance;
 	if (direction & DIR_UP		) shift += GetUpVector() * distance;
 	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
+	cout << XMVectorGetX(shift) << " ";
 	Move(shift, updateVelocity);
 }
 
@@ -236,7 +237,7 @@ AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* 
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
 	SetMesh(airplaneMesh);
-	SetCamera(ChangeCamera(CAMERA_MODE::SPACESHIP, milliseconds::zero()));
+	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
 	PlayerShader* shader{ new PlayerShader() };

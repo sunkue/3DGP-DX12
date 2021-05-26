@@ -39,13 +39,25 @@ void Mesh::ReleaseUploadBuffers()
 
 void Mesh::Render(ID3D12GraphicsCommandList* commandList)
 {
-	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
 	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
+	Render(commandList, 1);
+}
+
+void Mesh::Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount)
+{
+	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
 	if (mIndexBuffer) {
 		commandList->IASetIndexBuffer(&mIndexBufferView);
-		commandList->DrawIndexedInstanced(mIndicesCount, 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(mIndicesCount, instanceCount, 0, 0, 0);
 	}
-	else commandList->DrawInstanced(mVerticesCount, 1, mOffset, 0);
+	else commandList->DrawInstanced(mVerticesCount, instanceCount, mOffset, 0);
+}
+
+void Mesh::Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView)
+{
+	D3D12_VERTEX_BUFFER_VIEW VBV[]{ mVertexBufferView,instancingBufferView };
+	commandList->IASetVertexBuffers(mSlot, _countof(VBV), VBV);
+	Render(commandList, instanceCount);
 }
 
 /////////////////////////////////////////////////////
@@ -174,14 +186,14 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	float y = height * 0.5f;
 	float z = depth * 0.5f;
 	DiffusedVertex vertices[]{
-		 {-x, +y ,-z, RandomColor() + color}
-		,{+x, +y ,-z, RandomColor() + color}
-		,{+x, +y ,+z, RandomColor() + color}
-		,{-x, +y ,+z, RandomColor() + color}
-		,{-x, -y ,-z, RandomColor() + color}
-		,{+x, -y ,-z, RandomColor() + color}
-		,{+x, -y ,+z, RandomColor() + color}
-		,{-x, -y ,+z, RandomColor() + color}
+		 {-x, +y ,-z, Colors::Aquamarine + color}
+		,{+x, +y ,-z, Colors::Aquamarine + color}
+		,{+x, +y ,+z, Colors::Aquamarine + color}
+		,{-x, +y ,+z, Colors::Aquamarine + color}
+		,{-x, -y ,-z, Colors::Aquamarine + color}
+		,{+x, -y ,-z, Colors::Aquamarine + color}
+		,{+x, -y ,+z, Colors::Aquamarine + color}
+		,{-x, -y ,+z, Colors::Aquamarine + color}
 	};
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(

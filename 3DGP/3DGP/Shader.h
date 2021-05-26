@@ -8,6 +8,12 @@ struct CB_GAMEOBJECT_INFO
 	XMFLOAT4X4A mWorldMat;
 };
 
+struct VS_VB_INSTANCE
+{
+	XMFLOAT4X4A mTransform;
+	XMFLOAT4A	mColor;
+};
+
 class Shader
 {
 public:
@@ -80,4 +86,32 @@ protected:
 protected:
 	vector<shared_ptr<GameObject>> mObjects;
 
+};
+
+class InstancingShader : public ObjectsShader
+{
+public:
+	InstancingShader();
+	virtual ~InstancingShader();
+
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseObjects()override;
+
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseShaderVariables();
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
+
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) override;
+
+protected:
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+
+protected:
+	ComPtr<ID3D12Resource>	mcbGameObjects;
+	VS_VB_INSTANCE*			mcbMappedGameObjects;
+
+	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
 };

@@ -22,6 +22,20 @@ struct VS_OUTPUT
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
 };
+
+struct VS_INSTANCING_INPUT
+{
+	float3 position : POSITION;
+	float4 color : COLOR;
+	float4x4 tansform : WORLDMAT;
+	float4 instanceColor : INSTANCECOLOR;
+};
+
+struct VS_INSTANCING_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float4 color : COLOR;
+};
 //////////////////////////////////////
 float4 full(uint vertexID)
 {
@@ -65,6 +79,18 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	output.position = WVP(input.position);
 
 	output.color = input.color;
+	
+	return output;
+}
+
+VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input)
+{
+	VS_OUTPUT output;
+	
+	output.position = mul(mul(mul(float4(input.position, 1.0f)
+	, input.tansform), viewMat), projMat);
+
+	output.color = input.color + input.instanceColor;
 	
 	return output;
 }
@@ -113,6 +139,13 @@ float4 UFO(float4 input)
 
 /////////////////////////////////////////
 float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
+{
+	float4 output = input.color;
+	
+	return output;
+}
+
+float4 PSInstancing(VS_INSTANCING_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 	

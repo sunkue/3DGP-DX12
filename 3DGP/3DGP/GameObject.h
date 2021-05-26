@@ -27,6 +27,8 @@ public:
 	virtual void Animate(const milliseconds timeElapsed);
 
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera
+		, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
 
 protected:
 	virtual void PrepareRender();
@@ -39,7 +41,8 @@ public:
 	XMVECTOR XM_CALLCONV GetLook() const;
 	XMVECTOR XM_CALLCONV GetUp() const;
 	XMVECTOR XM_CALLCONV GetRight() const;
-	
+	XMMATRIX XM_CALLCONV GetWM()const { return XMLoadFloat4x4A(&mWorldMat); }
+
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(FXMVECTOR position);
 

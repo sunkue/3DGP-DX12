@@ -40,6 +40,8 @@ GameFramework::GameFramework(HINSTANCE hInstance, int showCmd)
 	, mRenderTargetBuffers			{ nullptr }
 	, mGameTimer					{}
 {
+	APP = this;
+	READY = false;
 }
 
 GameFramework::~GameFramework()
@@ -77,6 +79,7 @@ bool GameFramework::Initialize()
 #ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
 	ChanegeFullScreenMode();
 #endif
+	READY = true;
 	return true;
 }
 
@@ -159,7 +162,6 @@ bool GameFramework::InitDirect3D()
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	CreateDepthStencilView();
-	APP = this;
 	BuildObjects();
 
 	return true;
@@ -373,8 +375,6 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::BuildObjects()
 {
-	UINT W{ mWndClientWidth };
-	UINT H{ mWndClientHeight };
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
 
 	mScene = new Scene();
@@ -514,7 +514,7 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 		reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
 		return 0;
 	case WM_PAINT:
-		if (APP)FrameAdvance();
+		if (READY) FrameAdvance();
 		return 0;
 	}
 	return DefWindowProc(hWnd, messageID, wParam, lParam);
@@ -629,6 +629,7 @@ void GameFramework::ShowFPS()
 
 void GameFramework::FrameAdvance()
 {
+
 	mGameTimer.Tick();
 
 	ProcessInput();

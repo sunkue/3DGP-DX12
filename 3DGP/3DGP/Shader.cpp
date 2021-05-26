@@ -129,7 +129,7 @@ void Shader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandLi
 
 void Shader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	assert(false);
+	
 }
 
 void Shader::UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world)
@@ -137,7 +137,6 @@ void Shader::UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOA
 	XMFLOAT4X4A w;
 	XMStoreFloat4x4A(&w, XMMatrixTranspose(XMLoadFloat4x4A(world)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &w, 0);
-	
 }
 
 void Shader::ReleaseShaderVariables()
@@ -282,8 +281,7 @@ void ObjectsShader::ReleaseObjects()
 
 void ObjectsShader::AnimateObjects(milliseconds timeElapsed)
 {
-	mObjects[mObjects.size()/2-1]->Animate(timeElapsed);
-	//for (const auto& obj : mObjects)obj->Animate(timeElapsed);
+	for (const auto& obj : mObjects)obj->Animate(timeElapsed);
 }
 
 void ObjectsShader::ReleaseUploadBuffers()
@@ -296,3 +294,127 @@ void ObjectsShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camer
 	Shader::Render(commandList, camera);
 	for (const auto& obj : mObjects)obj->Render(commandList, camera);
 }
+
+////////////////////////////////////
+
+
+InstancingShader::InstancingShader()
+	: mInstancingBufferView{}
+	, mcbMappedGameObjects{}
+{
+	
+}
+
+InstancingShader::~InstancingShader()
+{
+
+}
+
+void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	int xCount{ 10 };
+	int yCount{ 10 };
+	int zCount{ 10 };
+	int i{ 0 };
+	mObjects.reserve(
+		(static_cast<size_t>(xCount) * 2 + 1)
+		* (static_cast<size_t>(yCount) * 2 + 1)
+		* (static_cast<size_t>(zCount) * 2 + 1));
+	float xPitch = 12.0f * 2.5f;
+	float yPitch = 12.0f * 2.5f;
+	float zPitch = 12.0f * 2.5f;
+	shared_ptr<RotatingObject> rotatingObj;
+	for (int x = -xCount; x <= xCount; ++x) {
+		for (int y = -yCount; y <= yCount; ++y) {
+			for (int z = -zCount; z <= zCount; ++z) {
+				rotatingObj = make_shared<RotatingObject>();
+				rotatingObj->SetPosition(xPitch * x, yPitch * y + 20.0f, zPitch * z);
+				rotatingObj->SetRotationAxis({ 0.0f, 1.0f, 0.0f });
+				rotatingObj->SetRotationSpeed(10.0f * (i++ % 10));
+				mObjects.push_back(rotatingObj);
+			}
+		}
+	}
+	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,12.0f,12.0f,12.0f} };
+	mObjects[0]->SetMesh(cubeMesh);
+	CreateShaderVariables(device, commandList);
+}
+
+void InstancingShader::ReleaseObjects()
+{
+
+}
+
+D3D12_INPUT_LAYOUT_DESC InstancingShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount{ 7 };
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "WORLDMAT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
+	,{ "WORLDMAT", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
+	,{ "WORLDMAT", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
+	,{ "WORLDMAT", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
+	,{ "INSTANCECOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE InstancingShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSInstancing", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE InstancingShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSInstancing", "ps_5_1", shaderBlob);
+}
+
+void InstancingShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
+}
+
+void InstancingShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mObjects.size()) };
+	mcbGameObjects = CreateBufferResource(device, commandList, nullptr, buffeSize
+		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
+	mcbGameObjects->Map(0, nullptr, (void**)&mcbMappedGameObjects);
+	mInstancingBufferView.BufferLocation = mcbGameObjects->GetGPUVirtualAddress();
+	mInstancingBufferView.StrideInBytes = sizeof(VS_VB_INSTANCE);
+	mInstancingBufferView.SizeInBytes = buffeSize;
+}
+
+void InstancingShader::ReleaseShaderVariables()
+{
+	if (mcbGameObjects) {
+		mcbGameObjects->Unmap(0, nullptr);
+		mcbGameObjects.Reset();
+	}
+}
+
+void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	for (int i = 0; i < mObjects.size(); ++i) {
+		mcbMappedGameObjects[i].mColor = (i % 2) ? (XMFLOAT4A{ 0.5f,0.0f,0.0f,0.0f }) : (XMFLOAT4A{ 0.0f,0.0f,0.5f,0.0f });
+		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
+	}
+}
+
+void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
+{
+	Shader::Render(commandList, camera);
+	UpdateShaderVariables(commandList);
+	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()), mInstancingBufferView);
+}
+
+

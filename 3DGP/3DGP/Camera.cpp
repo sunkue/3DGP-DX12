@@ -37,7 +37,7 @@ Camera::Camera(Camera* camera)
 void Camera::ProbationPrevCamera(Camera* camera)
 {
 	if (nullptr == camera)return;
-	if (camera->GetMode() == CAMERA_MODE::SPACESHIP)
+	if (camera->GetMode() == CAMERA_MODE::THIRD_PERSON)
 	{
 		mUpV = { 0.0f,1.0f,0.0f };
 		mRightV.y = 0.0f;
@@ -167,6 +167,8 @@ void Camera::ModulatePosWhileRotate(FXMMATRIX rotateMat)
 SpaceShipCamera::SpaceShipCamera(Camera* camera) :Camera{ camera }
 {
 	mMode = CAMERA_MODE::SPACESHIP;
+	SetLookAt(GetPosition() - XMVECTOR{0.0f, 1.0f, 0.0f, 0.0f});
+	GenerateViewMatrix();
 }
 
 void SpaceShipCamera::Rotate(float x, float y, float z)

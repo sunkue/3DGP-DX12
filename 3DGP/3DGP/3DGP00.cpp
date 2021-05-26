@@ -21,7 +21,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int showCmd)
 
 		if (!application.Initialize())
 		{
-			return 0;
+			throw DxException();
+			return 1;
 		}
 
 		return application.Run();
