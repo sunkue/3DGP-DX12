@@ -135,7 +135,7 @@ void Player::Rotate(float x, float y, float z)
 	XMStoreFloat3A(&mRightV, right);
 }
 
-void Player::Update(milliseconds timeElapsed)
+void Player::Update(const milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity) * timeE));
@@ -294,8 +294,8 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	case CAMERA_MODE::THIRD_PERSON: {
 		SetFriction(250.0f);
 		SetGravity({ 0.0f,0.0f,0.0f });
-		SetMaxVelocityXZ(125.0f);
-		SetMaxVelocityY(400.0f);
+		SetMaxVelocityXZ(375.0f);
+		SetMaxVelocityY(1200.0f);
 		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });

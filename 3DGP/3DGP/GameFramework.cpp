@@ -548,7 +548,7 @@ void GameFramework::ProcessInput()
 			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
 			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
 		}
-		if (dir)mPlayer->Move(dir, 50.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
+		if (dir)mPlayer->Move(dir, 150.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
 	}
 	mPlayer->Update(mGameTimer.GetTimeElapsed());
 }
