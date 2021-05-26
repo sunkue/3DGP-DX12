@@ -56,7 +56,7 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 	if (direction & DIR_LEFT	) shift -= GetRightVector() * distance;
 	if (direction & DIR_UP		) shift += GetUpVector() * distance;
 	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
-	cout << XMVectorGetX(shift) << " ";
+	cout << XMVectorGetZ(shift) << " ";
 	Move(shift, updateVelocity);
 }
 
@@ -146,15 +146,16 @@ void Player::Update(milliseconds timeElapsed)
 		mVelocity.x *= MaxVelocityXZ / length;
 		mVelocity.z *= MaxVelocityXZ / length;
 	}
-	float MaxVelpcityY{ mMaxVelocityY * timeE };
+	float MaxVelocityY{ mMaxVelocityY * timeE };
 	length = sqrtf(mVelocity.y * mVelocity.y);
 	if (mMaxVelocityY < length)
 	{
-		mVelocity.y *= MaxVelpcityY / length;
+		mVelocity.y *= MaxVelocityY / length;
 	}
 	XMVECTOR vel{ GetVelocity() };
 	Move(vel * timeE);
-
+	cout << "sd";
+	cout << timeE;
 	if (mPlayerUpdateContext)PlayerUpdateCallback(timeElapsed);
 	CAMERA_MODE camMode{ mCamera->GetMode() };
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->Update(GetPosition(), timeElapsed); }

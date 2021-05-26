@@ -631,7 +631,7 @@ void GameFramework::FrameAdvance()
 {
 
 	mGameTimer.Tick();
-
+	cout << "TICK:\n";
 	ProcessInput();
 	AnimateObjects();
 

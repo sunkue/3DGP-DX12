@@ -30,7 +30,7 @@ protected:
 protected:
 	//ObjectsShader
 	//InstancingShader
-	vector<InstancingShader>		mShaders;
+	vector<ObjectsShader>		mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 
 };
