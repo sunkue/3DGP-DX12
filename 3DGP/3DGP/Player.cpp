@@ -4,8 +4,9 @@
 #include "Player.h"
 
 
-Player::Player()
-	: mPosition{ 0.0f,0.0f,0.0f }
+Player::Player(int meshCount)
+	: GameObject{ meshCount }
+	, mPosition{ 0.0f,0.0f,0.0f }
 	, mRightV{ 1.0f,0.0f,0.0 }
 	, mUpV{ 0.0f,1.0f,0.0f }
 	, mLookV{ 0.0f,0.0f,1.0f }
@@ -228,10 +229,16 @@ void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 ////////////////////////////////////////////
 
-AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature)
+AirPlanePlayer::AirPlanePlayer(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, int meshCount
+)
+	: Player{ meshCount }
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
-	SetMesh(airplaneMesh);
+	SetMesh(0, airplaneMesh);
 	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
@@ -303,3 +310,38 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 
 	return mCamera;
 }
+
+/////////////////////////////////////////
+
+
+TerrainPlayer::TerrainPlayer(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, void* context
+	, int meshCount
+)
+	: Player{ meshCount }
+{
+	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
+	const float xCenter{ terrain->GetWidth() * 0.5f };
+	const float zCenter{ terrain->GetLength() * 0.5f };
+	const float height{ terrain->GetHeight(xCenter,zCenter) };
+	SetPosition({ xCenter,height + 1500.0f,zCenter });
+	SetPlayerUpdateContext(reinterpret_cast<void*>(terrain));
+	SetCameraUpdateContext(reinterpret_cast<void*>(terrain));
+
+
+}
+
+TerrainPlayer::~TerrainPlayer()
+{
+
+}
+
+virtual Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
+virtual void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed);
+virtual void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed);
+
+

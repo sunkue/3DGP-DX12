@@ -176,10 +176,10 @@ void GameObject::ReleaseShaderVariables()
 
 //////////////////////////////
 
-RotatingObject::RotatingObject()
+RotatingObject::RotatingObject(int meshCount) :GameObject{ meshCount }
 {
 	mxmf3RotationAxis = XMFLOAT3A{ 0.0f, 1.0f, 0.0f };
-	mRotationSpeed = 90.0f;
+	mRotationSpeed = 15.0f;
 }
 
 RotatingObject::~RotatingObject()
@@ -193,7 +193,57 @@ void RotatingObject::Animate(milliseconds timeElapsed)
 }
 
 //////////////////////////
+HeightMapTerrain::HeightMapTerrain(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, LPCTSTR fileName
+	, int width
+	, int length
+	, int blockWidth
+	, int blockLength
+	, XMFLOAT3A scale
+	, XMFLOAT4A color
+)
+	: GameObject{ 0 }
+	, mWidth{ width }
+	, mLength{ length }
+	, mScale{ scale }
+{
+	int xIncreasePerBlock{ (blockWidth - 1) };
+	int zIncreasePerBlock{ (blockLength - 1) };
+	mHeightMap = new HeightMapImage(fileName, width, length, scale);
 
-HeightMapTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature
-	, LPCTSTR fileName, int width, int length, int blockWidth, int blockLength, XMFLOAT3A scale, XMFLOAT4A color);
-virtual ~HeightMapTerrain();
+	const int xBlocks{ (width - 1) / xIncreasePerBlock };
+	const int zBlocks{ (length - 1) / zIncreasePerBlock };
+
+	mMeshes.resize(static_cast<size_t>(xBlocks)* zBlocks);
+	
+	HeightMapGridMesh* HMGM{ nullptr };
+	for (int z = 0, zStart = 0; z < zBlocks; ++z) {
+		for (int x = 0, xStart = 0; x < xBlocks; ++x) {
+			xStart = x * xIncreasePerBlock;
+			zStart = z * zIncreasePerBlock;
+			HMGM = new HeightMapGridMesh{ 
+				  device
+				, commandList
+				, xStart
+				, zStart
+				, blockWidth
+				, blockLength
+				, scale
+				, color
+				, mHeightMap };
+			SetMesh(x + (z * xBlocks), HMGM);
+		}
+	}
+
+	TerrainShader* shader = new TerrainShader();
+	shader->CreateShader(device, rootSignature);
+	SetShader(shader);
+}
+
+HeightMapTerrain::~HeightMapTerrain()
+{
+	delete mHeightMap;
+}

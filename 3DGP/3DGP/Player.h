@@ -13,7 +13,7 @@
 class Player : public GameObject
 {
 public:
-	Player();
+	Player(int meshCount = 1);
 	virtual ~Player();
 
 	XMVECTOR XM_CALLCONV GetLookVector()const { return XMLoadFloat3A(&mLookV); }
@@ -44,9 +44,9 @@ public:
 	void Update(milliseconds timeElapsed);
 
 	virtual void PlayerUpdateCallback(milliseconds timeElapsed) {}
-	void SetPlayerUpdateContext(LPVOID context) { mPlayerUpdateContext = context; }
+	void SetPlayerUpdateContext(void* context) { mPlayerUpdateContext = context; }
 	virtual void CameraUpdateCallback(milliseconds timeElapsed) {}
-	void SetUpdateCallback(LPVOID context) { mCameraUpdateContext = context; }
+	void SetCameraUpdateContext(void* context) { mCameraUpdateContext = context; }
 
 	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
 	virtual void ReleaseShaderVariables()override;
@@ -85,9 +85,21 @@ protected:
 class AirPlanePlayer :public Player
 {
 public:
-	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature);
+	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, int meshCount = 1);
 	virtual ~AirPlanePlayer();
 
-	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
-	virtual void PrepareRender();
+	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)override;
+	virtual void PrepareRender()override;
+};
+
+class TerrainPlayer : public Player
+{
+public:
+	TerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, void* context, int meshCount = 1);
+	virtual ~TerrainPlayer();
+	
+	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)override;
+	virtual void PlayerUpdateCallback(milliseconds timeElapsed)override;
+	virtual void CameraUpdateCallback(milliseconds timeElapsed)override;
+
 };
