@@ -8,7 +8,7 @@ class Camera;
 class GameObject
 {
 public:
-	GameObject(int meshCount = 1);
+	GameObject();
 	virtual ~GameObject();
 
 public:
@@ -21,7 +21,7 @@ private:
 public:
 	void ReleaseUploadBuffers();
 	
-	virtual void SetMesh(int index, Mesh* mesh);
+	virtual void SetMesh(Mesh* mesh);
 	virtual void SetShader(Shader* shader);
 
 	virtual void Animate(const milliseconds timeElapsed);
@@ -56,7 +56,7 @@ public:
 
 protected:
 	XMFLOAT4X4A	mWorldMat;
-	vector<Mesh*> mMeshes;
+	Mesh*	mMesh;
 	Shader*	mShader;
 
 };
@@ -64,7 +64,7 @@ protected:
 class RotatingObject : public GameObject
 {
 public:
-	RotatingObject(int meshCount = 1);
+	RotatingObject();
 	virtual ~RotatingObject();
 
 private:
@@ -76,30 +76,5 @@ public:
 	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mxmf3RotationAxis, rotationAxis); }
 	
 	virtual void Animate(milliseconds timeElapsed);
-
-};
-
-class HeightMapTerrain : public GameObject
-{
-public:
-	HeightMapTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature
-		, LPCTSTR fileName, int width, int length, int blockWidth, int blockLength, XMFLOAT3A scale, XMFLOAT4A color);
-	virtual ~HeightMapTerrain();
-
-public:
-	float GetHeight(float x, float z)const { return mHeightMap->GetHeight((x / mScale.x), (z / mScale.z)) * mScale.y; }
-	XMVECTOR XM_CALLCONV GetNormal(float x, float z)const { return mHeightMap->GetHeightNormal(static_cast<int>(x / mScale.x), static_cast<int>(z / mScale.z)); }
-	int GetHeightMapWidth()const { return mHeightMap->GetWidth(); }
-	int GetHeightMapLength()const { return mHeightMap->GetLength(); }
-
-	XMVECTOR GetScale()const { return XMLoadFloat3A(&mScale); }
-	int GetWidth()const { return mWidth * mScale.x; }
-	int GetLength()const { return mLength * mScale.z; }	
-
-private:
-	HeightMapImage* mHeightMap;
-	int mWidth;
-	int mLength;
-	XMFLOAT3A mScale;
 
 };
