@@ -139,14 +139,11 @@ void Player::Update(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity) * timeE));
 	float length{ sqrtf(mVelocity.x * mVelocity.x + mVelocity.z * mVelocity.z) };
-	//float MaxVelocityXZ{ mMaxVelocityXZ * timeE };
 	if (mMaxVelocityXZ < length)
 	{
 		mVelocity.x *= mMaxVelocityXZ / length;
 		mVelocity.z *= mMaxVelocityXZ / length;
 	}
-	
-	//float MaxVelocityY{ mMaxVelocityY * timeE };
 	length = sqrtf(mVelocity.y * mVelocity.y);
 	if (mMaxVelocityY < length)
 	{

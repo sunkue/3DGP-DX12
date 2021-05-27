@@ -37,14 +37,9 @@ void Mesh::ReleaseUploadBuffers()
 
 ////////////////////////////////////////////////
 
-void Mesh::Render(ID3D12GraphicsCommandList* commandList)
-{
-	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
-	Render(commandList, 1);
-}
-
 void Mesh::Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount)
 {
+	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
 	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
 	if (mIndexBuffer) {
 		commandList->IASetIndexBuffer(&mIndexBufferView);

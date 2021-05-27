@@ -27,6 +27,7 @@ public:
 	virtual void Animate(const milliseconds timeElapsed);
 
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount);
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera
 		, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
 

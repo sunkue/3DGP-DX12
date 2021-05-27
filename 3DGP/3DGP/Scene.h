@@ -28,8 +28,6 @@ protected:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
 
 protected:
-	//ObjectsShader
-	//InstancingShader
 	vector<InstancingShader>		mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 

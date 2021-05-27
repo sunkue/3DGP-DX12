@@ -10,6 +10,7 @@ cbuffer cbCameraInfo : register(b1)
 	matrix viewMat : packoffset(c0);
 	matrix projMat : packoffset(c4);
 }
+
 /////////////////////////////////////////
 struct VS_INPUT
 {
@@ -23,12 +24,18 @@ struct VS_OUTPUT
 	float4 color : COLOR;
 };
 
+struct INSTANCED_GAMEOBJECT_INFO
+{
+	matrix mTransform;
+	float4 mColor;
+};
+
+StructuredBuffer<INSTANCED_GAMEOBJECT_INFO> gameObjectInfos : register(t0);
+
 struct VS_INSTANCING_INPUT
 {
 	float3 position : POSITION;
 	float4 color : COLOR;
-	float4x4 tansform : WORLDMAT;
-	float4 instanceColor : INSTANCECOLOR;
 };
 
 struct VS_INSTANCING_OUTPUT
@@ -83,14 +90,14 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	return output;
 }
 
-VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input)
+VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input, uint instanceID : SV_InstanceID)
 {
 	VS_OUTPUT output;
 	
 	output.position = mul(mul(mul(float4(input.position, 1.0f)
-	, input.tansform), viewMat), projMat);
+	, gameObjectInfos[instanceID].mTransform), viewMat), projMat);
 
-	output.color = input.color + input.instanceColor;
+	output.color = input.color + gameObjectInfos[instanceID].mColor;
 	
 	return output;
 }

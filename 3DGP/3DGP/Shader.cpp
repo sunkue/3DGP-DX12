@@ -246,32 +246,6 @@ void ObjectsShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* root
 
 void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,12.0f,12.0f,12.0f} };
-	int xCount{ 10 };
-	int yCount{ 10 };
-	int zCount{ 10 };
-	int i{ 0 };
-	mObjects.reserve(
-		  (static_cast<size_t>(xCount) * 2 + 1) 
-		* (static_cast<size_t>(yCount) * 2 + 1)
-		* (static_cast<size_t>(zCount) * 2 + 1));
-	float xPitch = 12.0f * 2.5f;
-	float yPitch = 12.0f * 2.5f;
-	float zPitch = 12.0f * 2.5f;
-	shared_ptr<RotatingObject> rotatingObj;
-	for (int x = -xCount; x <= xCount; ++x) {
-		for (int y = -yCount; y <= yCount; ++y) {
-			for (int z = -zCount; z <= zCount; ++z) {
-				rotatingObj = make_shared<RotatingObject>();
-				rotatingObj->SetMesh(cubeMesh);
-				rotatingObj->SetPosition(xPitch * x, yPitch * y + 20.0f, zPitch * z);
-				rotatingObj->SetRotationAxis({ 0.0f, 1.0f, 0.0f });
-				rotatingObj->SetRotationSpeed(30.00f);
-				mObjects.push_back(rotatingObj);
-			}
-		}
-	}
-	CreateShaderVariables(device, commandList);
 }
 
 void ObjectsShader::ReleaseObjects()
@@ -347,17 +321,12 @@ void InstancingShader::ReleaseObjects()
 
 D3D12_INPUT_LAYOUT_DESC InstancingShader::CreateInputLayout()
 {
-	constexpr UINT InputElemDescsCount{ 7 };
+	constexpr UINT InputElemDescsCount{ 2 };
 	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "WORLDMAT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
-	,{ "WORLDMAT", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
-	,{ "WORLDMAT", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
-	,{ "WORLDMAT", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
-	,{ "INSTANCECOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 64, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;
@@ -387,11 +356,8 @@ void InstancingShader::CreateShaderVariables(ID3D12Device* device, ID3D12Graphic
 {
 	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mObjects.size()) };
 	mcbGameObjects = CreateBufferResource(device, commandList, nullptr, buffeSize
-		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
+		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
 	mcbGameObjects->Map(0, nullptr, (void**)&mcbMappedGameObjects);
-	mInstancingBufferView.BufferLocation = mcbGameObjects->GetGPUVirtualAddress();
-	mInstancingBufferView.StrideInBytes = sizeof(VS_VB_INSTANCE);
-	mInstancingBufferView.SizeInBytes = buffeSize;
 }
 
 void InstancingShader::ReleaseShaderVariables()
@@ -404,6 +370,7 @@ void InstancingShader::ReleaseShaderVariables()
 
 void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
+	commandList->SetGraphicsRootShaderResourceView(2, mcbGameObjects->GetGPUVirtualAddress());
 	for (int i = 0; i < mObjects.size(); ++i) {
 		mcbMappedGameObjects[i].mColor = (i % 2) ? (XMFLOAT4A{ 0.5f,0.0f,0.0f,0.0f }) : (XMFLOAT4A{ 0.0f,0.0f,0.5f,0.0f });
 		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
@@ -414,7 +381,7 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 {
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
-	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()), mInstancingBufferView);
+	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
 

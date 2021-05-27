@@ -67,6 +67,13 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	if (mMesh)mMesh->Render(commandList);
 }
 
+void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
+{
+	PrepareRender();
+	if (mMesh)mMesh->Render(commandList, instanceCount);
+}
+
+
 void GameObject::Render(
 	  ID3D12GraphicsCommandList* commandList
 	, Camera* camera

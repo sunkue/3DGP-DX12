@@ -15,18 +15,24 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
-	CD3DX12_ROOT_PARAMETER RootParameters[2];
+	CD3DX12_ROOT_PARAMETER RootParameters[3];
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
 		, 16
-		, 0
+		, 0						//b0 Player
 		, 0
 		, D3D12_SHADER_VISIBILITY_VERTEX);
 	
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[1]
 		, 32
-		, 1
+		, 1						//b1 Camera
+		, 0
+		, D3D12_SHADER_VISIBILITY_VERTEX);
+
+	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
+		RootParameters[2]
+		, 0						//t0
 		, 0
 		, D3D12_SHADER_VISIBILITY_VERTEX);
 	
