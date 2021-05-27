@@ -256,13 +256,19 @@ HeightMapImage::HeightMapImage(
 	HANDLE file{ CreateFile(fileName,GENERIC_READ,0,nullptr,OPEN_EXISTING
 		,FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY,nullptr) };
 	DWORD bytesRead;
-	ReadFile(file, heightMapPixels, PIXEL_COUNT, &bytesRead, nullptr);
+	if (!ReadFile(file, heightMapPixels, PIXEL_COUNT, &bytesRead, nullptr)) {
+		cout << "NOE";
+		assert(0);
+		throw exception("noHeightMapImageFile");
+	}
 	CloseHandle(file);
 
 	mHeightMapPixels = new BYTE[PIXEL_COUNT];
 	for (int y = 0; y < length; ++y) {
 		for (int x = 0; x < width; ++x) {
+			assert(x + ((length - 1 - y) * width) < PIXEL_COUNT);
 			mHeightMapPixels[x + ((length - 1 - y) * width)] = heightMapPixels[x + (y * width)];
+
 		}
 	}
 	delete[] heightMapPixels;
@@ -282,10 +288,9 @@ XMVECTOR HeightMapImage::GetHeightNormal(const int x, const int z)const
 	int HMAddX{ (x < (mWidth - 1)) ? (1) : (-1) };
 	int HMAddZ{ (z < (mLength - 1)) ? (mWidth) : (-mWidth) };
 
-	float* HM{ reinterpret_cast<float*>(mHeightMapPixels) };
-	float y1{ HM[HMIndex] * mScale.y };
-	float y2{ HM[HMIndex + HMAddX] * mScale.y };
-	float y3{ HM[HMIndex + HMAddZ] * mScale.y };
+	float y1{ (float)mHeightMapPixels[HMIndex] * mScale.y };
+	float y2{ (float)mHeightMapPixels[HMIndex + HMAddX] * mScale.y };
+	float y3{ (float)mHeightMapPixels[HMIndex + HMAddZ] * mScale.y };
 
 	XMVECTOR edge1{ XMVector3Normalize({0.0f, y3 - y1, mScale.z}) };
 	XMVECTOR edge2{ XMVector3Normalize({mScale.x, y2 - y1, 0.0f }) };
@@ -303,12 +308,10 @@ float HeightMapImage::GetHeight(const float fx, const float fz)const
 	float xPercent{ fx - x };
 	float zPercent{ fz - z };
 
-	float* HM{ reinterpret_cast<float*>(mHeightMapPixels) };
-
-	float BL{ HM[x + (z * mWidth)] };
-	float BR{ HM[(x + 1) + (z * mWidth)] };
-	float TL{ HM[x + ((z + 1) * mWidth)] };
-	float TR{ HM[(x + 1) + ((z + 1) * mWidth)] };
+	float BL{ (float)mHeightMapPixels[x + (z * mWidth)] };
+	float BR{ (float)mHeightMapPixels[(x + 1) + (z * mWidth)] };
+	float TL{ (float)mHeightMapPixels[x + ((z + 1) * mWidth)] };
+	float TR{ (float)mHeightMapPixels[(x + 1) + ((z + 1) * mWidth)] };
 #ifdef WITH_APPROXIMATE_OPPOSITE_CORNER
 	bool R2L{ (z % 2) != 0 };
 	if (R2L) {
@@ -341,6 +344,7 @@ HeightMapGridMesh::HeightMapGridMesh(
 	, mScale{ scale }
 {
 	mVerticesCount = width * length;
+	mStride = sizeof(DiffusedVertex);
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	DiffusedVertex* vertices{ new DiffusedVertex[mVerticesCount] };
 	float H{ 0.0f };
@@ -349,6 +353,7 @@ HeightMapGridMesh::HeightMapGridMesh(
 	for (int i = 0, z = zStart; z < (zStart + length); ++z) {
 		for (int x = xStart; x < (xStart + width); ++x, ++i)
 		{
+			assert(i < mVerticesCount);
 			XMVECTOR pos{ (x * scale.x), GetHeight(x,z,context), (z * scale.z) };
 			XMVECTOR col{ GetColor(x,z,context) + XMLoadFloat4A(&color) };
 			vertices[i] = DiffusedVertex{ pos, col };
@@ -356,9 +361,9 @@ HeightMapGridMesh::HeightMapGridMesh(
 			maxH = max(maxH, H);
 		}
 	}
-	const UINT bufferSize{ mStride * mVerticesCount };
+	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
-		device
+		  device
 		, commandList
 		, vertices
 		, bufferSize
@@ -374,15 +379,16 @@ HeightMapGridMesh::HeightMapGridMesh(
 	UINT* indices{ new UINT[mIndicesCount] };
 	for (UINT j = 0, z = 0; z < length - 1; ++z) {
 		if (z % 2 == 0) {
-			for (UINT x = 0; x < width; ++x) {
+			for (int x = 0; x < width; ++x) {
 				UINT index{ x + (z * width) };
 				if ((x == 0) && (0 < z))indices[j++] = index;
 				indices[j++] = index;
 				indices[j++] = index + width;
+				assert(j < mIndicesCount);
 			}
 		}
 		else {
-			for (UINT x = width - 1; 0 <= x; --x) {
+			for (int x = width - 1; 0 <= x; --x) {
 				UINT index{ x + (z * width) };
 				if (x == (width - 1))indices[j++] = index;
 				indices[j++] = index;
@@ -390,7 +396,7 @@ HeightMapGridMesh::HeightMapGridMesh(
 			}
 		}
 	}
-	const UINT bufferSize{ sizeof(UINT) * mIndicesCount };
+	bufferSize = sizeof(UINT) * mIndicesCount;
 	mIndexBuffer = CreateBufferResource(
 		device
 		, commandList
@@ -401,7 +407,7 @@ HeightMapGridMesh::HeightMapGridMesh(
 		, mIndexUploadBuffer.GetAddressOf());
 	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
 	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	mIndexBufferView.SizeInBytes = bufferSize;	
+	mIndexBufferView.SizeInBytes = bufferSize;
 	delete[] indices;
 }
 

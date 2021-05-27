@@ -61,6 +61,7 @@ constexpr UINT RFR = 144;
 constexpr float EPSILON = 1.0e-10f;
 
 inline bool IsZero(float value) { return(fabsf(value) < EPSILON); }
+inline bool IsZero(XMVECTOR value) { return IsZero(XMVectorGetX(value)) && IsZero(XMVectorGetY(value)) && IsZero(XMVectorGetZ(value)); }
 inline bool IsEqual(float a, float b) { return IsZero(a - b); }
 inline float InverseSqrt(float value) { return 1.0f / sqrtf(value); }
 

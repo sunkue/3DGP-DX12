@@ -70,7 +70,7 @@ public:
 	explicit ObjectsShader();
 	virtual ~ObjectsShader();
 
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context);
 	virtual void AnimateObjects(milliseconds timeElapsed);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
@@ -94,7 +94,7 @@ public:
 	InstancingShader();
 	virtual ~InstancingShader();
 
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)override;
 	virtual void ReleaseObjects()override;
 
 	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
@@ -114,4 +114,19 @@ protected:
 	VS_VB_INSTANCE*			mcbMappedGameObjects;
 
 	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
+};
+
+class TerrainShader : public Shader
+{
+public:
+	TerrainShader();
+	virtual ~TerrainShader();
+
+	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
+
+protected:
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+
 };

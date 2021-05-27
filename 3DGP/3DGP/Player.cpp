@@ -331,8 +331,14 @@ TerrainPlayer::TerrainPlayer(
 	SetPosition({ xCenter,height + 1500.0f,zCenter });
 	SetPlayerUpdateContext(reinterpret_cast<void*>(terrain));
 	SetCameraUpdateContext(reinterpret_cast<void*>(terrain));
+	CubeMeshDiffused* cube{ new CubeMeshDiffused{device,commandList,4.0f,12.0f,4.0f} };
+	SetMesh(0, cube);
 
+	PlayerShader* shader = new PlayerShader();
+	shader->CreateShader(device, rootSignature);
+	SetShader(shader);
 
+	CreateShaderVariables(device, commandList);
 }
 
 TerrainPlayer::~TerrainPlayer()
@@ -340,8 +346,73 @@ TerrainPlayer::~TerrainPlayer()
 
 }
 
-virtual Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
-virtual void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed);
-virtual void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed);
+Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
+{
+	CAMERA_MODE currCM = (mCamera) ? (mCamera->GetMode()) : (CAMERA_MODE::NO_CAMERA);
+	if (currCM == newCameraMode)return mCamera;
+	const float aspect{ GameFramework::GetApp()->GetAspectRatio() };
+	switch (newCameraMode)
+	{
+	case CAMERA_MODE::NO_CAMERA:
+		assert(0);
+		break;
+	case CAMERA_MODE::FIRST_PERSON:
+		SetFriction(250.0f);
+		SetGravity({ 0.0f,-250.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
+		mCamera->SetTimeLag(milliseconds::zero());
+		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
+		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
+		break;
+	case CAMERA_MODE::SPACESHIP:
+		SetFriction(125.0f);
+		SetGravity({ 0.0f,-0.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
+		mCamera->SetTimeLag(milliseconds::zero());
+		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
+		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
+		break;
+	case CAMERA_MODE::THIRD_PERSON:
+		SetFriction(250.0f);
+		SetGravity({ 0.0f,-250.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
+		mCamera->SetTimeLag(250ms);
+		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
+		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
+		break;
+	}
+	Update(timeElapsed);
+	return mCamera;
+}
+
+void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
+{
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
+	float height{ terrain->GetHeight(mPosition.x,mPosition.z) + 6.0f };
+	if (mPosition.y < height) {
+		mVelocity.y = 0.0f;
+		mPosition.y = height;
+	}
+}
+
+void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
+{
+	XMVECTOR pos = mCamera->GetPosition();
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
+	float height{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + 5.0f };
+	if (XMVectorGetY(pos) <= height) {
+		mCamera->SetPosition(XMVectorSetY(pos, height));
+		if (mCamera->GetMode() == CAMERA_MODE::THIRD_PERSON) {
+			ThirdPersonCamera* TPC{ reinterpret_cast<ThirdPersonCamera*>(mCamera) };
+			TPC->SetLookAt(GetPosition());
+		}
+	}
+}
 
 
