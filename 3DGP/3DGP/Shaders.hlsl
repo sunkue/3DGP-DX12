@@ -3,6 +3,7 @@
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix worldMat : packoffset(c0);
+	float optColor : packoffset(c4);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -85,7 +86,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	
 	output.position = WVP(input.position);
 
-	output.color = input.color;
+	output.color = input.color * optColor;
 	
 	return output;
 }

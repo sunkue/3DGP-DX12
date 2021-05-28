@@ -9,6 +9,7 @@ GameObject::GameObject()
 	: mMesh{ nullptr }
 	, mShader{ nullptr }
 	, mReferences{ 0 }
+	, mOptionColor{ 1.0f }
 {
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
 }
@@ -167,6 +168,7 @@ void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMFLOAT4X4A world;
 	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
+	commandList->SetGraphicsRoot32BitConstants(0, 1, &mOptionColor, 16);
 }
 
 void GameObject::ReleaseShaderVariables()

@@ -58,6 +58,7 @@ public:
 	virtual void PrepareRender()override;
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera = nullptr)override;
 
+	void ReRoll();
 protected:
 	XMFLOAT3A mPosition;
 	XMFLOAT3A mRightV;
@@ -80,6 +81,8 @@ protected:
 
 	Camera* mCamera;
 
+	bool mInvincible;
+	bool mStealth;
 };
 
 class AirPlanePlayer :public Player

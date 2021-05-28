@@ -18,7 +18,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	CD3DX12_ROOT_PARAMETER RootParameters[3];
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
-		, 16
+		, 17
 		, 0						//b0 Player
 		, 0
 		, D3D12_SHADER_VISIBILITY_VERTEX);

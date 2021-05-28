@@ -58,7 +58,7 @@ protected:
 	XMFLOAT4X4A	mWorldMat;
 	Mesh*	mMesh;
 	Shader*	mShader;
-
+	float mOptionColor;
 };
 
 class RotatingObject : public GameObject

@@ -470,7 +470,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
-			if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
+			//if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -528,13 +528,13 @@ void GameFramework::ProcessInput()
 
 	if (GetKeyboardState(key))
 	{
-		if (key['W'] & 0xf0)dir |= DIR_FORWARD;
-		if (key['S'] & 0xf0)dir |= DIR_BACKWARD;
+		//if (key['W'] & 0xf0)dir |= DIR_FORWARD;
+		//if (key['S'] & 0xf0)dir |= DIR_BACKWARD;
 		if (key['A'] & 0xf0)dir |= DIR_LEFT;
 		if (key['D'] & 0xf0)dir |= DIR_RIGHT;
 
-		if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
-		if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
+		//if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
+		//if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
 		if (key[VK_LEFT]	& 0xf0)dir |= DIR_LEFT;
 		if (key[VK_RIGHT]	& 0xf0)dir |= DIR_RIGHT;
 
@@ -638,7 +638,7 @@ void GameFramework::FrameAdvance()
 {
 
 	mGameTimer.Tick();
-	cout << "TICK:\n";
+	//cout << "TICK:\n";
 	ProcessInput();
 	AnimateObjects();
 

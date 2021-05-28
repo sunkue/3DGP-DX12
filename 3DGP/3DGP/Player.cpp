@@ -57,6 +57,26 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 	if (direction & DIR_UP		) shift += GetUpVector() * distance;
 	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
 	Move(shift, updateVelocity);
+
+
+
+
+
+
+	constexpr float MAX_ROLL = 30.f;
+	constexpr float t = 3.0f;
+	if (direction & DIR_RIGHT) {
+		if (mRoll < MAX_ROLL) {
+			mRoll += t;
+			Rotate(0.f, t, 0.0f);
+		}
+	}
+	if (direction & DIR_LEFT) {
+		if (-MAX_ROLL < mRoll) {
+			mRoll -= t;
+			Rotate(0.f, -t, 0.0f);
+		}
+	}
 }
 
 void Player::Move(FXMVECTOR shift, bool updateVelocity)
@@ -137,7 +157,9 @@ void Player::Rotate(float x, float y, float z)
 void Player::Update(const milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
-	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity) * timeE));
+	XMVECTOR Gravity(XMLoadFloat3A(&mGravity));
+	SetGravity(XMVectorAdd(Gravity, Gravity * 0.15f * timeE));
+	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity)));
 	float length{ sqrtf(mVelocity.x * mVelocity.x + mVelocity.z * mVelocity.z) };
 	if (mMaxVelocityXZ < length)
 	{
@@ -161,6 +183,58 @@ void Player::Update(const milliseconds timeElapsed)
 	float deceleration{ mFriction * timeE };
 	if (length < deceleration)deceleration = length;
 	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
+
+
+
+
+	mStealth = true;
+	if (mStealth) {
+		static float t{ 0.0f };
+		constexpr float t2{ 0.5f };
+		constexpr float MTP{ 100.0f };
+		constexpr float MTP2{ 0.2f };
+		static float time{ MTP };
+		static float time2{ MTP2 };
+		t += timeE;
+		if (t < t2)mOptionColor = 0.25f;
+		else if (time2 < MTP2/2) {
+			mOptionColor = 0.5f;
+		}
+		else {
+			mOptionColor = 0.25f;
+		}
+		time -= timeE;
+		time2 = (time2 < 0.0f) ? MTP2 : time2 - timeE;
+		if (time < 0) {
+			if (mInvincible) {
+				time = MTP;
+				return;
+			}
+			t = 0.0f; mStealth = false; time = MTP; mOptionColor = 1.0f;
+
+		}
+	}
+	ReRoll();
+}
+void Player::ReRoll()
+{
+	constexpr float t = 1.0f;
+	if (mRoll < 0.0f) {
+		mRoll += t;
+		Rotate(0.0f, t, 0.f);
+	}
+	else if (0.0f < mRoll) {
+		mRoll -= t;
+		Rotate(0.0f, -t, 0.f);
+	}
+	else {
+		/*
+		constexpr XMVECTOR Z{ 0.0f,0.0f,1.0f };
+		XMVECTOR look{ GetLookVector() };
+		float D = XMVectorGetX(XMVector3Dot(look, Z) / (XMVector3Length(look) * XMVector3Length(Z)));
+		Rotate(0.0f, D, 0.0f);
+		*/
+	}
 }
 
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
@@ -287,7 +361,7 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	}break;
 	case CAMERA_MODE::THIRD_PERSON: {
 		SetFriction(250.0f);
-		SetGravity({ 0.0f,0.0f,0.0f });
+		SetGravity({ 0.0f,0.0f,1.0f });
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
 		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
