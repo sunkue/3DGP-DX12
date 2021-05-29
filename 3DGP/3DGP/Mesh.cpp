@@ -21,6 +21,7 @@ Mesh::Mesh(
 	, mIndexUploadBuffer{ nullptr}
 	, mVertexBufferView{}
 	, mIndexBufferView{}
+	, mOOBB{}
 {
 
 }
@@ -132,6 +133,8 @@ CubeMeshDiffused::CubeMeshDiffused(
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
 
+	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
+	
 	mIndicesCount = 36;
 	UINT indices[]{
 		 3,1,0
@@ -181,12 +184,12 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	float y = height * 0.5f;
 	float z = depth * 0.5f;
 	DiffusedVertex vertices[]{
-		 {-x, +y ,-z, Colors::Aquamarine + color}
+		 {-x, +y ,-z, Colors::Aquamarine}
 		,{+x, +y ,-z, Colors::Aquamarine + color}
-		,{+x, +y ,+z, Colors::Aquamarine + color}
+		,{+x, +y ,+z, Colors::Aquamarine}
 		,{-x, +y ,+z, Colors::Aquamarine + color}
-		,{-x, -y ,-z, Colors::Aquamarine + color}
-		,{+x, -y ,-z, Colors::Aquamarine + color}
+		,{-x, -y ,-z, Colors::Aquamarine}
+		,{+x, -y ,-z, Colors::Aquamarine}
 		,{+x, -y ,+z, Colors::Aquamarine + color}
 		,{-x, -y ,+z, Colors::Aquamarine + color}
 	};
@@ -202,6 +205,8 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
+	
+	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
 
 	mIndicesCount = 36;
 	UINT indices[]{

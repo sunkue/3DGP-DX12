@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameObject.h"
+#include "Player.h"
 #include "Shader.h"
 
 
@@ -8,6 +9,7 @@
 GameObject::GameObject()
 	: mMesh{ nullptr }
 	, mShader{ nullptr }
+	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
 	, mOptionColor{ 1.0f }
 {
@@ -113,7 +115,7 @@ void GameObject::SetPosition(FXMVECTOR position)
 XMVECTOR GameObject::GetPosition()	const
 {
 	XMVECTOR pos{ XMVectorSet(mWorldMat._41,mWorldMat._42,mWorldMat._43,1.0f) };
-	return XMVector3Normalize(pos);
+	return pos;
 }
 
 XMVECTOR GameObject::GetLook() const
@@ -158,6 +160,13 @@ void GameObject::MoveFoward(float distance)
 	SetPosition(pos);
 }
 
+void GameObject::Move(FXMVECTOR vel)
+{
+	XMVECTOR pos = GetPosition();
+	pos += vel;
+	SetPosition(pos);
+}
+
 void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 
@@ -176,21 +185,58 @@ void GameObject::ReleaseShaderVariables()
 
 }
 
+void GameObject::UpdateBoundingBox()
+{
+	assert(mMesh);
+	if (mMesh) {
+		mMesh->mOOBB.Transform(mOOBB, GetWM());
+		XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
+	}
+
+}
+
 //////////////////////////////
 
-RotatingObject::RotatingObject()
+EnemyObject::EnemyObject()
+	: mRotationSpeed{ 90.0f }
+	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
+	, mSpeed{ Rand() * 10.0f + 10.0f }
 {
-	mxmf3RotationAxis = XMFLOAT3A{ 0.0f, 1.0f, 0.0f };
-	mRotationSpeed = 90.0f;
+	XMStoreFloat3A(&mDir, { (1.0f - Rand() * 2.0f) * 20.0f * Rand(),0.0f,-0.1f });
 }
 
-RotatingObject::~RotatingObject()
+void EnemyObject::Reset()
+{
+	SetPosition(Rand() * 50.0f, 0.0f
+		, XMVectorGetZ(Player::PLAYER->GetPosition()) + EnemyObject::RESETZPOSITION);
+}
+
+EnemyObject::~EnemyObject()
 {
 
 }
 
-void RotatingObject::Animate(milliseconds timeElapsed)
+void EnemyObject::Animate(milliseconds timeElapsed)
 {
-	RotateByAxis(XMLoadFloat3A(&mxmf3RotationAxis), mRotationSpeed * timeElapsed.count() / 1000.0f);
+	const float timeE{ timeElapsed.count() / 1000.0f };
+
+	RotateByAxis(XMLoadFloat3A(&mRotationAxis), mRotationSpeed * timeE);
+	Move(XMLoadFloat3A(&mDir) * mSpeed * timeE);
+	
+	UpdateBoundingBox();
+	
 }
 
+////////////////////
+WallObject::WallObject()
+{
+	XMStoreFloat4x4A(&mWorldMat, XMMatrixScaling(0.5f, 2.2f, 500.0f) * XMLoadFloat4x4A(&mWorldMat));
+}
+
+
+void WallObject::Animate(milliseconds timeElapsed) {
+	SetPosition(XMVectorGetX(GetPosition()), 0.0f, XMVectorGetZ(Player::PLAYER->GetPosition()));
+	
+	UpdateBoundingBox();
+	
+}

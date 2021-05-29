@@ -50,6 +50,7 @@ using Microsoft::WRL::ComPtr;
 #include <cassert>
 #include <fstream>
 #include <random>
+#include <thread>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"

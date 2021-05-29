@@ -555,7 +555,7 @@ void GameFramework::ProcessInput()
 			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
 			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
 		}
-		if (dir)mPlayer->Move(dir, 150.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
+		if (dir)mPlayer->Move(dir, 1500.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
 	}
 	mPlayer->Update(mGameTimer.GetTimeElapsed());
 }
@@ -578,7 +578,7 @@ void GameFramework::PopulateCommandList()
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescH{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
-	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::LightSeaGreen, 0, nullptr);
+	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::DarkCyan, 0, nullptr);
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
@@ -636,11 +636,13 @@ void GameFramework::ShowFPS()
 
 void GameFramework::FrameAdvance()
 {
-
-	mGameTimer.Tick();
-	//cout << "TICK:\n";
-	ProcessInput();
-	AnimateObjects();
+	/* º® ¶Õ ¹æÁö */
+	for (int i = 0; i < 4; ++i) {
+		mGameTimer.Tick();
+		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		ProcessInput();
+		AnimateObjects();
+	}
 
 	PopulateCommandList();
 	ExecuteComandLists();

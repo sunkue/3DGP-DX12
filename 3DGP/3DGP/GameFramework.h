@@ -27,6 +27,7 @@ public:
 	float GetAspectRatio()const { return mAspectRatio; }
 	UINT GetWidth()const { return mWndClientWidth; }
 	UINT GetHeight()const { return mWndClientHeight; }
+	GameTimer* GetTimer() { return &mGameTimer; }
 
 protected:
 	void OnCreate();

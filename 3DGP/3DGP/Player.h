@@ -13,6 +13,8 @@
 class Player : public GameObject
 {
 public:
+	static Player* PLAYER;
+public:
 	Player();
 	virtual ~Player();
 
@@ -22,7 +24,7 @@ public:
 
 	void SetFriction(float friction) { mFriction = friction; }
 	void XM_CALLCONV SetGravity(FXMVECTOR gravity) { XMStoreFloat3A(&mGravity, gravity); }
-	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityXZ = maxVelocity; }
+	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityZ = maxVelocity; }
 	void SetMaxVelocityY(float maxVelocity) { mMaxVelocityY = maxVelocity; }
 	void XM_CALLCONV SetVelocity(FXMVECTOR velocity) { XMStoreFloat3A(&mVelocity, velocity); }
 	XMVECTOR XM_CALLCONV GetVelocity()const { return XMLoadFloat3A(&mVelocity); }
@@ -58,7 +60,8 @@ public:
 	virtual void PrepareRender()override;
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera = nullptr)override;
 
-	void ReRoll();
+	void ReRoll(milliseconds timeElapsed);
+	bool Collable() { return mInvincible | mStealth; }
 protected:
 	XMFLOAT3A mPosition;
 	XMFLOAT3A mRightV;
@@ -72,7 +75,7 @@ protected:
 	XMFLOAT3A mVelocity;
 	XMFLOAT3A mGravity;
 
-	float mMaxVelocityXZ;
+	float mMaxVelocityZ;
 	float mMaxVelocityY;
 	float mFriction;
 
@@ -93,4 +96,6 @@ public:
 
 	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
 	virtual void PrepareRender();
+
+	void Crash();
 };

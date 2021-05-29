@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#include "Player.h"
+#include "Scene.h"
+#include "GameFramework.h"
 #include "Shader.h"
 
 //////////////////////////////////////
@@ -153,7 +156,6 @@ void Shader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender(commandList);
 }
-
 ///////////////////////////////////////////////////
 
 PlayerShader::PlayerShader()
@@ -276,47 +278,67 @@ InstancingShader::InstancingShader()
 	: mInstancingBufferView{}
 	, mcbMappedGameObjects{}
 {
-	
 }
 
 InstancingShader::~InstancingShader()
 {
 
 }
-
 void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	int xCount{ 10 };
-	int yCount{ 10 };
-	int zCount{ 10 };
+	int xCount{ 1 };
+	int yCount{ 1 };
+	int zCount{ 1 };
 	int i{ 0 };
 	mObjects.reserve(
 		(static_cast<size_t>(xCount) * 2 + 1)
 		* (static_cast<size_t>(yCount) * 2 + 1)
-		* (static_cast<size_t>(zCount) * 2 + 1));
-	float xPitch = 12.0f * 2.5f;
-	float yPitch = 12.0f * 2.5f;
-	float zPitch = 12.0f * 2.5f;
-	shared_ptr<RotatingObject> rotatingObj;
+		* (static_cast<size_t>(zCount) * 2 + 1) + 2);
+	shared_ptr<EnemyObject> rotatingObj;
+	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,6.0f,6.0f,6.0f} };
 	for (int x = -xCount; x <= xCount; ++x) {
 		for (int y = -yCount; y <= yCount; ++y) {
 			for (int z = -zCount; z <= zCount; ++z) {
-				rotatingObj = make_shared<RotatingObject>();
-				rotatingObj->SetPosition(xPitch * x, yPitch * y + 20.0f, zPitch * z);
-				rotatingObj->SetRotationAxis({ 0.0f, 1.0f, 0.0f });
-				rotatingObj->SetRotationSpeed(10.0f * (i++ % 10));
+				rotatingObj = make_shared<EnemyObject>();
+				rotatingObj->SetPosition(Rand() * 10.0f, 0.0f, EnemyObject::RESETZPOSITION/10.0f * (i % 10));
+				rotatingObj->SetRotationAxis({ Rand(), Rand(), Rand() });
+				rotatingObj->SetRotationSpeed(150.0f * Rand() * (++i % 10) + 10.0f);
+				rotatingObj->SetMesh(cubeMesh);
 				mObjects.push_back(rotatingObj);
+				Scene::SCENE->AddObject(rotatingObj.get());
 			}
 		}
 	}
-	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,12.0f,12.0f,12.0f} };
-	mObjects[0]->SetMesh(cubeMesh);
+	
+	constexpr float wallWidth{ 200.0f };
+	shared_ptr<WallObject> wall;
+	wall = make_shared<WallObject>();
+	wall->SetPosition(wallWidth / 2.0f, 0.0f, 0.0f);
+	wall->SetMesh(cubeMesh);
+	mObjects.push_back(wall);
+	Scene::SCENE->AddWall(wall.get());
+
+	wall = make_shared<WallObject>();
+	wall->SetPosition(-wallWidth / 2.0f, 0.0f, 0.0f);
+	mObjects.push_back(wall);
+	wall->SetMesh(cubeMesh);
+	Scene::SCENE->AddWall(wall.get());
+	
 	CreateShaderVariables(device, commandList);
 }
 
 void InstancingShader::ReleaseObjects()
 {
 
+}
+void InstancingShader::AnimateObjects(milliseconds timeElapsed)
+{
+	ObjectsShader::AnimateObjects(timeElapsed);
+	for (auto& obj : mObjects) { 
+		if (XMVectorGetZ(obj->GetPosition()) < XMVectorGetZ(Player::PLAYER->GetPosition()) - 120.0f) {
+			reinterpret_cast<EnemyObject*>(obj.get())->Reset();
+		}
+	}
 }
 
 D3D12_INPUT_LAYOUT_DESC InstancingShader::CreateInputLayout()
@@ -384,4 +406,82 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
+///////////////////////////////////////////////////
 
+EffectShader::EffectShader()
+	: mcbMappedEffects{ nullptr }
+	, mInstancingBufferView{}
+{
+
+}
+
+EffectShader::~EffectShader()
+{
+
+}
+
+void EffectShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
+}
+
+D3D12_INPUT_LAYOUT_DESC EffectShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount = 2;
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE EffectShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE EffectShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1", shaderBlob);
+}
+
+void EffectShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mEffects.size()) };
+	mcbEffects = CreateBufferResource(device, commandList, nullptr, buffeSize
+		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+	mcbEffects->Map(0, nullptr, (void**)&mcbMappedEffects);
+}
+
+void EffectShader::ReleaseShaderVariables()
+{
+	if (mcbEffects) {
+		mcbEffects->Unmap(0, nullptr);
+		mcbEffects.Reset();
+	}
+}
+
+void EffectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	const float timeE{ GameFramework::GetApp()->GetTimer()->GetTimeElapsed().count() / 1000.0f };
+	commandList->SetGraphicsRootShaderResourceView(2, mcbEffects->GetGPUVirtualAddress());
+	for (int i = 0; i < mEffects.size(); ++i) {
+		mcbMappedEffects[i].mTime += timeE;
+	}
+}
+
+void EffectShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
+{
+	Shader::Render(commandList, camera);
+	UpdateShaderVariables(commandList);
+}
+
+///////////////////////////////////////////////////

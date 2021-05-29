@@ -1,6 +1,6 @@
 
 //////////////////////////////////////
-cbuffer cbGameObjectInfo : register(b0)
+cbuffer cbPlayerInfo : register(b0)
 {
 	matrix worldMat : packoffset(c0);
 	float optColor : packoffset(c4);
@@ -12,7 +12,27 @@ cbuffer cbCameraInfo : register(b1)
 	matrix projMat : packoffset(c4);
 }
 
+cbuffer cbPlayerInfo : register(b2)
+{
+	int EffectsNum : packoffset(c0);
+}
 /////////////////////////////////////////
+struct INSTANCED_GAMEOBJECT_INFO
+{
+	matrix mTransform;
+	float4 mColor;
+};
+StructuredBuffer<INSTANCED_GAMEOBJECT_INFO> gameObjectInfos : register(t0);
+
+struct EFFECT_INFO
+{
+	float3 mPosition;
+	float mEmitTime;
+	float mLifeTime;
+};
+StructuredBuffer<EFFECT_INFO> effectInfos : register(t1);
+//////////////////////////////////////////
+
 struct VS_INPUT
 {
 	float3 position : POSITION;
@@ -25,13 +45,6 @@ struct VS_OUTPUT
 	float4 color : COLOR;
 };
 
-struct INSTANCED_GAMEOBJECT_INFO
-{
-	matrix mTransform;
-	float4 mColor;
-};
-
-StructuredBuffer<INSTANCED_GAMEOBJECT_INFO> gameObjectInfos : register(t0);
 
 struct VS_INSTANCING_INPUT
 {

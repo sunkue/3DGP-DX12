@@ -1,10 +1,16 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "Player.h"
+
+Scene* Scene::SCENE = nullptr;
 
 Scene::Scene()
 	: mGraphicsRootSignature{ nullptr }
-{}
+	, mPlayer{ nullptr }
+{
+	SCENE = this;
+}
 
 Scene::~Scene()
 {
@@ -15,7 +21,8 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
-	CD3DX12_ROOT_PARAMETER RootParameters[3];
+	CD3DX12_ROOT_PARAMETER RootParameters[4];
+	/* 앞쪽이 접근속도가 빠름 */
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
 		, 17
@@ -31,10 +38,16 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 		, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
-		RootParameters[2]
-		, 0						//t0
+		  RootParameters[2]
+		, 0						//t0 instance objescts
 		, 0
 		, D3D12_SHADER_VISIBILITY_VERTEX);
+
+	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
+		  RootParameters[3]
+		, 1						//t1 
+		, 0
+		, D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	D3D12_ROOT_SIGNATURE_FLAGS RSFlags{
 		  D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
@@ -122,6 +135,7 @@ bool Scene::ProcessInput()
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
 	for (auto& shader : mShaders)shader.AnimateObjects(timeElapsed);
+	CheckCollision(timeElapsed);
 };
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
@@ -133,4 +147,38 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 
+void Scene::CheckCollision(const milliseconds timeElapsed)
+{
+	const float timeE{ timeElapsed.count() / 1000.0f };
+	// obj player
+	if (!mPlayer->Collable()) {
+		for (const auto& obj : mObjects) {
+			if (obj->mOOBB.Intersects(mPlayer->mOOBB)) {
+				reinterpret_cast<AirPlanePlayer*>(mPlayer)->Crash();
+			}
+		}
+	}
 
+	// wall obj
+	for (const auto& wall : mWalls) {
+		for (const auto& obj : mObjects) {
+			if (wall->mOOBB.Intersects(obj->mOOBB)) {
+				XMVECTOR dir{ obj->GetDir() };
+				dir = XMVectorSetX(dir, -XMVectorGetX(dir));
+				obj->SetDir(dir);
+				assert((void*)obj != (void*)mPlayer);
+			}
+		}
+	}
+
+	// wall player
+	for (const auto& wall : mWalls) {
+		if (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
+			while (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
+				mPlayer->Move((mPlayer->GetPosition() - wall->GetPosition()) * XMVECTOR { 1.0f, 0.0f, 0.0f } *timeE);
+				mPlayer->GameObject::SetPosition(mPlayer->GetPosition());
+				mPlayer->UpdateBoundingBox();
+			}
+		}
+	}
+}

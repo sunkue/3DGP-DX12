@@ -8,6 +8,9 @@ class Camera;
 class Scene
 {
 public:
+	static Scene* SCENE;
+
+public:
 	Scene();
 	~Scene();
 
@@ -27,9 +30,24 @@ protected:
 	bool ProcessInput();
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
 
+	void CheckCollision(const milliseconds timeElapsed);
+
 protected:
-	vector<InstancingShader>		mShaders;
+	vector<InstancingShader>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
+
+
+
+
+public:
+	void SetPlayer(Player* player) { mPlayer = player; };
+	void AddObject(EnemyObject* obj) { mObjects.push_back(obj); }
+	void AddWall(WallObject* obj) { mWalls.push_back(obj); }
+
+protected:
+	Player* mPlayer;
+	vector<EnemyObject*> mObjects;
+	vector<WallObject*> mWalls;
 
 };
 
