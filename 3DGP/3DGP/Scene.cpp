@@ -153,6 +153,7 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	if (!mPlayer->Collable()) {
 		for (const auto& obj : mObjects) {
 			if (obj->mOOBB.Intersects(mPlayer->mOOBB)) {
+				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.15f);
 				reinterpret_cast<AirPlanePlayer*>(mPlayer)->Crash();
 			}
 		}
@@ -173,7 +174,7 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	// wall player
 	for (const auto& wall : mWalls) {
 		if (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
-			mEffect->NewWallEffect(mPlayer->GetPosition(), 500.0f);
+			mEffect->NewWallEffect(mPlayer->GetPosition(), 0.05f);
 
 			while (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
 				mPlayer->Move((mPlayer->GetPosition() - wall->GetPosition()) * XMVECTOR { 1.0f, 0.0f, 0.0f } *timeE);

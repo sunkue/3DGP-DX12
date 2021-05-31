@@ -26,6 +26,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
 
 	void NewWallEffect(FXMVECTOR pos, float lifeTime);
+	void NewObjEffect(FXMVECTOR pos, float lifeTime);
 
 protected:
 	ComPtr<ID3D12Resource>	mcbEffects;

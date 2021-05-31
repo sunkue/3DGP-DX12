@@ -38,8 +38,6 @@ void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	commandList->SetGraphicsRootShaderResourceView(3, mcbEffects->GetGPUVirtualAddress());
 	for (int i = 0; i < size; ++i) {
 		mcbMappedEffects[i].mTime += timeE;
-		mcbMappedEffects[i].mPosition = mcbMappedEffects[0].mPosition;
-
 	}
 	/*cout << mcbMappedEffects[0].mTime << " \nx: ";
 	cout << mcbMappedEffects[0].mPosition.x << "\ny: ";
@@ -49,10 +47,15 @@ void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 
 void Effect::NewWallEffect(FXMVECTOR pos, float lifeTime)
 {
+	if (alive(&mcbMappedEffects[0]))return;
 	mcbMappedEffects[0].mLifeTime = mcbMappedEffects[0].mTime + lifeTime;
 	XMStoreFloat3(&mcbMappedEffects[0].mPosition, pos);
 }
-	
+void Effect::NewObjEffect(FXMVECTOR pos, float lifeTime)
+{
+	mcbMappedEffects[1].mLifeTime = mcbMappedEffects[1].mTime + lifeTime;
+	XMStoreFloat3(&mcbMappedEffects[1].mPosition, pos);
+}
 
 
 ///////////////////////////////////////////////////
