@@ -22,9 +22,8 @@ public:
 	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 	void ReleaseUploadBuffers();
 	void AnimateObjects(const milliseconds timeElapsed);
-	ID3D12RootSignature* GetGraphicsRootSignature()const { return mGraphicsRootSignature.Get(); }
-	HeightMapTerrain* GetTerrain()const { return mTerrain; }
-
+	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
+	
 protected:
 	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
@@ -37,7 +36,6 @@ protected:
 protected:
 	vector<InstancingShader>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
-	HeightMapTerrain*				mTerrain;
 
 
 

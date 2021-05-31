@@ -15,11 +15,9 @@ class Effect;
 class Player : public GameObject
 {
 public:
-
 	static Player* PLAYER;
 public:
 	Player();
-
 	virtual ~Player();
 
 	XMVECTOR XM_CALLCONV GetLookVector()const { return XMLoadFloat3A(&mLookV); }
@@ -50,9 +48,9 @@ public:
 	void Update(milliseconds timeElapsed);
 
 	virtual void PlayerUpdateCallback(milliseconds timeElapsed) {}
-	void SetPlayerUpdateContext(void* context) { mPlayerUpdateContext = context; }
+	void SetPlayerUpdateContext(LPVOID context) { mPlayerUpdateContext = context; }
 	virtual void CameraUpdateCallback(milliseconds timeElapsed) {}
-	void SetCameraUpdateContext(void* context) { mCameraUpdateContext = context; }
+	void SetUpdateCallback(LPVOID context) { mCameraUpdateContext = context; }
 
 	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
 	virtual void ReleaseShaderVariables()override;
@@ -96,13 +94,11 @@ protected:
 class AirPlanePlayer :public Player
 {
 public:
-	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, int meshCount = 1);
+	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature);
 	virtual ~AirPlanePlayer();
-
 
 	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
 	virtual void PrepareRender();
 
 	void Crash();
-
 };
