@@ -6,7 +6,7 @@
 
 class Camera;
 class Scene;
-
+class Effect;
 
 class GameFramework
 {
@@ -27,6 +27,7 @@ public:
 	float GetAspectRatio()const { return mAspectRatio; }
 	UINT GetWidth()const { return mWndClientWidth; }
 	UINT GetHeight()const { return mWndClientHeight; }
+	GameTimer* GetTimer() { return &mGameTimer; }
 
 protected:
 	void OnCreate();
@@ -55,6 +56,9 @@ protected:
 
 	void BuildObjects();
 	void ReleaseObjects();
+
+public:
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
 
 protected:
 	void ChanegeFullScreenMode();
@@ -102,6 +106,8 @@ protected:
 	Scene*						mScene;
 	Camera*						mCamera;
 	Player*						mPlayer;
+	Effect*						mEffect;
+
 	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
 };

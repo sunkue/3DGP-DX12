@@ -10,10 +10,16 @@
 #define DIR_UP			0x10
 #define DIR_DOWN		0x20
 
+class Effect;
+
 class Player : public GameObject
 {
 public:
-	Player(int meshCount = 1);
+
+	static Player* PLAYER;
+public:
+	Player();
+
 	virtual ~Player();
 
 	XMVECTOR XM_CALLCONV GetLookVector()const { return XMLoadFloat3A(&mLookV); }
@@ -22,7 +28,7 @@ public:
 
 	void SetFriction(float friction) { mFriction = friction; }
 	void XM_CALLCONV SetGravity(FXMVECTOR gravity) { XMStoreFloat3A(&mGravity, gravity); }
-	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityXZ = maxVelocity; }
+	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityZ = maxVelocity; }
 	void SetMaxVelocityY(float maxVelocity) { mMaxVelocityY = maxVelocity; }
 	void XM_CALLCONV SetVelocity(FXMVECTOR velocity) { XMStoreFloat3A(&mVelocity, velocity); }
 	XMVECTOR XM_CALLCONV GetVelocity()const { return XMLoadFloat3A(&mVelocity); }
@@ -58,6 +64,9 @@ public:
 	virtual void PrepareRender()override;
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera = nullptr)override;
 
+	void ReRoll(milliseconds timeElapsed);
+	bool Collable() { return mInvincible | mStealth; }
+	void SetEffect(Effect* eff) { mEffect = eff; }
 protected:
 	XMFLOAT3A mPosition;
 	XMFLOAT3A mRightV;
@@ -71,7 +80,7 @@ protected:
 	XMFLOAT3A mVelocity;
 	XMFLOAT3A mGravity;
 
-	float mMaxVelocityXZ;
+	float mMaxVelocityZ;
 	float mMaxVelocityY;
 	float mFriction;
 
@@ -79,7 +88,9 @@ protected:
 	LPVOID mCameraUpdateContext;
 
 	Camera* mCamera;
-
+	Effect* mEffect;
+	bool mInvincible;
+	bool mStealth;
 };
 
 class AirPlanePlayer :public Player
@@ -88,18 +99,10 @@ public:
 	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, int meshCount = 1);
 	virtual ~AirPlanePlayer();
 
-	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)override;
-	virtual void PrepareRender()override;
-};
 
-class TerrainPlayer : public Player
-{
-public:
-	TerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, void* context, int meshCount = 1);
-	virtual ~TerrainPlayer();
-	
-	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)override;
-	virtual void PlayerUpdateCallback(milliseconds timeElapsed)override;
-	virtual void CameraUpdateCallback(milliseconds timeElapsed)override;
+	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
+	virtual void PrepareRender();
+
+	void Crash();
 
 };

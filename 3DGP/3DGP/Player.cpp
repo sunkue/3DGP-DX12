@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "GameFramework.h"
+#include "Scene.h"
 #include "Player.h"
 
+Player* Player::PLAYER = nullptr;
 
 Player::Player(int meshCount)
 	: GameObject{ meshCount }
@@ -12,7 +14,7 @@ Player::Player(int meshCount)
 	, mLookV{ 0.0f,0.0f,1.0f }
 	, mVelocity{ 0.0f,0.0f,0.0f }
 	, mGravity{ 0.0f,0.0f,0.0f }
-	, mMaxVelocityXZ{ 0.0f }
+	, mMaxVelocityZ{ 0.0f }
 	, mMaxVelocityY{ 0.0f }
 	, mFriction{ 0.0f }
 	, mPitch{ 0.0f }
@@ -21,7 +23,11 @@ Player::Player(int meshCount)
 	, mPlayerUpdateContext{ nullptr }
 	, mCameraUpdateContext{ nullptr }
 	, mCamera{ nullptr }
+	, mInvincible{ false }
+	, mStealth{ false }
 {
+	PLAYER = this;
+	Scene::SCENE->SetPlayer(this);
 }
 
 Player::~Player()
@@ -51,13 +57,30 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 {
 	if (0x00 == direction)return;
 	XMVECTOR shift{ XMVectorZero() };
+	constexpr XMVECTOR R{ 0.5f,0.0f,0.0f };
 	if (direction & DIR_FORWARD	) shift += GetLookVector() * distance;
 	if (direction & DIR_BACKWARD) shift -= GetLookVector() * distance;
-	if (direction & DIR_RIGHT	) shift += GetRightVector() * distance;
-	if (direction & DIR_LEFT	) shift -= GetRightVector() * distance;
+	if (direction & DIR_RIGHT	) shift += R * distance;
+	if (direction & DIR_LEFT	) shift -= R * distance;
 	if (direction & DIR_UP		) shift += GetUpVector() * distance;
 	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
 	Move(shift, updateVelocity);
+
+
+	constexpr float MAX_ROLL = 30.f;
+	constexpr float t = 3.0f;
+	if (direction & DIR_RIGHT) {
+		if (mRoll < MAX_ROLL) {
+			mRoll += t;
+			Rotate(0.f, t, 0.0f);
+		}
+	}
+	if (direction & DIR_LEFT) {
+		if (-MAX_ROLL < mRoll) {
+			mRoll -= t;
+			Rotate(0.f, -t, 0.0f);
+		}
+	}
 }
 
 void Player::Move(FXMVECTOR shift, bool updateVelocity)
@@ -138,12 +161,14 @@ void Player::Rotate(float x, float y, float z)
 void Player::Update(const milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
-	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity) * timeE));
-	float length{ sqrtf(mVelocity.x * mVelocity.x + mVelocity.z * mVelocity.z) };
-	if (mMaxVelocityXZ < length)
+	XMVECTOR Gravity(XMLoadFloat3A(&mGravity));
+	SetGravity(XMVectorAdd(Gravity, Gravity * 0.15f * timeE));
+	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity)));
+	float length{ sqrtf(mVelocity.z * mVelocity.z) };
+	if (mMaxVelocityZ < length)
 	{
-		mVelocity.x *= mMaxVelocityXZ / length;
-		mVelocity.z *= mMaxVelocityXZ / length;
+		//mVelocity.x *= mMaxVelocityXZ / length;
+		mVelocity.z *= mMaxVelocityZ / length;
 	}
 	length = sqrtf(mVelocity.y * mVelocity.y);
 	if (mMaxVelocityY < length)
@@ -153,15 +178,74 @@ void Player::Update(const milliseconds timeElapsed)
 	XMVECTOR vel{ GetVelocity() };
 	Move(vel * timeE);
 	if (mPlayerUpdateContext)PlayerUpdateCallback(timeElapsed);
+
+	/* camera */
 	CAMERA_MODE camMode{ mCamera->GetMode() };
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->Update(GetPosition(), timeElapsed); }
 	if (mCameraUpdateContext)CameraUpdateCallback(timeElapsed);
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition()); }
 	mCamera->RegenerateViewMatrix();
+
 	length = XMVectorGetX(XMVector3Length(vel));
 	float deceleration{ mFriction * timeE };
 	if (length < deceleration)deceleration = length;
 	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
+
+
+
+
+	if (mStealth) {
+		static float t{ 0.0f };
+		constexpr float t2{ 0.01f };
+		constexpr float MTP{ 0.5f };
+		constexpr float MTP2{ 0.2f };
+		static float time{ MTP };
+		static float time2{ MTP2 };
+		t += timeE;
+		if (t < t2)mOptionColor = 0.25f;
+		else if (time2 < MTP2/2.0f) {
+			mOptionColor = 0.5f;
+		}
+		else {
+			mOptionColor = 0.25f;
+		}
+		time -= timeE;
+		time2 = (time2 < 0.0f) ? MTP2 : time2 - timeE;
+		if (time < 0) {
+			if (mInvincible) {
+				time = MTP;
+				return;
+			}
+			t = 0.0f; mStealth = false; time = MTP; mOptionColor = 1.0f;
+
+		}
+	}
+	ReRoll(timeElapsed);
+	UpdateBoundingBox();
+}
+
+
+void Player::ReRoll(milliseconds timeElapsed)
+{
+	constexpr float T = 300.0f;
+	const float TimeE{ timeElapsed.count() / 1000.0f };
+	const float t{ T * TimeE };
+	if (mRoll < 0.0f) {
+		mRoll += t;
+		Rotate(0.0f, t, 0.f);
+	}
+	else if (0.0f < mRoll) {
+		mRoll -= t;
+		Rotate(0.0f, -t, 0.f);
+	}
+	else {
+		/*
+		constexpr XMVECTOR Z{ 0.0f,0.0f,1.0f };
+		XMVECTOR look{ GetLookVector() };
+		float D = XMVectorGetX(XMVector3Dot(look, Z) / (XMVector3Length(look) * XMVector3Length(Z)));
+		Rotate(0.0f, D, 0.0f);
+		*/
+	}
 }
 
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
@@ -245,6 +329,7 @@ AirPlanePlayer::AirPlanePlayer(
 	PlayerShader* shader{ new PlayerShader() };
 	shader->CreateShader(device, rootSignature);
 	SetShader(shader);
+	SetScale({ 0.5f,1.0f,1.0f });
 }
 
 AirPlanePlayer::~AirPlanePlayer()
@@ -256,7 +341,8 @@ void AirPlanePlayer::PrepareRender()
 {
 	Player::PrepareRender();
 	XMMATRIX rotate{ XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f),0.0f,0.0f) };
-	XMStoreFloat4x4A(&mWorldMat, rotate * XMLoadFloat4x4A(&mWorldMat));
+	XMMATRIX scale{ XMMatrixScalingFromVector(GetScale()) };
+	XMStoreFloat4x4A(&mWorldMat, scale * rotate * XMLoadFloat4x4A(&mWorldMat));
 }
 
 Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
@@ -294,9 +380,9 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	}break;
 	case CAMERA_MODE::THIRD_PERSON: {
 		SetFriction(250.0f);
-		SetGravity({ 0.0f,0.0f,0.0f });
-		SetMaxVelocityXZ(125.0f);
-		SetMaxVelocityY(400.0f);
+		SetGravity({ 0.0f,0.0f,1.0f });
+		SetMaxVelocityXZ(500.0f);
+		SetMaxVelocityY(0.0f);
 		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
@@ -311,108 +397,11 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	return mCamera;
 }
 
-/////////////////////////////////////////
 
 
-TerrainPlayer::TerrainPlayer(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, ID3D12RootSignature* rootSignature
-	, void* context
-	, int meshCount
-)
-	: Player{ meshCount }
+void AirPlanePlayer::Crash()
 {
-	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
-	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
-	const float xCenter{ terrain->GetWidth() * 0.5f };
-	const float zCenter{ terrain->GetLength() * 0.5f };
-	const float height{ terrain->GetHeight(xCenter,zCenter) };
-	SetPosition({ xCenter,height + 1500.0f,zCenter });
-	SetPlayerUpdateContext(reinterpret_cast<void*>(terrain));
-	SetCameraUpdateContext(reinterpret_cast<void*>(terrain));
-	CubeMeshDiffused* cube{ new CubeMeshDiffused{device,commandList,4.0f,12.0f,4.0f} };
-	SetMesh(0, cube);
-
-	PlayerShader* shader = new PlayerShader();
-	shader->CreateShader(device, rootSignature);
-	SetShader(shader);
-
-	CreateShaderVariables(device, commandList);
+	SetGravity({ 0.0f,0.0f,1.0f });
+	SetVelocity({ 0.0f,0.0f,5.0f });
+	mStealth = true;
 }
-
-TerrainPlayer::~TerrainPlayer()
-{
-
-}
-
-Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
-{
-	CAMERA_MODE currCM = (mCamera) ? (mCamera->GetMode()) : (CAMERA_MODE::NO_CAMERA);
-	if (currCM == newCameraMode)return mCamera;
-	const float aspect{ GameFramework::GetApp()->GetAspectRatio() };
-	switch (newCameraMode)
-	{
-	case CAMERA_MODE::NO_CAMERA:
-		assert(0);
-		break;
-	case CAMERA_MODE::FIRST_PERSON:
-		SetFriction(250.0f);
-		SetGravity({ 0.0f,-250.0f,0.0f });
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
-		mCamera->SetTimeLag(milliseconds::zero());
-		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
-		break;
-	case CAMERA_MODE::SPACESHIP:
-		SetFriction(125.0f);
-		SetGravity({ 0.0f,-0.0f,0.0f });
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
-		mCamera->SetTimeLag(milliseconds::zero());
-		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
-		break;
-	case CAMERA_MODE::THIRD_PERSON:
-		SetFriction(250.0f);
-		SetGravity({ 0.0f,-250.0f,0.0f });
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currCM);
-		mCamera->SetTimeLag(250ms);
-		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
-		mCamera->GenerateProjectionMatrix(60.0f, aspect, 1.01f, 50000.0f);
-		break;
-	}
-	Update(timeElapsed);
-	return mCamera;
-}
-
-void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
-{
-	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
-	float height{ terrain->GetHeight(mPosition.x,mPosition.z) + 6.0f };
-	if (mPosition.y < height) {
-		mVelocity.y = 0.0f;
-		mPosition.y = height;
-	}
-}
-
-void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
-{
-	XMVECTOR pos = mCamera->GetPosition();
-	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
-	float height{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + 5.0f };
-	if (XMVectorGetY(pos) <= height) {
-		mCamera->SetPosition(XMVectorSetY(pos, height));
-		if (mCamera->GetMode() == CAMERA_MODE::THIRD_PERSON) {
-			ThirdPersonCamera* TPC{ reinterpret_cast<ThirdPersonCamera*>(mCamera) };
-			TPC->SetLookAt(GetPosition());
-		}
-	}
-}
-
-

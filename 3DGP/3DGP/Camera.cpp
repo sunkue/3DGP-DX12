@@ -145,6 +145,12 @@ void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMFLOAT4X4A proj;
 	XMStoreFloat4x4A(&proj, XMMatrixTranspose(XMLoadFloat4x4A(&mProjectionMat)));
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &proj, 16);
+	struct V {
+		float x;
+		float y;
+	} v{ mViewport.Width,mViewport.Height };
+	//cout << v.x << v.y << " ";
+	commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 32);
 }
 
 void Camera::ReleaseShaderVariables()

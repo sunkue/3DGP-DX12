@@ -21,6 +21,7 @@ Mesh::Mesh(
 	, mIndexUploadBuffer{ nullptr}
 	, mVertexBufferView{}
 	, mIndexBufferView{}
+	, mOOBB{}
 {
 
 }
@@ -103,7 +104,7 @@ CubeMeshDiffused::CubeMeshDiffused(
 	, float width, float height, float depth)
 	: Mesh{ device, commandList }
 {
-	// ∞≥≥Î∞°¥Ÿ øÏææ,, ø¿∫Í¡ß∆Æ ∏Æ¥ı ∏∏µÈ¿⁄.
+	// Í∞úÎÖ∏Í∞ÄÎã§ Ïö∞Ïî®,, Ïò§Î∏åÏ†ùÌä∏ Î¶¨Îçî ÎßåÎì§Ïûê.
 	mVerticesCount = 8;
 	mStride = sizeof(DiffusedVertex);
 	float x = width  * 0.5f;
@@ -132,6 +133,8 @@ CubeMeshDiffused::CubeMeshDiffused(
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
 
+	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
+	
 	mIndicesCount = 36;
 	UINT indices[]{
 		 3,1,0
@@ -181,14 +184,16 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	float y = height * 0.5f;
 	float z = depth * 0.5f;
 	DiffusedVertex vertices[]{
-		 {-x, +y ,-z, Colors::WhiteSmoke + color}
-		,{+x, +y ,-z, Colors::Black + color}
-		,{+x, +y ,+z, Colors::Black + color}
-		,{-x, +y ,+z, Colors::Black + color}
-		,{-x, -y ,-z, Colors::WhiteSmoke + color}
-		,{+x, -y ,-z, Colors::Black + color}
-		,{+x, -y ,+z, Colors::Black + color}
-		,{-x, -y ,+z, Colors::Black + color}
+
+		 {-x, +y ,-z, Colors::Aquamarine}
+		,{+x, +y ,-z, Colors::Aquamarine + color}
+		,{+x, +y ,+z, Colors::Aquamarine}
+		,{-x, +y ,+z, Colors::Aquamarine + color}
+		,{-x, -y ,-z, Colors::Aquamarine}
+		,{+x, -y ,-z, Colors::Aquamarine}
+		,{+x, -y ,+z, Colors::Aquamarine + color}
+		,{-x, -y ,+z, Colors::Aquamarine + color}
+
 	};
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
@@ -202,6 +207,8 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
+	
+	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
 
 	mIndicesCount = 36;
 	UINT indices[]{
@@ -439,7 +446,7 @@ XMVECTOR HeightMapGridMesh::GetColor(int x, int z, void* context)const
 	float scale{ XMVectorGetX(scaleTemp) };
 	scale = (scale / 4.0f) + 0.05f;
 	scale = clamp(scale, 0.25f, 1.0f);
-	//fScale ¿∫ ¡∂∏Ì π›ªÁ ∫Ò¿≤.
+	//fScale ÏùÄ Ï°∞Î™Ö Î∞òÏÇ¨ ÎπÑÏú®.
 	XMVECTOR col{ incidentLight * scale };
 	return col;
 }

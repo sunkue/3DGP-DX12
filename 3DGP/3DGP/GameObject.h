@@ -42,6 +42,9 @@ public:
 	XMVECTOR XM_CALLCONV GetLook() const;
 	XMVECTOR XM_CALLCONV GetUp() const;
 	XMVECTOR XM_CALLCONV GetRight() const;
+	XMVECTOR XM_CALLCONV GetScale() const { return XMLoadFloat3A(&mScale); }
+	void XM_CALLCONV SetScale(FXMVECTOR scale) { return XMStoreFloat3A(&mScale, scale); }
+
 	XMMATRIX XM_CALLCONV GetWM()const { return XMLoadFloat4x4A(&mWorldMat); }
 
 	void SetPosition(float x, float y, float z);
@@ -50,32 +53,58 @@ public:
 	void MoveRight(float distance = 1.0f);
 	void MoveUp(float distance = 1.0f);
 	void MoveFoward(float distance = 1.0f);
+	void XM_CALLCONV Move(FXMVECTOR vel);
 
 	void XM_CALLCONV RotateByAxis(const FXMVECTOR xmf3Axis, const float angle);
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
+	void UpdateBoundingBox();
 
 protected:
 	XMFLOAT4X4A	mWorldMat;
 	vector<Mesh*> mMeshes;
 	Shader*	mShader;
+	float mOptionColor;
+	XMFLOAT3A mScale;
 
+public:
+	BoundingOrientedBox mOOBB;
 };
 
-class RotatingObject : public GameObject
+
+class EnemyObject : public GameObject
 {
 public:
-	RotatingObject(int meshCount = 1);
-	virtual ~RotatingObject();
+
+	static constexpr float RESETZPOSITION{ 1500.0f };
+
+public:
+	EnemyObject();
+	virtual ~EnemyObject();
+
 
 private:
-	XMFLOAT3A mxmf3RotationAxis;
+	XMFLOAT3A mRotationAxis;
 	float mRotationSpeed;
+	XMFLOAT3A mDir;
+	float mSpeed;
 
 public:
 	void SetRotationSpeed(float rotationSpeed) { mRotationSpeed = rotationSpeed; }
-	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mxmf3RotationAxis, rotationAxis); }
-	
+	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mRotationAxis, rotationAxis); }
+	void Reset();
+	XMVECTOR XM_CALLCONV GetDir() { return XMLoadFloat3A(&mDir); }
+	void XM_CALLCONV SetDir(FXMVECTOR dir) { XMStoreFloat3A(&mDir, dir); }
 	virtual void Animate(milliseconds timeElapsed);
+};
+
+class WallObject : public GameObject
+{
+public:
+	WallObject();
+	virtual ~WallObject() {};
+	virtual void Animate(milliseconds timeElapsed);
+
+private:
 
 };
 

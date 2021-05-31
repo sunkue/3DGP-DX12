@@ -36,7 +36,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
 ////////
 #include <iostream>
@@ -50,6 +50,7 @@ using Microsoft::WRL::ComPtr;
 #include <cassert>
 #include <fstream>
 #include <random>
+#include <thread>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
@@ -95,4 +96,10 @@ inline XMVECTORF32 RandomColor()
 
 	05/27
    ~06/21
+
+
+
+   셰이딩 관련 알아둘 사항 ->
+	A 구조체들 float3A 등등... 은 메모리에 거꾸로 저장됨..
+	z->x x->z ㅋㅋㅋ 고생 좀 했음.
 */

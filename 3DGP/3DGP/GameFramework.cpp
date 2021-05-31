@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "GameFramework.h"
+#include "Effect.h"
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -80,6 +81,8 @@ bool GameFramework::Initialize()
 	ChanegeFullScreenMode();
 #endif
 	READY = true;
+	ShowWindow(mhWnd, mShowCmd);
+	UpdateWindow(mhWnd);
 	return true;
 }
 
@@ -147,9 +150,6 @@ bool GameFramework::InitMainWindow()
 	{
 		return false;
 	}
-	
-	ShowWindow(mhWnd, mShowCmd);
-	UpdateWindow(mhWnd);
 
 	return true;
 }
@@ -157,7 +157,6 @@ bool GameFramework::InitMainWindow()
 bool GameFramework::InitDirect3D()
 {
 	CreateDirect3DDevice();
-
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
@@ -194,15 +193,16 @@ void GameFramework::OnDestroy()
 void GameFramework::CreateDirect3DDevice()
 {
 	UINT DXGIFactoryFlags = 0;
-#ifdef _DEBUG
+#ifdef _D2EBUG
+	cout << "s";
 	{
 		ComPtr<ID3D12Debug> comD3dDebugController{ nullptr };
 		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(comD3dDebugController.GetAddressOf())));
 		if (comD3dDebugController.Get()) { comD3dDebugController->EnableDebugLayer(); }
 		DXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 	}
+	cout << "s";
 #endif // _DEBUG
-
 	ThrowIfFailed(CreateDXGIFactory2(DXGIFactoryFlags, IID_PPV_ARGS(mFactory.GetAddressOf())));
 
 	ComPtr<IDXGIAdapter1> comD3dAdapter{};
@@ -389,6 +389,10 @@ void GameFramework::BuildObjects()
 		, 1);
 	mCamera = mPlayer->GetCamera();
 
+	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
+	mPlayer->SetEffect(mEffect);
+	mScene->SetEffect(mEffect);
+
 	mCommandList->Close();
 	ExecuteComandLists();
 	WaitForGpuComplete();
@@ -402,6 +406,12 @@ void GameFramework::ReleaseObjects()
 {
 	if (mScene)mScene->ReleaseObjects();
 	delete mScene;
+	
+	if (mCamera)mCamera->ReleaseShaderVariables();
+	delete mCamera;
+
+	if (mEffect)mEffect->ReleaseShaderVariables();
+	delete mEffect;
 }
 
 void GameFramework::ChanegeFullScreenMode()
@@ -475,7 +485,7 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
-			if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
+			//if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -508,7 +518,7 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
-		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
+		//OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -533,10 +543,16 @@ void GameFramework::ProcessInput()
 
 	if (GetKeyboardState(key))
 	{
-		if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
-		if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
+		//if (key['W'] & 0xf0)dir |= DIR_FORWARD;
+		//if (key['S'] & 0xf0)dir |= DIR_BACKWARD;
+		if (key['A'] & 0xf0)dir |= DIR_LEFT;
+		if (key['D'] & 0xf0)dir |= DIR_RIGHT;
+
+		//if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
+		//if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
 		if (key[VK_LEFT]	& 0xf0)dir |= DIR_LEFT;
 		if (key[VK_RIGHT]	& 0xf0)dir |= DIR_RIGHT;
+
 		if (key[VK_SHIFT]	& 0xf0)dir |= DIR_UP;
 		if (key[VK_CONTROL]	& 0xf0)dir |= DIR_DOWN;
 	}
@@ -554,7 +570,7 @@ void GameFramework::ProcessInput()
 			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
 			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
 		}
-		if (dir)mPlayer->Move(dir, 150.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
+		if (dir)mPlayer->Move(dir, 1500.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
 	}
 	mPlayer->Update(mGameTimer.GetTimeElapsed());
 }
@@ -577,21 +593,28 @@ void GameFramework::PopulateCommandList()
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescH{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
-	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::LightSeaGreen, 0, nullptr);
+	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::DarkCyan, 0, nullptr);
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
 
+	
 	if (mScene)mScene->Render(mCommandList.Get(), mCamera);
 #ifdef WITH_PLAYER_TOP
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 #endif // With_PLAYER_TOP
 	if (mPlayer)mPlayer->Render(mCommandList.Get(), mCamera);
+		
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	mCommandList->ResourceBarrier(1, &RB);
 
 	ThrowIfFailed(mCommandList->Close());
+}
+
+void GameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	if (mEffect)mEffect->UpdateShaderVariables(commandList);
 }
 
 void GameFramework::WaitForGpuComplete()
@@ -635,11 +658,13 @@ void GameFramework::ShowFPS()
 
 void GameFramework::FrameAdvance()
 {
-
-	mGameTimer.Tick();
-	cout << "TICK:\n";
-	ProcessInput();
-	AnimateObjects();
+	/* º® ¶Õ ¹æÁö */
+	for (int i = 0; i < 4; ++i) {
+		mGameTimer.Tick();
+		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		ProcessInput();
+		AnimateObjects();
+	}
 
 	PopulateCommandList();
 	ExecuteComandLists();

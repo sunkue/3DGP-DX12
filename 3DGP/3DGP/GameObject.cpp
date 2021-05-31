@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "GameFramework.h"
 #include "GameObject.h"
+#include "Player.h"
 #include "Shader.h"
 
 
@@ -8,7 +10,9 @@
 GameObject::GameObject(int meshCount)
 	: mMeshes{ meshCount }
 	, mShader{ nullptr }
+	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
+	, mOptionColor{ 1.0f }
 {
 	assert(mMeshes.size() == meshCount);
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
@@ -61,11 +65,14 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender();
 	UpdateShaderVariables(commandList);
+
 	if (mShader) {
 		//mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}
-	for (auto& m : mMeshes)if (m)m->Render(commandList);
+
+	if (mMesh) mMesh->Render(commandList);
+
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
@@ -112,7 +119,7 @@ void GameObject::SetPosition(FXMVECTOR position)
 XMVECTOR GameObject::GetPosition()	const
 {
 	XMVECTOR pos{ XMVectorSet(mWorldMat._41,mWorldMat._42,mWorldMat._43,1.0f) };
-	return XMVector3Normalize(pos);
+	return pos;
 }
 
 XMVECTOR GameObject::GetLook() const
@@ -157,6 +164,13 @@ void GameObject::MoveFoward(float distance)
 	SetPosition(pos);
 }
 
+void GameObject::Move(FXMVECTOR vel)
+{
+	XMVECTOR pos = GetPosition();
+	pos += vel;
+	SetPosition(pos);
+}
+
 void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 
@@ -167,6 +181,7 @@ void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMFLOAT4X4A world;
 	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
+	commandList->SetGraphicsRoot32BitConstants(0, 1, &mOptionColor, 16);
 }
 
 void GameObject::ReleaseShaderVariables()
@@ -174,76 +189,62 @@ void GameObject::ReleaseShaderVariables()
 
 }
 
-//////////////////////////////
-
-RotatingObject::RotatingObject(int meshCount) :GameObject{ meshCount }
+void GameObject::UpdateBoundingBox()
 {
-	mxmf3RotationAxis = XMFLOAT3A{ 0.0f, 1.0f, 0.0f };
-	mRotationSpeed = 15.0f;
-}
-
-RotatingObject::~RotatingObject()
-{
-
-}
-
-void RotatingObject::Animate(milliseconds timeElapsed)
-{
-	RotateByAxis(XMLoadFloat3A(&mxmf3RotationAxis), mRotationSpeed * timeElapsed.count() / 1000.0f);
-}
-
-//////////////////////////
-HeightMapTerrain::HeightMapTerrain(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, ID3D12RootSignature* rootSignature
-	, LPCTSTR fileName
-	, int width
-	, int length
-	, int blockWidth
-	, int blockLength
-	, XMFLOAT3A scale
-	, XMFLOAT4A color
-)
-	: GameObject{ 0 }
-	, mWidth{ width }
-	, mLength{ length }
-	, mScale{ scale }
-{
-	int xIncreasePerBlock{ (blockWidth - 1) };
-	int zIncreasePerBlock{ (blockLength - 1) };
-	mHeightMap = new HeightMapImage(fileName, width, length, scale);
-
-	const int xBlocks{ (width - 1) / xIncreasePerBlock };
-	const int zBlocks{ (length - 1) / zIncreasePerBlock };
-
-	mMeshes.resize(static_cast<size_t>(xBlocks)* zBlocks);
-	
-	HeightMapGridMesh* HMGM{ nullptr };
-	for (int z = 0, zStart = 0; z < zBlocks; ++z) {
-		for (int x = 0, xStart = 0; x < xBlocks; ++x) {
-			xStart = x * xIncreasePerBlock;
-			zStart = z * zIncreasePerBlock;
-			HMGM = new HeightMapGridMesh{ 
-				  device
-				, commandList
-				, xStart
-				, zStart
-				, blockWidth
-				, blockLength
-				, scale
-				, color
-				, mHeightMap };
-			SetMesh(x + (z * xBlocks), HMGM);
-		}
+	assert(mMesh);
+	if (mMesh) {
+		mMesh->mOOBB.Transform(mOOBB, GetWM());
+		XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
 	}
 
-	TerrainShader* shader = new TerrainShader();
-	shader->CreateShader(device, rootSignature);
-	SetShader(shader);
 }
 
-HeightMapTerrain::~HeightMapTerrain()
+//////////////////////////////
+
+
+EnemyObject::EnemyObject()
+	: mRotationSpeed{ 90.0f }
+	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
+	, mSpeed{ Rand() * 10.0f + 10.0f }
 {
-	delete mHeightMap;
+	XMStoreFloat3A(&mDir, { (1.0f - Rand() * 2.0f) * 20.0f * Rand(),0.0f,-0.1f });
+}
+
+void EnemyObject::Reset()
+{
+	SetPosition(Rand() * 50.0f, 0.0f
+		, XMVectorGetZ(Player::PLAYER->GetPosition()) + EnemyObject::RESETZPOSITION);
+
+
+}
+
+EnemyObject::~EnemyObject()
+{
+
+}
+
+void EnemyObject::Animate(milliseconds timeElapsed)
+{
+	const float timeE{ timeElapsed.count() / 1000.0f };
+
+	RotateByAxis(XMLoadFloat3A(&mRotationAxis), mRotationSpeed * timeE);
+	Move(XMLoadFloat3A(&mDir) * mSpeed * timeE);
+	
+	UpdateBoundingBox();
+	
+}
+
+
+////////////////////
+WallObject::WallObject()
+{
+	XMStoreFloat4x4A(&mWorldMat, XMMatrixScaling(0.5f, 2.2f, 500.0f) * XMLoadFloat4x4A(&mWorldMat));
+}
+
+
+void WallObject::Animate(milliseconds timeElapsed) {
+	SetPosition(XMVectorGetX(GetPosition()), 0.0f, XMVectorGetZ(Player::PLAYER->GetPosition()));
+	
+	UpdateBoundingBox();
+	
 }

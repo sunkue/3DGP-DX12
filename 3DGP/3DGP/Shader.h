@@ -85,7 +85,6 @@ protected:
 	
 protected:
 	vector<shared_ptr<GameObject>> mObjects;
-
 };
 
 class InstancingShader : public ObjectsShader
@@ -96,6 +95,7 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)override;
 	virtual void ReleaseObjects()override;
+	virtual void AnimateObjects(milliseconds timeElapsed)override;
 
 	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
 	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
@@ -112,7 +112,7 @@ protected:
 protected:
 	ComPtr<ID3D12Resource>	mcbGameObjects;
 	VS_VB_INSTANCE*			mcbMappedGameObjects;
-
+	
 	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
 };
 

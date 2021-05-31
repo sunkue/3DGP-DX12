@@ -62,7 +62,7 @@ public:
 	void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount = 1);
 	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
-	
+
 protected:
 	ComPtr<ID3D12Resource>	mVertexBuffer;
 	ComPtr<ID3D12Resource>	mVertexUploadBuffer;
@@ -78,6 +78,9 @@ protected:
 	UINT mSlot;
 	UINT mStride;
 	UINT mOffset;
+
+public:
+	BoundingOrientedBox mOOBB;
 };
 
 class TriangleMesh : public Mesh
@@ -99,7 +102,8 @@ class AirplaneMeshDiffused : public Mesh
 {
 public:
 	AirplaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-		, float width = 20.0f, float height = 20.0f, float depth = 4.0f, XMVECTORF32 color = Colors::Aquamarine);
+
+		, float width = 4.0f, float height = 4.0f, float depth = 4.0f, XMVECTORF32 color = Colors::BlueViolet);
 	virtual ~AirplaneMeshDiffused();
 };
 
