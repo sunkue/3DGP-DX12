@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "GameFramework.h"
+#include "Effect.h"
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -384,6 +385,10 @@ void GameFramework::BuildObjects()
 	mPlayer = new AirPlanePlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature());
 	mCamera = mPlayer->GetCamera();
 
+	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
+	mPlayer->SetEffect(mEffect);
+	mScene->SetEffect(mEffect);
+
 	mCommandList->Close();
 	ExecuteComandLists();
 	WaitForGpuComplete();
@@ -397,6 +402,12 @@ void GameFramework::ReleaseObjects()
 {
 	if (mScene)mScene->ReleaseObjects();
 	delete mScene;
+	
+	if (mCamera)mCamera->ReleaseShaderVariables();
+	delete mCamera;
+
+	if (mEffect)mEffect->ReleaseShaderVariables();
+	delete mEffect;
 }
 
 void GameFramework::ChanegeFullScreenMode()
@@ -588,11 +599,17 @@ void GameFramework::PopulateCommandList()
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 #endif // With_PLAYER_TOP
 	if (mPlayer)mPlayer->Render(mCommandList.Get(), mCamera);
+		
 	RB.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	RB.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	mCommandList->ResourceBarrier(1, &RB);
 
 	ThrowIfFailed(mCommandList->Close());
+}
+
+void GameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+	if (mEffect)mEffect->UpdateShaderVariables(commandList);
 }
 
 void GameFramework::WaitForGpuComplete()

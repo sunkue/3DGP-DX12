@@ -1,21 +1,24 @@
 #include "stdafx.h"
-#include "ShaderHelper.h"
+#include "Effect.h"
 #include "GameFramework.h"
 
+bool alive(PS_VB_EFFECT* a) { return a->mTime < a->mLifeTime; }
+bool dead(PS_VB_EFFECT* a) { return !alive(a); }
 
-EffectShader::EffectShader()
+Effect::Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int n)
 	: mcbMappedEffects{ nullptr }
 	, mInstancingBufferView{}
 {
-
+	mEffects.resize(n);
+	CreateShaderVariables(device, commandList);
 }
 
-EffectShader::~EffectShader()
+Effect::~Effect()
 {
 
 }
 
-void EffectShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+void Effect::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	const UINT buffeSize{ static_cast<UINT>(sizeof(PS_VB_EFFECT) * mEffects.size()) };
 	mcbEffects = CreateBufferResource(device, commandList, nullptr, buffeSize
@@ -23,7 +26,7 @@ void EffectShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCom
 	mcbEffects->Map(0, nullptr, (void**)&mcbMappedEffects);
 }
 
-void EffectShader::ReleaseShaderVariables()
+void Effect::ReleaseShaderVariables()
 {
 	if (mcbEffects) {
 		mcbEffects->Unmap(0, nullptr);
@@ -31,7 +34,7 @@ void EffectShader::ReleaseShaderVariables()
 	}
 }
 
-void EffectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	const float timeE{ GameFramework::GetApp()->GetTimer()->GetTimeElapsed().count() / 1000.0f };
 	commandList->SetGraphicsRootShaderResourceView(2, mcbEffects->GetGPUVirtualAddress());
@@ -39,5 +42,13 @@ void EffectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 		mcbMappedEffects[i].mTime += timeE;
 	}
 }
+
+void Effect::NewWallEffect(FXMVECTOR pos, float lifeTime)
+{
+	mEffects[0]->mLifeTime = mEffects[0]->mTime + lifeTime;
+	XMStoreFloat3A(&mEffects[0]->mPosition, pos);
+}
+	
+
 
 ///////////////////////////////////////////////////

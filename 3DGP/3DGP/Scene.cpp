@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "GameFramework.h"
 #include "Player.h"
+#include "Effect.h"
 
 Scene* Scene::SCENE = nullptr;
 
 Scene::Scene()
 	: mGraphicsRootSignature{ nullptr }
+	, mEffect{ nullptr }
 	, mPlayer{ nullptr }
 {
 	SCENE = this;
@@ -45,7 +48,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		  RootParameters[3]
-		, 1						//t1 
+		, 1						//t1 Effect
 		, 0
 		, D3D12_SHADER_VISIBILITY_PIXEL);
 	
@@ -144,6 +147,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
+	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 
@@ -174,6 +178,8 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	// wall player
 	for (const auto& wall : mWalls) {
 		if (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
+			mEffect->NewWallEffect(mPlayer->GetPosition(), 500.0f);
+
 			while (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
 				mPlayer->Move((mPlayer->GetPosition() - wall->GetPosition()) * XMVECTOR { 1.0f, 0.0f, 0.0f } *timeE);
 				mPlayer->GameObject::SetPosition(mPlayer->GetPosition());

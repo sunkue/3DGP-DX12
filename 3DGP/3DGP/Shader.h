@@ -14,13 +14,6 @@ struct VS_VB_INSTANCE
 	XMFLOAT4A	mColor;
 };
 
-struct PS_VB_EFFECT
-{
-	XMFLOAT3A mPosition;
-	float mTime;
-	float mLifeTime;
-};
-
 class Shader
 {
 public:

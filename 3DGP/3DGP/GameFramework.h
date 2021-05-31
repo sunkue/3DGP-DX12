@@ -6,7 +6,7 @@
 
 class Camera;
 class Scene;
-
+class Effect;
 
 class GameFramework
 {
@@ -57,6 +57,9 @@ protected:
 	void BuildObjects();
 	void ReleaseObjects();
 
+public:
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+
 protected:
 	void ChanegeFullScreenMode();
 
@@ -103,6 +106,8 @@ protected:
 	Scene*						mScene;
 	Camera*						mCamera;
 	Player*						mPlayer;
+	Effect*						mEffect;
+
 	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
 };

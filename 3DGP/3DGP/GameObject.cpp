@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameFramework.h"
 #include "GameObject.h"
 #include "Player.h"
 #include "Shader.h"
@@ -63,11 +64,13 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender();
 	UpdateShaderVariables(commandList);
+
 	if (mShader) {
+		GameFramework::GetApp()->UpdateShaderVariables(commandList);
 		mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}
-	if (mMesh)mMesh->Render(commandList);
+	if (mMesh) mMesh->Render(commandList);
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)

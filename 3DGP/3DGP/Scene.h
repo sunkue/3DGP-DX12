@@ -4,6 +4,7 @@
 
 class GameObject;
 class Camera;
+class Effect;
 
 class Scene
 {
@@ -43,11 +44,11 @@ public:
 	void SetPlayer(Player* player) { mPlayer = player; };
 	void AddObject(EnemyObject* obj) { mObjects.push_back(obj); }
 	void AddWall(WallObject* obj) { mWalls.push_back(obj); }
-
+	void SetEffect(Effect* eff) { mEffect = eff; }
 protected:
 	Player* mPlayer;
 	vector<EnemyObject*> mObjects;
 	vector<WallObject*> mWalls;
-
+	Effect* mEffect;
 };
 
