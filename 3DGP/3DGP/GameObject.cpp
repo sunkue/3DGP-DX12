@@ -7,19 +7,20 @@
 
 /// ////////////////////////////////////////
 
-GameObject::GameObject()
-	: mMesh{ nullptr }
+GameObject::GameObject(int meshCount)
+	: mMeshes{ meshCount }
 	, mShader{ nullptr }
 	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
 	, mOptionColor{ 1.0f }
 {
+	assert(mMeshes.size() == meshCount);
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
 }
 
 GameObject::~GameObject()
 {
-	SAFE_RELEASE(mMesh);
+	for (auto& m : mMeshes)SAFE_RELEASE(m);
 	if (mShader) {
 		mShader->ReleaseShaderVariables();
 		mShader->Release();
@@ -28,11 +29,11 @@ GameObject::~GameObject()
 
 /// ////////////////////////////////////////
 
-void GameObject::SetMesh(Mesh* mesh)
+void GameObject::SetMesh(int index, Mesh* mesh)
 {
-	SAFE_RELEASE(mMesh);
-	mMesh = mesh;
-	SAFE_ADDREF(mesh);
+	if(mMeshes[index])SAFE_RELEASE(mMeshes[index]);
+	mMeshes[index] = mesh;
+	SAFE_ADDREF(mMeshes[index]);
 }
 
 void GameObject::SetShader(Shader* shader)
@@ -44,7 +45,7 @@ void GameObject::SetShader(Shader* shader)
 
 void GameObject::ReleaseUploadBuffers()
 {
-	if (mMesh)mMesh->ReleaseUploadBuffers();
+	for (auto& m : mMeshes)if (m)m->ReleaseUploadBuffers();
 }
 
 
@@ -66,16 +67,18 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	UpdateShaderVariables(commandList);
 
 	if (mShader) {
-		mShader->UpdateShaderVariable(commandList, &mWorldMat);
+		//mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}
+
 	if (mMesh) mMesh->Render(commandList);
+
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
 {
 	PrepareRender();
-	if (mMesh)mMesh->Render(commandList, instanceCount);
+	for (auto& m : mMeshes)if (m)m->Render(commandList, instanceCount);
 }
 
 
@@ -86,8 +89,7 @@ void GameObject::Render(
 	, D3D12_VERTEX_BUFFER_VIEW instancingBufferView)
 {
 	PrepareRender();
-	assert(mMesh);
-	mMesh->Render(commandList, instanceCount, instancingBufferView);
+	for (auto& m : mMeshes)if (m)m->Render(commandList, instanceCount, instancingBufferView);
 }
 
 void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
@@ -199,6 +201,7 @@ void GameObject::UpdateBoundingBox()
 
 //////////////////////////////
 
+
 EnemyObject::EnemyObject()
 	: mRotationSpeed{ 90.0f }
 	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
@@ -211,6 +214,8 @@ void EnemyObject::Reset()
 {
 	SetPosition(Rand() * 50.0f, 0.0f
 		, XMVectorGetZ(Player::PLAYER->GetPosition()) + EnemyObject::RESETZPOSITION);
+
+
 }
 
 EnemyObject::~EnemyObject()
@@ -228,6 +233,7 @@ void EnemyObject::Animate(milliseconds timeElapsed)
 	UpdateBoundingBox();
 	
 }
+
 
 ////////////////////
 WallObject::WallObject()

@@ -246,8 +246,45 @@ void ObjectsShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* root
 	Shader::CreateShader(device, rootSignature);
 }
 
-void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
 {
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
+	int width{ terrain->GetWidth() };
+	int length{ terrain->GetLength() };
+	float xPitch{ 12.0f * 3.5f };
+	float yPitch{ 12.0f * 3.5f };
+	float zPitch{ 12.0f * 3.5f };
+	int xObjects{ static_cast<int>(width / xPitch) };
+	int yObjects{ 2 };
+	int zObjects{ static_cast<int>(length / zPitch) };
+
+	CubeMeshDiffused* cube{ new CubeMeshDiffused{device,commandList,12.0f,12.0f,12.0f} };
+	XMVECTOR rotateAxis, surfaceNormal;
+	shared_ptr<RotatingObject> rotatingObj;
+	for (int x = 0, i = 0; x < xObjects; ++x) {
+		for (int z = 0; z < zObjects; ++z) {
+			for (int y = 0; y < yObjects; ++y) {
+				rotatingObj = make_shared<RotatingObject>(1);
+				rotatingObj->SetMesh(0, cube);
+				float xPos = x * xPitch;
+				float zPos = z * zPitch;
+				float height{ terrain->GetHeight(xPos,zPos) };
+				rotatingObj->SetPosition(xPos, height + (y * 10.0f * yPitch) + 6.0f, zPos);
+				constexpr XMVECTOR YAXIS{ { 0.0f,1.0f,0.0f } };
+				if (y == 0) {
+					surfaceNormal = terrain->GetNormal(xPos, zPos);
+					rotateAxis = XMVector3Cross(YAXIS, surfaceNormal);
+					if (IsZero(rotateAxis)) rotateAxis = YAXIS;
+					float angle{ acos(XMVectorGetX(XMVector3Dot(YAXIS,surfaceNormal))) };
+					rotatingObj->RotateByAxis(rotateAxis, XMConvertToDegrees(angle));
+				}
+				rotatingObj->SetRotationAxis(YAXIS);
+				rotatingObj->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+				mObjects.push_back(rotatingObj);
+			}
+		}
+	}
+	CreateShaderVariables(device, commandList);
 }
 
 void ObjectsShader::ReleaseObjects()
@@ -284,6 +321,7 @@ InstancingShader::~InstancingShader()
 {
 
 }
+
 void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	int xCount{ 1 };
@@ -309,7 +347,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 			}
 		}
 	}
-	
+
 	constexpr float wallWidth{ 200.0f };
 	shared_ptr<WallObject> wall;
 	wall = make_shared<WallObject>();
@@ -323,7 +361,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 	mObjects.push_back(wall);
 	wall->SetMesh(cubeMesh);
 	Scene::SCENE->AddWall(wall.get());
-	
+
 	CreateShaderVariables(device, commandList);
 }
 
@@ -407,4 +445,6 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
+
 ///////////////////////////////////////////////////
+
