@@ -36,7 +36,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
 ////////
 #include <iostream>
