@@ -66,7 +66,6 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	UpdateShaderVariables(commandList);
 
 	if (mShader) {
-		GameFramework::GetApp()->UpdateShaderVariables(commandList);
 		mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}

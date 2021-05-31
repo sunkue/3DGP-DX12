@@ -31,33 +31,29 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 		, 17
 		, 0						//b0 Player
 		, 0
-		, D3D12_SHADER_VISIBILITY_VERTEX);
+		, D3D12_SHADER_VISIBILITY_ALL);
 	
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[1]
-		, 32
+		, 34
 		, 1						//b1 Camera
 		, 0
-		, D3D12_SHADER_VISIBILITY_VERTEX);
+		, D3D12_SHADER_VISIBILITY_ALL);
 
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		  RootParameters[2]
 		, 0						//t0 instance objescts
 		, 0
-		, D3D12_SHADER_VISIBILITY_VERTEX);
+		, D3D12_SHADER_VISIBILITY_ALL);
 
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		  RootParameters[3]
 		, 1						//t1 Effect
 		, 0
-		, D3D12_SHADER_VISIBILITY_PIXEL);
+		, D3D12_SHADER_VISIBILITY_ALL);
 	
 	D3D12_ROOT_SIGNATURE_FLAGS RSFlags{
 		  D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
-		| D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS
-		| D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS
-		| D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS
-		| D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS
 	};
 	CD3DX12_ROOT_SIGNATURE_DESC RSDesc{
 		   _countof(RootParameters)
@@ -147,7 +143,6 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
-	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 

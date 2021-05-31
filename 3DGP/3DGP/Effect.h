@@ -2,12 +2,9 @@
 
 struct PS_VB_EFFECT
 {
-	XMFLOAT3A mPosition;
 	float mTime{ 0.0f };
-	float mLifeTime;
-
-	friend bool alive(PS_VB_EFFECT* a);
-	friend bool dead(PS_VB_EFFECT* a);
+	float mLifeTime{ 5.0f };
+	XMFLOAT3 mPosition;
 };
 // 0 wall	 1 Obj
 
@@ -31,9 +28,7 @@ public:
 	void NewWallEffect(FXMVECTOR pos, float lifeTime);
 
 protected:
-	vector<PS_VB_EFFECT*> mEffects;
 	ComPtr<ID3D12Resource>	mcbEffects;
 	PS_VB_EFFECT* mcbMappedEffects;
-
-	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
+	int size;
 };

@@ -403,6 +403,7 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 {
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
+	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 

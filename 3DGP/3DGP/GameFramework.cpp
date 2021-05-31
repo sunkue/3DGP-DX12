@@ -81,6 +81,8 @@ bool GameFramework::Initialize()
 	ChanegeFullScreenMode();
 #endif
 	READY = true;
+	ShowWindow(mhWnd, mShowCmd);
+	UpdateWindow(mhWnd);
 	return true;
 }
 
@@ -148,9 +150,6 @@ bool GameFramework::InitMainWindow()
 	{
 		return false;
 	}
-	
-	ShowWindow(mhWnd, mShowCmd);
-	UpdateWindow(mhWnd);
 
 	return true;
 }
@@ -158,7 +157,6 @@ bool GameFramework::InitMainWindow()
 bool GameFramework::InitDirect3D()
 {
 	CreateDirect3DDevice();
-
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
@@ -195,15 +193,16 @@ void GameFramework::OnDestroy()
 void GameFramework::CreateDirect3DDevice()
 {
 	UINT DXGIFactoryFlags = 0;
-#ifdef _DEBUG
+#ifdef _D2EBUG
+	cout << "s";
 	{
 		ComPtr<ID3D12Debug> comD3dDebugController{ nullptr };
 		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(comD3dDebugController.GetAddressOf())));
 		if (comD3dDebugController.Get()) { comD3dDebugController->EnableDebugLayer(); }
 		DXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 	}
+	cout << "s";
 #endif // _DEBUG
-
 	ThrowIfFailed(CreateDXGIFactory2(DXGIFactoryFlags, IID_PPV_ARGS(mFactory.GetAddressOf())));
 
 	ComPtr<IDXGIAdapter1> comD3dAdapter{};
@@ -594,6 +593,7 @@ void GameFramework::PopulateCommandList()
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
 
+	
 	if (mScene)mScene->Render(mCommandList.Get(), mCamera);
 #ifdef WITH_PLAYER_TOP
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
@@ -656,7 +656,7 @@ void GameFramework::FrameAdvance()
 	/* º® ¶Õ ¹æÁö */
 	for (int i = 0; i < 4; ++i) {
 		mGameTimer.Tick();
-		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
 		ProcessInput();
 		AnimateObjects();
 	}
