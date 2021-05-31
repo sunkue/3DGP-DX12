@@ -59,12 +59,6 @@ using namespace std;
 using namespace std::chrono;
 using TimePoint = steady_clock::time_point;
 constexpr UINT RFR = 144;
-constexpr float EPSILON = 1.0e-10f;
-
-inline bool IsZero(float value) { return(fabsf(value) < EPSILON); }
-inline bool IsZero(XMVECTOR value) { return IsZero(XMVectorGetX(value)) && IsZero(XMVectorGetY(value)) && IsZero(XMVectorGetZ(value)); }
-inline bool IsEqual(float a, float b) { return IsZero(a - b); }
-inline float InverseSqrt(float value) { return 1.0f / sqrtf(value); }
 
 
 class RANDOM
@@ -85,16 +79,12 @@ inline XMVECTORF32 RandomColor()
 {
 	return { Rand(),Rand(),Rand(),1.0f };
 }
-
-
-
-
 /*
 	목표 일주일 3챕터, 8주
 
 	현재 chapter 6 / 따라하기 14
 
-	05/27
+	05/26
    ~06/21
 
 

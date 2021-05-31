@@ -6,9 +6,8 @@
 
 Player* Player::PLAYER = nullptr;
 
-Player::Player(int meshCount)
-	: GameObject{ meshCount }
-	, mPosition{ 0.0f,0.0f,0.0f }
+Player::Player()
+	: mPosition{ 0.0f,0.0f,0.0f }
 	, mRightV{ 1.0f,0.0f,0.0 }
 	, mUpV{ 0.0f,1.0f,0.0f }
 	, mLookV{ 0.0f,0.0f,1.0f }
@@ -313,16 +312,10 @@ void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 ////////////////////////////////////////////
 
-AirPlanePlayer::AirPlanePlayer(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, ID3D12RootSignature* rootSignature
-	, int meshCount
-)
-	: Player{ meshCount }
+AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature)
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
-	SetMesh(0, airplaneMesh);
+	SetMesh(airplaneMesh);
 	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
@@ -396,7 +389,6 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 
 	return mCamera;
 }
-
 
 
 void AirPlanePlayer::Crash()

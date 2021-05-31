@@ -5,7 +5,6 @@ class Vertex
 public:
 	Vertex() : mPosition{ 0.0f,0.0f,0.0f } {}
 	Vertex(float x, float y, float z) : mPosition{ x,y,z } {}
-	explicit Vertex(FXMVECTOR pos) { XMStoreFloat3A(&mPosition, pos); }
 	explicit Vertex(XMFLOAT3A pos)	: mPosition{ pos.x,pos.y,pos.z } {}
 
 protected:
@@ -27,11 +26,6 @@ public:
 	{
 		XMStoreFloat4A(&mxmf4Diffuse, diffuse);
 	}
-	DiffusedVertex(FXMVECTOR pos, FXMVECTOR diffuse)
-		: Vertex{ pos }
-	{
-		XMStoreFloat4A(&mxmf4Diffuse, diffuse);
-	}
 	DiffusedVertex(float x, float y, float z, float r, float g, float b, float a)
 		: Vertex{ x,y,z }
 		, mxmf4Diffuse{ r,g,b,a } {}
@@ -42,8 +36,6 @@ public:
 protected:
 	XMFLOAT4A mxmf4Diffuse;
 };
-
-////////////////////////////////////
 
 class Mesh
 {
@@ -102,55 +94,6 @@ class AirplaneMeshDiffused : public Mesh
 {
 public:
 	AirplaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-
 		, float width = 4.0f, float height = 4.0f, float depth = 4.0f, XMVECTORF32 color = Colors::BlueViolet);
 	virtual ~AirplaneMeshDiffused();
-};
-
-
-////////////////////////////////////
-
-class HeightMapImage
-{
-public:
-	HeightMapImage(LPCTSTR fileName, int width, int length, XMFLOAT3A scale);
-	~HeightMapImage();
-
-	float GetHeight(float x, float z)const;
-	XMVECTOR XM_CALLCONV GetHeightNormal(int x, int z)const;
-	
-	XMVECTOR XM_CALLCONV GetScale()const { return XMLoadFloat3A(&mScale); }
-	BYTE* GetPixels()const { return mHeightMapPixels; }
-	int GetWidth() { return mWidth; }
-	int GetLength() { return mLength; }	
-
-private:
-	BYTE*		mHeightMapPixels;
-	int			mWidth;
-	int			mLength;
-	XMFLOAT3A	mScale;
-
-};
-
-class HeightMapGridMesh : public Mesh
-{
-public:
-	HeightMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-		, int Xstart, int Zstart, int width, int length
-		, XMFLOAT3A scale = XMFLOAT3A{ 1.0f,1.0f,1.0f }
-		, XMFLOAT4A color = XMFLOAT4A{ 1.0f,1.0f,0.0f,0.0f }, void* context = nullptr);
-	virtual ~HeightMapGridMesh();
-
-	XMVECTOR XM_CALLCONV GetScale()const { return XMLoadFloat3A(&mScale); }
-	int GetWidth()const { return mWidth; }
-	int GetLength()const { return mLength; }
-
-	virtual float GetHeight(int x, int z, void* context)const;
-	virtual XMVECTOR XM_CALLCONV GetColor(int x, int z, void* context)const;
-
-protected:
-	int mWidth;
-	int mLength;
-	XMFLOAT3A mScale;
-
 };
