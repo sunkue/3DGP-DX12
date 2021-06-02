@@ -6,8 +6,9 @@
 
 Player* Player::PLAYER = nullptr;
 
-Player::Player()
-	: mPosition{ 0.0f,0.0f,0.0f }
+Player::Player(int meshes)
+	: GameObject{ meshes }
+	, mPosition{ 0.0f,0.0f,0.0f }
 	, mRightV{ 1.0f,0.0f,0.0 }
 	, mUpV{ 0.0f,1.0f,0.0f }
 	, mLookV{ 0.0f,0.0f,1.0f }
@@ -312,10 +313,16 @@ void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 ////////////////////////////////////////////
 
-AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature)
+AirPlanePlayer::AirPlanePlayer(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, int meshes
+)
+	: Player{ meshes }
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
-	SetMesh(1, airplaneMesh);
+	SetMesh(0, airplaneMesh);
 	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
@@ -400,10 +407,33 @@ void AirPlanePlayer::Crash()
 
 ////////////////////////////////
 
-TerrainPlayer::TerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-	, ID3D12RootSignature* rootSignature, void* context, int meshes = 1)
+TerrainPlayer::TerrainPlayer(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, void* context
+	, int meshes
+)
+	: Player{ meshes }
 {
+	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
+	
+	SetPlayerUpdateContext(context);
+	SetCameraUpdateContext(context);
+	
+	const HeightMapTerrain* const terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
+	float const xCenter{ terrain->GetWidth() * 0.5f };
+	float const zCenter{ terrain->GetLength() * 0.5f };
+	float const height{ terrain->GetHeight(xCenter,zCenter) };
+	SetPosition({ xCenter,height + 1500.0f,zCenter });
 
+	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,4.0f,12.0f,4.0f) };
+	SetMesh(0, cube);
+
+	PlayerShader* shader{ new PlayerShader() };
+	shader->CreateShader(device, rootSignature);
+	SetShader(shader);
+	CreateShaderVariables(device, commandList);
 }
 
 TerrainPlayer::~TerrainPlayer()
@@ -413,15 +443,85 @@ TerrainPlayer::~TerrainPlayer()
 
 Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
 {
+	CAMERA_MODE currentCameraMode{ (mCamera) ? (mCamera->GetMode()) : (CAMERA_MODE::NO_CAMERA) };
+	if (currentCameraMode == newCameraMode)return mCamera;
+	GameFramework* app{ GameFramework::GetApp() };
+	UINT W{ app->GetWidth() };
+	UINT H{ app->GetHeight() };
+	switch (newCameraMode)
+	{
+	case CAMERA_MODE::FIRST_PERSON: {
+		SetFriction(250.0f);
+		SetGravity({ 0.0f,-250.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode);
+		mCamera->SetTimeLag(milliseconds::zero());
+		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->SetViewport(0, 0, W, H);
+		mCamera->SetScissorRect(0, 0, W, H);
+	}break;
+	case CAMERA_MODE::SPACESHIP: {
+		SetFriction(125.0f);
+		SetGravity({ 0.0f,0.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::SPACESHIP, currentCameraMode);
+		mCamera->SetTimeLag(milliseconds::zero());
+		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->SetViewport(0, 0, W, H);
+		mCamera->SetScissorRect(0, 0, W, H);
+	}break;
+	case CAMERA_MODE::THIRD_PERSON: {
+		SetFriction(250.0f);
+		SetGravity({ 0.0f,-250.0f,0.0f });
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
+		mCamera->SetTimeLag(250ms);
+		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
+		mCamera->SetViewport(0, 0, W, H);
+		mCamera->SetScissorRect(0, 0, W, H);
+	}break;
+	}
+	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
+	Update(timeElapsed);
 
+	return mCamera;
 }
 
 void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
 {
-
+	XMVECTOR pos{ GetPosition() };
+	HeightMapTerrain const* const terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
+	constexpr float magicNum{ 6.0f };
+	float const height{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + magicNum };
+	if (XMVectorGetY(pos) < height) {
+		XMVECTOR vel{ GetVelocity() };
+		vel = XMVectorSetY(vel, 0.0f);
+		SetVelocity(vel);
+		pos = XMVectorSetY(pos, height);
+		SetPosition(pos);
+	}
 }
 
 void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
 {
+	XMVECTOR cameraPos{ mCamera->GetPosition() };
+	HeightMapTerrain const* const terrain{ reinterpret_cast<HeightMapTerrain*>(mCameraUpdateContext) };
+	constexpr float magicNum{ 5.0f };
+	float const height{ terrain->GetHeight(XMVectorGetX(cameraPos),XMVectorGetZ(cameraPos)) + magicNum };
+	if (XMVectorGetY(cameraPos) <= height) {
+		XMVECTOR vel{ GetVelocity() };
+		cameraPos = XMVectorSetY(cameraPos, height);
+		SetPosition(cameraPos);
+		if (CAMERA_MODE::THIRD_PERSON == mCamera->GetMode()) {
+			ThirdPersonCamera* cameraHandle{ reinterpret_cast<ThirdPersonCamera*>(mCamera) };
+			cameraHandle->SetLookAt(GetPosition());
+		}
+	}
 
 }
