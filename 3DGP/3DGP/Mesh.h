@@ -102,14 +102,14 @@ public:
 	virtual ~AirplaneMeshDiffused();
 };
 
-class HeigthMapImage
+class HeightMapImage
 {
 public:
-	HeigthMapImage(string_view fileName, int width, int length, XMFLOAT3A scale);
-	~HeigthMapImage();
+	HeightMapImage(string_view fileName, int width, int length, XMFLOAT3A scale);
+	~HeightMapImage();
 
 	float const GetHeight(float x, float z)const;
-	XMVECTOR const GetNormal(int x, int z)const;
+	XMVECTOR const XM_CALLCONV GetNormal(int x, int z)const;
 	
 	XMFLOAT3A const GetScale()const { return mScale; }
 	const BYTE* const GetPixels()const { return mHeightMapPixels.get(); }

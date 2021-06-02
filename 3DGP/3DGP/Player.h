@@ -102,3 +102,16 @@ public:
 
 	void Crash();
 };
+
+class TerrainPlayer : public Player
+{
+public:
+	TerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
+		, ID3D12RootSignature* rootSignature, void* context, int meshes = 1);
+	virtual ~TerrainPlayer();
+
+	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
+	
+	virtual void PlayerUpdateCallback(milliseconds timeElapsed);
+	virtual void CameraUpdateCallback(milliseconds timeElapsed);
+};

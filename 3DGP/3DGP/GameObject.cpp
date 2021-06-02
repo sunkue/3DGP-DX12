@@ -7,19 +7,20 @@
 
 /// ////////////////////////////////////////
 
-GameObject::GameObject()
-	: mMesh{ nullptr }
-	, mShader{ nullptr }
+GameObject::GameObject(int meshes)
+	: mShader{ nullptr }
 	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
 	, mOptionColor{ 1.0f }
 {
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
+	mMesh.resize(meshes);
 }
 
 GameObject::~GameObject()
 {
-	SAFE_RELEASE(mMesh);
+	for (auto& m : mMesh) SAFE_RELEASE(m);
+	mMesh.clear();
 	if (mShader) {
 		mShader->ReleaseShaderVariables();
 		mShader->Release();
@@ -28,10 +29,10 @@ GameObject::~GameObject()
 
 /// ////////////////////////////////////////
 
-void GameObject::SetMesh(Mesh* mesh)
+void GameObject::SetMesh(int index, Mesh* mesh)
 {
-	SAFE_RELEASE(mMesh);
-	mMesh = mesh;
+	SAFE_RELEASE(mMesh[index]);
+	mMesh[index] = mesh;
 	SAFE_ADDREF(mesh);
 }
 
@@ -44,7 +45,7 @@ void GameObject::SetShader(Shader* shader)
 
 void GameObject::ReleaseUploadBuffers()
 {
-	if (mMesh)mMesh->ReleaseUploadBuffers();
+	for (auto& m : mMesh)m->ReleaseUploadBuffers();
 }
 
 
@@ -69,13 +70,13 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 		mShader->UpdateShaderVariable(commandList, &mWorldMat);
 		mShader->Render(commandList, camera);
 	}
-	if (mMesh) mMesh->Render(commandList);
+	for (auto& m : mMesh)m->Render(commandList);
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
 {
 	PrepareRender();
-	if (mMesh)mMesh->Render(commandList, instanceCount);
+	for (auto& m : mMesh)m->Render(commandList, instanceCount);
 }
 
 
@@ -86,8 +87,7 @@ void GameObject::Render(
 	, D3D12_VERTEX_BUFFER_VIEW instancingBufferView)
 {
 	PrepareRender();
-	assert(mMesh);
-	mMesh->Render(commandList, instanceCount, instancingBufferView);
+	for (auto& m : mMesh)m->Render(commandList, instanceCount, instancingBufferView);
 }
 
 void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
@@ -189,22 +189,19 @@ void GameObject::ReleaseShaderVariables()
 
 void GameObject::UpdateBoundingBox()
 {
-	assert(mMesh);
-	if (mMesh) {
-		mMesh->mOOBB.Transform(mOOBB, GetWM());
-		XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
-	}
-
+	assert(mMesh.empty() == false);
+	mMesh[0]->mOOBB.Transform(mOOBB, GetWM());
+	XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
 }
 
 //////////////////////////////
 
-EnemyObject::EnemyObject()
+EnemyObject::EnemyObject(int meshes)
 	: mRotationSpeed{ 90.0f }
 	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
 	, mSpeed{ Rand() * 10.0f + 10.0f }
 {
-	XMStoreFloat3A(&mDir, { (1.0f - Rand() * 2.0f) * 20.0f * Rand(),0.0f,-0.1f });
+	XMStoreFloat3A(&mDir, XMVectorZero());
 }
 
 void EnemyObject::Reset()
@@ -238,7 +235,57 @@ WallObject::WallObject()
 
 void WallObject::Animate(milliseconds timeElapsed) {
 	SetPosition(XMVectorGetX(GetPosition()), 0.0f, XMVectorGetZ(Player::PLAYER->GetPosition()));
-	
 	UpdateBoundingBox();
+}
+
+
+///////////////////////////////////
+
+
+HeightMapTerrain::HeightMapTerrain(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature
+	, string_view fileName
+	, int width
+	, int length
+	, int blockWidth
+	, int blockLength
+	, XMFLOAT3A scale
+	, XMVECTORF32 color
+)
+	: GameObject{ 0 }
+	, mWidth{ width }
+	, mLength{ length }
+	, mScale{ scale }
+	, mHeightMapImage{ make_unique<HeightMapImage>(fileName,width,length,scale) }
+{
+	int const xQuadsPerBlock{ blockWidth - 1 };
+	int const zQuadsPerBlock{ blockLength - 1 };
+
+	long const xBlocks{ (width - 1) / xQuadsPerBlock };
+	long const zBlocks{ (length - 1) / zQuadsPerBlock };
+	mMesh.resize(xBlocks* zBlocks);
+
+	HeighMapGridMesh* HMGM{ nullptr };
+	for (int z = 0, zStart = 0; z < zBlocks; z++) {
+		for (int x = 0, xStart = 0; x < xBlocks; x++) {
+			xStart = x * xQuadsPerBlock;
+			zStart = z * zQuadsPerBlock;
+			HMGM = new HeighMapGridMesh{
+				  device, commandList
+				, xStart, zStart
+				, blockWidth, blockLength
+				, scale, color, mHeightMapImage.get() };
+			SetMesh(x + z * xBlocks, HMGM);
+		}
+	}
+	TerrainShader* shader{ new TerrainShader(); };
+	shader->CreateShader(device, rootSignature);
+	SetShader(shader);
+}
+
+HeightMapTerrain::~HeightMapTerrain()
+{
 	
 }

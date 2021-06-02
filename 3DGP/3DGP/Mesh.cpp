@@ -245,7 +245,7 @@ AirplaneMeshDiffused::~AirplaneMeshDiffused()
 /////////////////////////////////////////////
 
 
-HeigthMapImage::HeigthMapImage(
+HeightMapImage::HeightMapImage(
 	  string_view fileName
 	, int width
 	, int length
@@ -268,13 +268,13 @@ HeigthMapImage::HeigthMapImage(
 	}
 }
 
-HeigthMapImage::~HeigthMapImage()
+HeightMapImage::~HeightMapImage()
 {
 	
 }
 
 #define WITH_APPROXIMATE_OPPOSITE_CORNER
-float const HeigthMapImage::GetHeight(const float fx,const float fz)const
+float const HeightMapImage::GetHeight(const float fx,const float fz)const
 {
 	if (OutOfRange(fx, fz))return 0.0f;
 
@@ -304,7 +304,7 @@ float const HeigthMapImage::GetHeight(const float fx,const float fz)const
 	return Height;
 }
 
-XMVECTOR const HeigthMapImage::GetNormal(const int x,const int z)const
+XMVECTOR const HeightMapImage::GetNormal(const int x,const int z)const
 {
 	if (OutOfRange(x, z))return { 0.0f,1.0f,0.0f };
 
@@ -405,7 +405,7 @@ HeighMapGridMesh::~HeighMapGridMesh()
 
 float const HeighMapGridMesh::OnGetHeight(int x, int z, void* context)const
 {
-	HeigthMapImage const* const HMImage{ reinterpret_cast<HeigthMapImage*>(context) };
+	HeightMapImage const* const HMImage{ reinterpret_cast<HeightMapImage*>(context) };
 	BYTE const* const HMPixels{ HMImage->GetPixels() };
 	XMFLOAT3A scale{ HMImage->GetScale() };
 	int width{ HMImage->GetWidth() };
@@ -419,7 +419,7 @@ XMVECTORF32 const HeighMapGridMesh::OnGetColor(int x, int z, void* context)const
 	lightDir = XMVector3Normalize(lightDir);
 	XMVECTORF32 incidentLightColor{ 0.9f,0.8f,0.4f,1.0f };
 
-	HeigthMapImage const* const HMImage{ reinterpret_cast<HeigthMapImage*>(context) };
+	HeightMapImage const* const HMImage{ reinterpret_cast<HeightMapImage*>(context) };
 
 	float fScale{ XMVectorGetX(XMVector3Dot(HMImage->GetNormal(x,z),lightDir)) };
 	fScale += XMVectorGetX(XMVector3Dot(HMImage->GetNormal(x + 1, z), lightDir));

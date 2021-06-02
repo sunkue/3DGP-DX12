@@ -315,7 +315,7 @@ void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 AirPlanePlayer::AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature)
 {
 	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
-	SetMesh(airplaneMesh);
+	SetMesh(1, airplaneMesh);
 	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
 	SetPosition({ 0.0f,0.0f,-50.0f });
@@ -396,4 +396,32 @@ void AirPlanePlayer::Crash()
 	SetGravity({ 0.0f,0.0f,1.0f });
 	SetVelocity({ 0.0f,0.0f,5.0f });
 	mStealth = true;
+}
+
+////////////////////////////////
+
+TerrainPlayer::TerrainPlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
+	, ID3D12RootSignature* rootSignature, void* context, int meshes = 1)
+{
+
+}
+
+TerrainPlayer::~TerrainPlayer()
+{
+
+}
+
+Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
+{
+
+}
+
+void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
+{
+
+}
+
+void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
+{
+
 }
