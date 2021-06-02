@@ -246,8 +246,54 @@ void ObjectsShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* root
 	Shader::CreateShader(device, rootSignature);
 }
 
-void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
 {
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
+	float const terrainWidth{ terrain->GetWidth() };
+	float const terrainLength{ terrain->GetLength() };
+
+	constexpr float xPitch{ 12.0f * 3.5f };
+	constexpr float yPitch{ 12.0f * 3.5f };
+	float constexpr zPitch{ 12.0f * 3.5f };
+
+	int const xObjects{ static_cast<int>(terrainWidth / xPitch) };
+	int const yObjects{ 2 };
+	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
+	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
+
+	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
+		,12.0f,12.0f,12.0f) };
+	
+	XMVECTOR rotateAxis;
+	XMVECTOR surfaceNormal;	
+	shared_ptr<EnemyObject> Eobj{ nullptr };
+	for (int i = 0, x = 0; x < xObjects; x++) {
+		for (int z = 0; z < zObjects; z++) {
+			for (int y = 0; y < yObjects; y++, i++) {
+				Eobj = make_shared<EnemyObject>(1);
+				Eobj->SetMesh(0, cube);
+				float const xPosition = x * xPitch;
+				float const zPosition = z * zPitch;
+				float const height{ terrain->GetHeight(xPosition,zPosition) };
+				constexpr float magicNum0{ 10.0f };
+				constexpr float magicNum1{ 6.0f };
+				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + magicNum1, zPosition);
+				
+				constexpr XMVECTOR yAxis{ 0.0f,1.0f,0.0f };
+				if (0 == y) {
+					surfaceNormal = terrain->GetNormal(xPosition, zPosition);
+					rotateAxis = XMVector3Cross(yAxis, surfaceNormal);
+					if (IsZero(rotateAxis)) rotateAxis = { 0.0f,1.0f,0.0f };
+					float const angle{ acos(XMVectorGetX(XMVector3Dot(yAxis,surfaceNormal))) };
+					Eobj->RotateByAxis(rotateAxis, XMConvertToDegrees(angle));
+				}
+				Eobj->SetRotationAxis(yAxis);
+				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
+				mObjects.push_back(Eobj);
+			}
+		}
+	}
+	CreateShaderVariables(device, commandList);
 }
 
 void ObjectsShader::ReleaseObjects()
@@ -284,46 +330,53 @@ InstancingShader::~InstancingShader()
 {
 
 }
-void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
 {
-	int xCount{ 1 };
-	int yCount{ 1 };
-	int zCount{ 1 };
-	int i{ 0 };
-	mObjects.reserve(
-		(static_cast<size_t>(xCount) * 2 + 1)
-		* (static_cast<size_t>(yCount) * 2 + 1)
-		* (static_cast<size_t>(zCount) * 2 + 1) + 2);
-	shared_ptr<EnemyObject> rotatingObj;
-	CubeMeshDiffused* cubeMesh{ new CubeMeshDiffused{device,commandList,6.0f,6.0f,6.0f} };
-	for (int x = -xCount; x <= xCount; ++x) {
-		for (int y = -yCount; y <= yCount; ++y) {
-			for (int z = -zCount; z <= zCount; ++z) {
-				rotatingObj = make_shared<EnemyObject>();
-				rotatingObj->SetPosition(Rand() * 10.0f, 0.0f, EnemyObject::RESETZPOSITION/10.0f * (i % 10));
-				rotatingObj->SetRotationAxis({ Rand(), Rand(), Rand() });
-				rotatingObj->SetRotationSpeed(150.0f * Rand() * (++i % 10) + 10.0f);
-				rotatingObj->SetMesh(cubeMesh);
-				mObjects.push_back(rotatingObj);
-				Scene::SCENE->AddObject(rotatingObj.get());
+	HeightMapTerrain* terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
+	float const terrainWidth{ terrain->GetWidth() };
+	float const terrainLength{ terrain->GetLength() };
+
+	constexpr float xPitch{ 12.0f * 3.5f };
+	constexpr float yPitch{ 12.0f * 3.5f };
+	float constexpr zPitch{ 12.0f * 3.5f };
+
+	int const xObjects{ static_cast<int>(terrainWidth / xPitch) };
+	int const yObjects{ 2 };
+	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
+	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
+
+	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
+		,12.0f,12.0f,12.0f) };
+
+	XMVECTOR rotateAxis;
+	XMVECTOR surfaceNormal;
+	shared_ptr<EnemyObject> Eobj{ nullptr };
+	for (int i = 0, x = 0; x < xObjects; x++) {
+		for (int z = 0; z < zObjects; z++) {
+			for (int y = 0; y < yObjects; y++, i++) {
+				Eobj = make_shared<EnemyObject>(1);
+				Eobj->SetMesh(0, cube);
+				float const xPosition = x * xPitch;
+				float const zPosition = z * zPitch;
+				float const height{ terrain->GetHeight(xPosition,zPosition) };
+				constexpr float magicNum0{ 10.0f };
+				constexpr float magicNum1{ 6.0f };
+				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + magicNum1, zPosition);
+
+				constexpr XMVECTOR yAxis{ 0.0f,1.0f,0.0f };
+				if (0 == y) {
+					surfaceNormal = terrain->GetNormal(xPosition, zPosition);
+					rotateAxis = XMVector3Cross(yAxis, surfaceNormal);
+					if (IsZero(rotateAxis)) rotateAxis = { 0.0f,1.0f,0.0f };
+					float const angle{ acos(XMVectorGetX(XMVector3Dot(yAxis,surfaceNormal))) };
+					Eobj->RotateByAxis(rotateAxis, XMConvertToDegrees(angle));
+				}
+				Eobj->SetRotationAxis(yAxis);
+				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
+				mObjects.push_back(Eobj);
 			}
 		}
 	}
-	
-	constexpr float wallWidth{ 200.0f };
-	shared_ptr<WallObject> wall;
-	wall = make_shared<WallObject>();
-	wall->SetPosition(wallWidth / 2.0f, 0.0f, 0.0f);
-	wall->SetMesh(cubeMesh);
-	mObjects.push_back(wall);
-	Scene::SCENE->AddWall(wall.get());
-
-	wall = make_shared<WallObject>();
-	wall->SetPosition(-wallWidth / 2.0f, 0.0f, 0.0f);
-	mObjects.push_back(wall);
-	wall->SetMesh(cubeMesh);
-	Scene::SCENE->AddWall(wall.get());
-	
 	CreateShaderVariables(device, commandList);
 }
 
@@ -408,3 +461,47 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 }
 
 ///////////////////////////////////////////////////
+
+
+TerrainShader::TerrainShader()
+{
+
+}
+
+TerrainShader::~TerrainShader()
+{
+
+}
+
+void TerrainShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
+}
+
+D3D12_INPUT_LAYOUT_DESC TerrainShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount{ 2 };
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE TerrainShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSInstancing", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE TerrainShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSInstancing", "ps_5_1", shaderBlob);
+}

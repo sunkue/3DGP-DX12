@@ -90,10 +90,17 @@ inline XMVECTORF32 RandomColor()
 constexpr float EPSILON{ 1.0e-10f };
 
 inline bool const IsZero(const float value) { return fabs(value) < EPSILON; }
+inline bool const IsZero(const XMVECTOR value) { 
+	return IsZero(XMVectorGetX(value)) 
+		&& IsZero(XMVectorGetY(value)) 
+		&& IsZero(XMVectorGetZ(value));
+}
 inline bool const IsEqual(const float a, const float b) { return IsZero(a - b); }
 inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b){
-	return IsZero(XMVectorGetX(a)) && IsZero(XMVectorGetY(a))
-		&& IsZero(XMVectorGetZ(a)); 0 && IsZero(XMVectorGetW(a));
+	XMVECTOR val = a - b;
+	return IsZero(XMVectorGetX(val)) 
+		&& IsZero(XMVectorGetY(val))
+		&& IsZero(XMVectorGetZ(val));
 }
 
 

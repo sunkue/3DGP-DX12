@@ -25,6 +25,7 @@ Player::Player(int meshes)
 	, mCamera{ nullptr }
 	, mInvincible{ false }
 	, mStealth{ false }
+	, mEffect{ nullptr }
 {
 	PLAYER = this;
 	Scene::SCENE->SetPlayer(this);
@@ -392,7 +393,6 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 	}break;
 	}
 	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
-	//Update(timeElapsed);
 
 	return mCamera;
 }
@@ -417,18 +417,18 @@ TerrainPlayer::TerrainPlayer(
 	: Player{ meshes }
 {
 	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
-	
-	SetPlayerUpdateContext(context);
-	SetCameraUpdateContext(context);
-	
+
+	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,4.0f,12.0f,4.0f) };
+	SetMesh(0, cube);
+
 	const HeightMapTerrain* const terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
 	float const xCenter{ terrain->GetWidth() * 0.5f };
 	float const zCenter{ terrain->GetLength() * 0.5f };
 	float const height{ terrain->GetHeight(xCenter,zCenter) };
-	SetPosition({ xCenter,height + 1500.0f,zCenter });
+	SetPosition({ xCenter,height + 1500.0f,zCenter });	
 
-	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,4.0f,12.0f,4.0f) };
-	SetMesh(0, cube);
+	SetPlayerUpdateContext(context);
+	SetCameraUpdateContext(context);
 
 	PlayerShader* shader{ new PlayerShader() };
 	shader->CreateShader(device, rootSignature);
@@ -488,7 +488,6 @@ Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds time
 	}break;
 	}
 	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
-	Update(timeElapsed);
 
 	return mCamera;
 }
@@ -523,5 +522,4 @@ void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
 			cameraHandle->SetLookAt(GetPosition());
 		}
 	}
-
 }

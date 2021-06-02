@@ -381,7 +381,7 @@ void GameFramework::BuildObjects()
 	mScene = new Scene();
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
-	mPlayer = new AirPlanePlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature());
+	mPlayer = new TerrainPlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature(), mScene->GetTerrain(), 1);
 	mCamera = mPlayer->GetCamera();
 
 	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);

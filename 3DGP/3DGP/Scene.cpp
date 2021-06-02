@@ -11,6 +11,7 @@ Scene::Scene()
 	: mGraphicsRootSignature{ nullptr }
 	, mEffect{ nullptr }
 	, mPlayer{ nullptr }
+	, mTerrain{ nullptr }
 {
 	SCENE = this;
 }
@@ -82,11 +83,32 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
+	
+	XMFLOAT3A scale{ 8.0f,2.0f,8.0f };
+	XMVECTORF32 color{ 0.0f,0.2f,0.0f,0.0f };
+
+
+#ifdef WITH_TERRAIN_PARITION
+	mTerrain = new HeightMapTerrain(
+		device, commandList
+		, mGraphicsRootSignature.Get()
+		, "Assets/Image/Terrain/heightMap.raw"sv
+		, 257, 257, 17, 17, scale, color
+	);
+#else
+	mTerrain = new HeightMapTerrain(
+		  device, commandList
+		, mGraphicsRootSignature.Get()
+		, "Assets/Image/Terrain/heightMap.raw"sv
+		, 257, 257, 257, 257, scale, color
+	);
+#endif
+
 
 	assert(mShaders.empty());
 	mShaders.emplace_back();
 	mShaders[0].CreateShader(device, mGraphicsRootSignature.Get());
-	mShaders[0].BuildObjects(device, commandList);
+	mShaders[0].BuildObjects(device, commandList, mTerrain);
 };
 
 void Scene::ReleaseObjects()
@@ -97,11 +119,13 @@ void Scene::ReleaseObjects()
 		shader.ReleaseShaderVariables();
 		shader.ReleaseObjects();
 	}
+	delete mTerrain;
 };
 
 void Scene::ReleaseUploadBuffers()
 {
 	for (auto& shader : mShaders)shader.ReleaseUploadBuffers();
+	if (mTerrain)mTerrain->ReleaseUploadBuffers();
 }
 
 ///////////////////////////////////////////////////
@@ -143,6 +167,9 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
+	
+	if (mTerrain)mTerrain->Render(commandList, camera);
+
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 

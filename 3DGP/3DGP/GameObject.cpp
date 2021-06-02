@@ -15,6 +15,7 @@ GameObject::GameObject(int meshes)
 {
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
 	mMesh.resize(meshes);
+	assert(mMesh.size() == meshes);
 }
 
 GameObject::~GameObject()
@@ -34,6 +35,7 @@ void GameObject::SetMesh(int index, Mesh* mesh)
 	SAFE_RELEASE(mMesh[index]);
 	mMesh[index] = mesh;
 	SAFE_ADDREF(mesh);
+	assert(mMesh[index]);
 }
 
 void GameObject::SetShader(Shader* shader)
@@ -190,6 +192,7 @@ void GameObject::ReleaseShaderVariables()
 void GameObject::UpdateBoundingBox()
 {
 	assert(mMesh.empty() == false);
+	assert(mMesh[0]);
 	mMesh[0]->mOOBB.Transform(mOOBB, GetWM());
 	XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
 }
@@ -265,7 +268,7 @@ HeightMapTerrain::HeightMapTerrain(
 
 	long const xBlocks{ (width - 1) / xQuadsPerBlock };
 	long const zBlocks{ (length - 1) / zQuadsPerBlock };
-	mMesh.resize(xBlocks* zBlocks);
+	mMesh.resize(static_cast<size_t>(xBlocks)* zBlocks);
 
 	HeighMapGridMesh* HMGM{ nullptr };
 	for (int z = 0, zStart = 0; z < zBlocks; z++) {
@@ -280,7 +283,7 @@ HeightMapTerrain::HeightMapTerrain(
 			SetMesh(x + z * xBlocks, HMGM);
 		}
 	}
-	TerrainShader* shader{ new TerrainShader(); };
+	TerrainShader* shader{ new TerrainShader() };
 	shader->CreateShader(device, rootSignature);
 	SetShader(shader);
 }
