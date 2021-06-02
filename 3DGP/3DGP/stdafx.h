@@ -51,15 +51,21 @@ using Microsoft::WRL::ComPtr;
 #include <fstream>
 #include <random>
 #include <thread>
+#include <filesystem>
+#include <fstream>
+#include <string_view>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
 
 using namespace std;
 using namespace std::chrono;
+using namespace std::literals::string_view_literals;
 using TimePoint = steady_clock::time_point;
 constexpr UINT RFR = 144;
 
+#undef min
+#undef max
 
 class RANDOM
 {
@@ -79,12 +85,25 @@ inline XMVECTORF32 RandomColor()
 {
 	return { Rand(),Rand(),Rand(),1.0f };
 }
+
+
+constexpr float EPSILON{ 1.0e-10f };
+
+inline bool const IsZero(const float value) { return fabs(value) < EPSILON; }
+inline bool const IsEqual(const float a, const float b) { return IsZero(a - b); }
+inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b){
+	return IsZero(XMVectorGetX(a)) && IsZero(XMVectorGetY(a))
+		&& IsZero(XMVectorGetZ(a)); 0 && IsZero(XMVectorGetW(a));
+}
+
+
+
 /*
 	목표 일주일 3챕터, 8주
 
 	현재 chapter 6 / 따라하기 14
 
-	05/26
+	06/02
    ~06/21
 
 

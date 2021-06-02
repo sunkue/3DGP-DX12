@@ -24,7 +24,7 @@
     <ProjectGuid>{961e3805-ae16-456e-8a88-35ca80cfb9d3}</ProjectGuid>
     <RootNamespace>My3DGP1</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>3DGP00</ProjectName>
+    <ProjectName>연습</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
