@@ -152,7 +152,7 @@ void Player::Update(const milliseconds timeElapsed)
 	XMVECTOR Gravity(XMLoadFloat3A(&mGravity));
 	SetGravity(XMVectorAdd(Gravity, Gravity * 0.15f * timeE));
 	SetVelocity(XMVectorAdd(GetVelocity(), XMLoadFloat3A(&mGravity)));
-	float length{ sqrtf(std::pow(mVelocity.x,2) + std::pow(mVelocity.z,2)) };
+	float length{ sqrtf(mVelocity.x * mVelocity.x + mVelocity.z * mVelocity.z) };
 	if (mMaxVelocityXZ < length)
 	{
 		mVelocity.x *= mMaxVelocityXZ / length;

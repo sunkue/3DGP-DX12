@@ -36,6 +36,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
 ////////
 #include <iostream>
@@ -103,8 +104,7 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b){
 }
 
 
-//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
-//#define WITH_TERRAIN_PARITION
+
 /*
 	목표 일주일 3챕터, 8주
 

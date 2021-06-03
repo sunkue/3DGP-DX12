@@ -89,12 +89,6 @@ public:
 protected:
 	void XM_CALLCONV ModulatePosWhileRotate(FXMMATRIX rotateMat);
 	
-public:
-	void GenerateFrustum();
-	bool IsInFrustum(BoundingOrientedBox const& OOBB)const {
-		return m_frustum.Intersects(OOBB);
-	}
-
 protected:
 	XMFLOAT3A mPosition;
 
@@ -125,8 +119,6 @@ protected:
 	D3D12_RECT mScissorRect;
 
 	Player* mPlayer;
-
-	BoundingFrustum m_frustum;
 };
 
 

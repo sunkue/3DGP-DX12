@@ -59,13 +59,6 @@ public:
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void UpdateBoundingBox();
 
-public:
-	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { mOOBB = OOBB; }
-
-public:
-	bool const IsVisible(Camera const* const camera = nullptr);
-
 protected:
 	XMFLOAT4X4A	mWorldMat;
 	vector<Mesh*>	mMesh;
@@ -73,6 +66,7 @@ protected:
 	float mOptionColor;
 	XMFLOAT3A mScale;
 
+public:
 	BoundingOrientedBox mOOBB;
 };
 

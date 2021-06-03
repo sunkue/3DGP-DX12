@@ -66,8 +66,6 @@ void GameObject::PrepareRender()
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
-	if (false == IsVisible(camera))return;
-
 	PrepareRender();
 	UpdateShaderVariables(commandList);
 
@@ -201,17 +199,8 @@ void GameObject::UpdateBoundingBox()
 {
 	assert(mMesh.empty() == false);
 	assert(mMesh[0]);
-	mMesh[0]->GetOOBB().Transform(mOOBB, GetWM());
+	mMesh[0]->mOOBB.Transform(mOOBB, GetWM());
 	XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
-}
-
-bool const GameObject::IsVisible(Camera const* const camera)
-{
-	if (nullptr == camera)return false;
-	PrepareRender();
-	BoundingOrientedBox OOBB = mMesh.at(0)->GetOOBB();
-	OOBB.Transform(OOBB, GetWM());
-	return camera->IsInFrustum(OOBB);
 }
 
 //////////////////////////////

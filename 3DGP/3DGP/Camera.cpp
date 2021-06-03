@@ -128,7 +128,6 @@ void Camera::RegenerateViewMatrix()
 		-XMVectorGetX(XMVector3Dot(pos, look)),
 		mViewMat._44
 	};
-	GenerateFrustum();
 }
 
 void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
@@ -168,14 +167,6 @@ void Camera::ModulatePosWhileRotate(FXMMATRIX rotateMat)
 	pos = XMVectorAdd(pos, playerPos);
 	XMStoreFloat3A(&mPosition, pos);
 }
-
-void Camera::GenerateFrustum()
-{
-	m_frustum.CreateFromMatrix(m_frustum, GetProjectionMatrix());
-	XMMATRIX inversView{ XMMatrixInverse(nullptr, GetViewMatrix()) };
-	m_frustum.Transform(m_frustum, inversView);
-}
-
 
 //////////////////////////////////
 
@@ -293,4 +284,3 @@ void ThirdPersonCamera::SetLookAt(FXMVECTOR lookAt)
 	mUpV	= XMFLOAT3A{ lookAtMat._12,lookAtMat._22,lookAtMat._32 };
 	mLookV	= XMFLOAT3A{ lookAtMat._13,lookAtMat._23,lookAtMat._33 };
 }
-
