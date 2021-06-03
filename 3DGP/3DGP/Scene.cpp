@@ -169,13 +169,14 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->UpdateShaderVariables(commandList);
 	
 	assert(mTerrain);
-	if (mTerrain)mTerrain->Render(commandList, camera);
+	//if (mTerrain)mTerrain->Render(commandList, camera);
 
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
 };
 
 void Scene::CheckCollision(const milliseconds timeElapsed)
 {
+	assert(false);
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {

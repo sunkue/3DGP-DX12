@@ -201,7 +201,8 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 
 	output += Effect0Wall(input.originPosition);
 	output -= Effect1Obj(input.originPosition);
-
+	
+	output = float4(0.5f, 0.5f, 0.0f, 0.0f);
 	return output;
 }
 //x : 1918
@@ -213,5 +214,6 @@ float4 PSInstancing(VS_INSTANCING_OUTPUT input) : SV_TARGET
 	output += Effect0Wall(input.originPosition);
 	output -= Effect1Obj(input.originPosition);
 	//output = float4(input.position.x / viewport.x, input.position.y / viewport.y, 0.0f, 0.0f);
+	output = float4(0.5f, 0.5f, 0.0f, 0.0f);
 	return output;
 }
