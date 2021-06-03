@@ -563,7 +563,7 @@ void GameFramework::ProcessInput()
 			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
 			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
 		}
-		if (dir)mPlayer->Move(dir, 1500.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
+		if (dir)mPlayer->Move(dir, 400.0f * mGameTimer.GetTimeElapsed().count() / 1000.0f, true);
 	}
 	mPlayer->Update(mGameTimer.GetTimeElapsed());
 }
@@ -652,9 +652,10 @@ void GameFramework::ShowFPS()
 void GameFramework::FrameAdvance()
 {
 	/* º® ¶Õ ¹æÁö */
-	for (int i = 0; i < 4; ++i) {
+	constexpr int TIMES{ 1 };
+	for (int i = 0; i < TIMES; ++i) {
 		mGameTimer.Tick();
-		cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
 		ProcessInput();
 		AnimateObjects();
 	}

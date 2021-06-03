@@ -183,8 +183,8 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	if (!mPlayer->Collable()) {
 		for (const auto& obj : mObjects) {
 			if (obj->mOOBB.Intersects(mPlayer->mOOBB)) {
-				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.15f);
-				reinterpret_cast<AirPlanePlayer*>(mPlayer)->Crash();
+				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
+				mPlayer->Crash();
 			}
 		}
 	}

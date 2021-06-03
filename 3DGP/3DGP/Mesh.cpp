@@ -172,7 +172,7 @@ CubeMeshDiffused::~CubeMeshDiffused()
 
 /////////////////////////////////////
 
-AirplaneMeshDiffused::AirplaneMeshDiffused(
+PlayerMeshDiffused::PlayerMeshDiffused(
 	  ID3D12Device* device
 	, ID3D12GraphicsCommandList* commandList
 	, float width, float height, float depth
@@ -238,7 +238,7 @@ AirplaneMeshDiffused::AirplaneMeshDiffused(
 	mIndexBufferView.SizeInBytes = bufferSize;
 }
 
-AirplaneMeshDiffused::~AirplaneMeshDiffused()
+PlayerMeshDiffused::~PlayerMeshDiffused()
 {
 
 }

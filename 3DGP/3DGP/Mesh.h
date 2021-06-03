@@ -94,12 +94,12 @@ public:
 	virtual ~CubeMeshDiffused();
 };
 
-class AirplaneMeshDiffused : public Mesh
+class PlayerMeshDiffused : public Mesh
 {
 public:
-	AirplaneMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
+	PlayerMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
 		, float width = 4.0f, float height = 4.0f, float depth = 4.0f, XMVECTORF32 color = Colors::BlueViolet);
-	virtual ~AirplaneMeshDiffused();
+	virtual ~PlayerMeshDiffused();
 };
 
 class HeightMapImage

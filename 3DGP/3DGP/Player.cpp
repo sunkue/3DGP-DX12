@@ -147,6 +147,7 @@ void Player::Update(const milliseconds timeElapsed)
 	assert(mPlayerUpdateContext);
 	assert(mCameraUpdateContext);
 
+	/* updateByVelocity */
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	XMVECTOR Gravity(XMLoadFloat3A(&mGravity));
 	SetGravity(XMVectorAdd(Gravity, Gravity * 0.15f * timeE));
@@ -166,6 +167,12 @@ void Player::Update(const milliseconds timeElapsed)
 	Move(vel * timeE);
 	if (mPlayerUpdateContext)PlayerUpdateCallback(timeElapsed);
 
+	/* friction */
+	length = XMVectorGetX(XMVector3Length(vel));
+	float deceleration{ mFriction * timeE };
+	if (length < deceleration)deceleration = length;
+	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
+
 	/* camera */
 	CAMERA_MODE camMode{ mCamera->GetMode() };
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->Update(GetPosition(), timeElapsed); }
@@ -173,11 +180,8 @@ void Player::Update(const milliseconds timeElapsed)
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition()); }
 	mCamera->RegenerateViewMatrix();
 
-	length = XMVectorGetX(XMVector3Length(vel));
-	float deceleration{ mFriction * timeE };
-	if (length < deceleration)deceleration = length;
-	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
 
+	/*stealth*/
 	if (mStealth) {
 		static float t{ 0.0f };
 		constexpr float t2{ 0.01f };
@@ -205,6 +209,12 @@ void Player::Update(const milliseconds timeElapsed)
 		}
 	}
 	UpdateBoundingBox();
+}
+
+void Player::Crash()
+{
+	//SetVelocity({ 0.0f,0.0f,0.0f });
+	mStealth = true;
 }
 
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
@@ -280,7 +290,7 @@ AirPlanePlayer::AirPlanePlayer(
 )
 	: Player{ meshes }
 {
-	Mesh* airplaneMesh{ new AirplaneMeshDiffused(device,commandList) };
+	Mesh* airplaneMesh{ new PlayerMeshDiffused(device,commandList) };
 	SetMesh(0, airplaneMesh);
 	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
 	CreateShaderVariables(device, commandList);
@@ -356,12 +366,6 @@ Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds tim
 }
 
 
-void AirPlanePlayer::Crash()
-{
-	SetVelocity({ 0.0f,0.0f,0.0f });
-	mStealth = true;
-}
-
 ////////////////////////////////
 
 TerrainPlayer::TerrainPlayer(
@@ -375,7 +379,7 @@ TerrainPlayer::TerrainPlayer(
 {
 	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
 
-	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,4.0f,12.0f,4.0f) };
+	PlayerMeshDiffused* cube{ new PlayerMeshDiffused(device,commandList,4.0f,12.0f,4.0f) };
 	SetMesh(0, cube);
 
 	const HeightMapTerrain* const terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
@@ -456,9 +460,6 @@ void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
 	constexpr float magicNum{ 6.0f };
 	float const height{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + magicNum };
 	if (XMVectorGetY(pos) < height) {
-		XMVECTOR vel{ GetVelocity() };
-		vel = XMVectorSetY(vel, 0.0f);
-		SetVelocity(vel);
 		pos = XMVectorSetY(pos, height);
 		SetPosition(pos);
 	}
@@ -471,9 +472,8 @@ void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
 	constexpr float magicNum{ 5.0f };
 	float const height{ terrain->GetHeight(XMVectorGetX(cameraPos),XMVectorGetZ(cameraPos)) + magicNum };
 	if (XMVectorGetY(cameraPos) <= height) {
-		XMVECTOR vel{ GetVelocity() };
 		cameraPos = XMVectorSetY(cameraPos, height);
-		SetPosition(cameraPos);
+		mCamera->SetPosition(cameraPos);
 		if (CAMERA_MODE::THIRD_PERSON == mCamera->GetMode()) {
 			ThirdPersonCamera* cameraHandle{ reinterpret_cast<ThirdPersonCamera*>(mCamera) };
 			cameraHandle->SetLookAt(GetPosition());

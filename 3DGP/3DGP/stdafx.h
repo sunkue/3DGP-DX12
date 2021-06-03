@@ -108,14 +108,10 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b){
 /*
 	목표 일주일 3챕터, 8주
 
-	현재 chapter 6 / 따라하기 14
+	현재 chapter 6 / 따라하기 15
 
-	06/02
+	06/03
    ~06/21
 
 
-
-   셰이딩 관련 알아둘 사항 ->
-	A 구조체들 float3A 등등... 은 메모리에 거꾸로 저장됨..
-	z->x x->z ㅋㅋㅋ 고생 좀 했음.
 */

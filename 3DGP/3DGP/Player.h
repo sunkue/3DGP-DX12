@@ -47,9 +47,9 @@ public:
 	void Rotate(float x, float y, float z);
 	void Update(milliseconds timeElapsed);
 
-	virtual void PlayerUpdateCallback(milliseconds timeElapsed) {}
+	virtual void PlayerUpdateCallback(milliseconds timeElapsed) { assert(false); }
 	void SetPlayerUpdateContext(void* context) { mPlayerUpdateContext = context; }
-	virtual void CameraUpdateCallback(milliseconds timeElapsed) {}
+	virtual void CameraUpdateCallback(milliseconds timeElapsed) { assert(false); }
 	void SetCameraUpdateContext(void* context) { mCameraUpdateContext = context; }
 
 	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
@@ -64,6 +64,9 @@ public:
 
 	bool Collable() { return mInvincible | mStealth; }
 	void SetEffect(Effect* eff) { mEffect = eff; }
+
+	void Crash();
+
 protected:
 	XMFLOAT3A mPosition;
 	XMFLOAT3A mRightV;
@@ -99,7 +102,7 @@ public:
 	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
 	virtual void PrepareRender();
 
-	void Crash();
+	
 };
 
 class TerrainPlayer : public Player
