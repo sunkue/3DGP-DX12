@@ -59,6 +59,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount = 1);
 	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
 
+public:
+	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }
+	void SetOOBB(BoundingOrientedBox&& OOBB) { mOOBB = OOBB; }
+
 protected:
 	ComPtr<ID3D12Resource>	mVertexBuffer;
 	ComPtr<ID3D12Resource>	mVertexUploadBuffer;
@@ -75,7 +79,6 @@ protected:
 	UINT mStride;
 	UINT mOffset;
 
-public:
 	BoundingOrientedBox mOOBB;
 };
 

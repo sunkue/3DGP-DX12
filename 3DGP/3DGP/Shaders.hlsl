@@ -9,7 +9,7 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix viewMat : packoffset(c0);
 	matrix projMat : packoffset(c4);
-	float2 viewport : packoffset(c8);
+	float2 viewport : packoffset(c8.x);
 }
 
 /////////////////////////////////////////
