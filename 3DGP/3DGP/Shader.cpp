@@ -456,7 +456,7 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 {
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
-	GameFramework::GetApp()->UpdateShaderVariables(commandList);
+	
 	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
@@ -497,11 +497,11 @@ D3D12_INPUT_LAYOUT_DESC TerrainShader::CreateInputLayout()
 D3D12_SHADER_BYTECODE TerrainShader::CreateVertexShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "VSInstancing", "vs_5_1", shaderBlob);
+		(L"Shaders.hlsl"), "VSTerrain", "vs_5_1", shaderBlob);
 }
 
 D3D12_SHADER_BYTECODE TerrainShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "PSInstancing", "ps_5_1", shaderBlob);
+		(L"Shaders.hlsl"), "PSTerrain", "ps_5_1", shaderBlob);
 }

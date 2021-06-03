@@ -23,7 +23,8 @@ Mesh::Mesh(
 	, mIndexBufferView{}
 	, mOOBB{}
 {
-
+	assert(device);
+	assert(commandList);
 }
 
 Mesh::~Mesh()
@@ -339,21 +340,23 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	, mLength{ length }
 {
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	/* vertex */
+	// vertex 
 	mVerticesCount = width * length;
 	mStride = sizeof(DiffusedVertex);
 	unique_ptr<DiffusedVertex[]> vertices = make_unique<DiffusedVertex[]>(mVerticesCount);
 	float height{ 0.0f }, minH{ +FLT_MAX }, maxH{ -FLT_MAX };
 	for (int i = 0, z = Zstart; z < (Zstart + length); z++) {
 		for (int x = Xstart; x < (Xstart + width); x++, i++) {
-			XMVECTOR pos{ x * scale.x,OnGetHeight(x,z,context),z * scale.z };
+			XMVECTOR pos{ scale.x * x,OnGetHeight(x,z,context),scale.z * z };
 			XMVECTORF32 col;
 			col.v = { OnGetColor(x,z,context).v + color.v };
 			vertices[i] = DiffusedVertex{ pos, col };
+	
 			minH = min(minH, height);
 			maxH = max(maxH, height);
 		}
 	}
+	
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
 		  device
@@ -365,7 +368,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	mVertexBufferView.SizeInBytes = bufferSize;
 	mVertexBufferView.StrideInBytes = mStride;
 
-	/* index */
+	/// index 
 	mIndicesCount = (width * 2) * (length - 1) + (length - 1 - 1);
 	unique_ptr<UINT[]> indices = make_unique<UINT[]>(mIndicesCount);
 	for (int j = 0, z = 0; z < length - 1; z++) {
@@ -398,6 +401,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
 	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	mIndexBufferView.SizeInBytes = bufferSize;
+	
 }
 
 HeighMapGridMesh::~HeighMapGridMesh()

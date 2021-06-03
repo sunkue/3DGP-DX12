@@ -29,7 +29,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	/* 앞쪽이 접근속도가 빠름 */
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
-		, 17
+		, 16
 		, 0						//b0 Player
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
@@ -167,11 +167,13 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->RSSetViewportScissorRect(commandList);
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
-	
-	assert(mTerrain);
-	//if (mTerrain)mTerrain->Render(commandList, camera);
+	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
+
+	assert(mTerrain);
+	if (mTerrain)mTerrain->Render(commandList, camera);
+
 };
 
 void Scene::CheckCollision(const milliseconds timeElapsed)

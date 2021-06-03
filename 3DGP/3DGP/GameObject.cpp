@@ -14,6 +14,7 @@ GameObject::GameObject(int meshes)
 	, mOptionColor{ 1.0f }
 {
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
+	assert(0 <= meshes);
 	mMesh.resize(meshes);
 	assert(mMesh.size() == meshes);
 }
@@ -68,10 +69,9 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	PrepareRender();
 	UpdateShaderVariables(commandList);
 
-	if (mShader) {
-		mShader->UpdateShaderVariable(commandList, &mWorldMat);
-		mShader->Render(commandList, camera);
-	}
+	assert(mShader);
+	mShader->Render(commandList, camera);
+
 	for (auto& m : mMesh)m->Render(commandList);
 }
 
@@ -181,7 +181,13 @@ void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMFLOAT4X4A world;
 	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
-	commandList->SetGraphicsRoot32BitConstants(0, 1, &mOptionColor, 16);
+	/*
+	cout << world._11 << "\t" << world._12 << "\t" << world._13 << "\t" << world._14 << "\n";
+	cout << world._21 << "\t" << world._22 << "\t" << world._23 << "\t" << world._14 << "\n";
+	cout << world._31 << "\t" << world._32 << "\t" << world._33 << "\t" << world._14 << "\n";
+	cout << world._41 << "\t" << world._42 << "\t" << world._43 << "\t" << world._14 << "\n";
+	cout << "\n\n\n";
+	*/
 }
 
 void GameObject::ReleaseShaderVariables()
@@ -200,7 +206,8 @@ void GameObject::UpdateBoundingBox()
 //////////////////////////////
 
 EnemyObject::EnemyObject(int meshes)
-	: mRotationSpeed{ 90.0f }
+	: GameObject(meshes)
+	, mRotationSpeed{ 90.0f }
 	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
 	, mSpeed{ Rand() * 10.0f + 10.0f }
 {

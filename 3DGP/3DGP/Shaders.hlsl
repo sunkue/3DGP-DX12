@@ -3,7 +3,6 @@
 cbuffer cbPlayerInfo : register(b0)
 {
 	matrix worldMat : packoffset(c0);
-	float optColor : packoffset(c4);
 }
 
 cbuffer cbCameraInfo : register(b1)
@@ -105,7 +104,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	
 	output.position = WVP(input.position);
 
-	output.color = input.color * optColor;
+	output.color = input.color;
 
 	return output;
 }
@@ -119,12 +118,19 @@ VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input, uint instanceID : S
 	, gameObjectInfos[instanceID].mTransform), viewMat), projMat);
 
 	output.color = input.color + gameObjectInfos[instanceID].mColor;
-
-	if (450.0f < output.position.y)
-	{
-		output.color = float4(0.0f, 0.5f, 0.5f, 0.0f);
-	}
 	
+	return output;
+}
+
+VS_OUTPUT VSTerrain(VS_INPUT input)
+{
+	VS_OUTPUT output;
+	output.originPosition = mul(float4(input.position, 1.0f), worldMat).xyz;
+	
+	output.position = WVP(input.position);
+
+	output.color = input.color;
+
 	return output;
 }
 /////////////////////////////////////////
@@ -202,7 +208,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 	output += Effect0Wall(input.originPosition);
 	output -= Effect1Obj(input.originPosition);
 	
-	output = float4(0.5f, 0.5f, 0.0f, 0.0f);
+	
 	return output;
 }
 //x : 1918
@@ -214,6 +220,17 @@ float4 PSInstancing(VS_INSTANCING_OUTPUT input) : SV_TARGET
 	output += Effect0Wall(input.originPosition);
 	output -= Effect1Obj(input.originPosition);
 	//output = float4(input.position.x / viewport.x, input.position.y / viewport.y, 0.0f, 0.0f);
-	output = float4(0.5f, 0.5f, 0.0f, 0.0f);
+	
+	return output;
+}
+
+float4 PSTerrain(VS_OUTPUT input) : SV_TARGET
+{
+	float4 output = input.color;
+
+	output += Effect0Wall(input.originPosition);
+	output -= Effect1Obj(input.originPosition);
+	
+	
 	return output;
 }

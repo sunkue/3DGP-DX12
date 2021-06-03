@@ -536,13 +536,13 @@ void GameFramework::ProcessInput()
 
 	if (GetKeyboardState(key))
 	{
-		//if (key['W'] & 0xf0)dir |= DIR_FORWARD;
-		//if (key['S'] & 0xf0)dir |= DIR_BACKWARD;
+		if (key['W'] & 0xf0)dir |= DIR_FORWARD;
+		if (key['S'] & 0xf0)dir |= DIR_BACKWARD;
 		if (key['A'] & 0xf0)dir |= DIR_LEFT;
 		if (key['D'] & 0xf0)dir |= DIR_RIGHT;
 
-		//if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
-		//if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
+		if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
+		if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
 		if (key[VK_LEFT]	& 0xf0)dir |= DIR_LEFT;
 		if (key[VK_RIGHT]	& 0xf0)dir |= DIR_RIGHT;
 
