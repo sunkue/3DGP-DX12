@@ -161,6 +161,9 @@ void Player::Rotate(float x, float y, float z)
 
 void Player::Update(const milliseconds timeElapsed)
 {
+	assert(mPlayerUpdateContext);
+	assert(mCameraUpdateContext);
+
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	XMVECTOR Gravity(XMLoadFloat3A(&mGravity));
 	SetGravity(XMVectorAdd(Gravity, Gravity * 0.15f * timeE));
@@ -191,9 +194,6 @@ void Player::Update(const milliseconds timeElapsed)
 	float deceleration{ mFriction * timeE };
 	if (length < deceleration)deceleration = length;
 	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
-
-
-
 
 	if (mStealth) {
 		static float t{ 0.0f };

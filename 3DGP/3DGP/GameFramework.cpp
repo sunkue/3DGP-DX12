@@ -193,15 +193,13 @@ void GameFramework::OnDestroy()
 void GameFramework::CreateDirect3DDevice()
 {
 	UINT DXGIFactoryFlags = 0;
-#ifdef _D2EBUG
-	cout << "s";
+#ifdef _DEBUG
 	{
 		ComPtr<ID3D12Debug> comD3dDebugController{ nullptr };
 		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(comD3dDebugController.GetAddressOf())));
 		if (comD3dDebugController.Get()) { comD3dDebugController->EnableDebugLayer(); }
 		DXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 	}
-	cout << "s";
 #endif // _DEBUG
 	ThrowIfFailed(CreateDXGIFactory2(DXGIFactoryFlags, IID_PPV_ARGS(mFactory.GetAddressOf())));
 
@@ -656,7 +654,7 @@ void GameFramework::FrameAdvance()
 	/* º® ¶Õ ¹æÁö */
 	for (int i = 0; i < 4; ++i) {
 		mGameTimer.Tick();
-		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
 		ProcessInput();
 		AnimateObjects();
 	}

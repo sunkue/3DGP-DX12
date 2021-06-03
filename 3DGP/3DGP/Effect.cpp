@@ -7,7 +7,9 @@ bool dead(PS_VB_EFFECT* a) { return !alive(a); }
 
 Effect::Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int n)
 	: size{ n }
+	, mcbMappedEffects{ new PS_VB_EFFECT[n] }
 {
+
 	CreateShaderVariables(device, commandList);
 }
 

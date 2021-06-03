@@ -90,18 +90,16 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 
 #ifdef WITH_TERRAIN_PARITION
 	mTerrain = new HeightMapTerrain(
-		device, commandList
+		  device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
-		, 257, 257, 17, 17, scale, color
-	);
+		, 257, 257, 17, 17, scale, color);
 #else
 	mTerrain = new HeightMapTerrain(
 		  device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
-		, 257, 257, 257, 257, scale, color
-	);
+		, 257, 257, 257, 257, scale, color);
 #endif
 
 
@@ -168,6 +166,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
 	
+	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);
 
 	for (auto& shader : mShaders)shader.Render(commandList, camera);
@@ -180,8 +179,6 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	if (!mPlayer->Collable()) {
 		for (const auto& obj : mObjects) {
 			if (obj->mOOBB.Intersects(mPlayer->mOOBB)) {
-				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.15f);
-				reinterpret_cast<AirPlanePlayer*>(mPlayer)->Crash();
 			}
 		}
 	}
@@ -190,9 +187,6 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	for (const auto& wall : mWalls) {
 		for (const auto& obj : mObjects) {
 			if (wall->mOOBB.Intersects(obj->mOOBB)) {
-				XMVECTOR dir{ obj->GetDir() };
-				dir = XMVectorSetX(dir, -XMVectorGetX(dir));
-				obj->SetDir(dir);
 				assert((void*)obj != (void*)mPlayer);
 			}
 		}
@@ -201,13 +195,6 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	// wall player
 	for (const auto& wall : mWalls) {
 		if (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
-			mEffect->NewWallEffect(mPlayer->GetPosition(), 0.05f);
-
-			while (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
-				mPlayer->Move((mPlayer->GetPosition() - wall->GetPosition()) * XMVECTOR { 1.0f, 0.0f, 0.0f } *timeE);
-				mPlayer->GameObject::SetPosition(mPlayer->GetPosition());
-				mPlayer->UpdateBoundingBox();
-			}
 		}
 	}
 }
