@@ -41,7 +41,7 @@ public:
 	HeightMapTerrain* GetTerrain()const { return mTerrain; }
 
 protected:
-	vector<ObjectsShader>	mShaders;
+	vector<InstancingShader>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 	Player* mPlayer;
 	vector<EnemyObject*> mObjects;

@@ -34,6 +34,8 @@ protected:
 	void CheckCollision(const milliseconds timeElapsed);
 
 protected:
+	//InstancingShader
+	//ObjectsShader
 	vector<InstancingShader>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 

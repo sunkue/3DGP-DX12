@@ -41,10 +41,6 @@ void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	for (int i = 0; i < size; ++i) {
 		mcbMappedEffects[i].mTime += timeE;
 	}
-	/*cout << mcbMappedEffects[0].mTime << " \nx: ";
-	cout << mcbMappedEffects[0].mPosition.x << "\ny: ";
-	cout << mcbMappedEffects[0].mPosition.y << "\nz: ";
-	cout << mcbMappedEffects[0].mPosition.z << " \n";*/
 }
 
 void Effect::NewWallEffect(FXMVECTOR pos, float lifeTime)

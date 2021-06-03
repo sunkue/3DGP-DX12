@@ -105,6 +105,8 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 
 	assert(mShaders.empty());
 	mShaders.emplace_back();
+	assert(mShaders.size() == 1);
+
 	mShaders[0].CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[0].BuildObjects(device, commandList, mTerrain);
 };
@@ -156,7 +158,7 @@ bool Scene::ProcessInput()
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
 	for (auto& shader : mShaders)shader.AnimateObjects(timeElapsed);
-	CheckCollision(timeElapsed);
+	//CheckCollision(timeElapsed);
 };
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
