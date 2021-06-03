@@ -357,6 +357,8 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 		}
 	}
 	
+	mOOBB = { {0.0f,0.0f,0.0f},{(scale.x * width),max(minH,maxH),(scale.z * length)},{0.0f,0.0f,0.0f,1.0f} };
+
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
 		  device
