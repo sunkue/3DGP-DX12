@@ -302,9 +302,9 @@ float const HeightMapImage::GetHeight(const float fx,const float fz)const
 		else BL = TL + (BR - TR);
 	}
 #endif // WITH_APPROXIMATE_OPPOSITE_CORNER
-	float const THeight{ TL * (1 - xFract) + TR * xFract };
-	float const BHeight{ BL * (1 - xFract) + BR * xFract };
-	float const Height{ BHeight * (1 - zFract) + THeight * zFract };
+	float const THeight{ lerp(TL, TR, xFract) };
+	float const BHeight{ lerp(BL, BR, xFract) };
+	float const Height{ lerp(BHeight, THeight, zFract) };
 	return Height;
 }
 

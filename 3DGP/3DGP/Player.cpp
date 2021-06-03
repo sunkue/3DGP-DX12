@@ -58,13 +58,13 @@ void Player::Move(BYTE direction, float distance, bool updateVelocity)
 {
 	if (0x00 == direction)return;
 	XMVECTOR shift{ XMVectorZero() };
-	if (direction & DIR_FORWARD	) shift += GetLookVector() * distance;
-	if (direction & DIR_BACKWARD) shift -= GetLookVector() * distance;
-	if (direction & DIR_RIGHT	) shift += GetRightVector() * distance;
-	if (direction & DIR_LEFT	) shift -= GetRightVector() * distance;
-	if (direction & DIR_UP		) shift += GetUpVector() * distance;
-	if (direction & DIR_DOWN	) shift -= GetUpVector() * distance;
-	Move(shift, updateVelocity);
+	if (direction & DIR_FORWARD	) shift += GetLookVector();
+	if (direction & DIR_BACKWARD) shift -= GetLookVector();
+	if (direction & DIR_RIGHT	) shift += GetRightVector();
+	if (direction & DIR_LEFT	) shift -= GetRightVector();
+	if (direction & DIR_UP		) shift += GetUpVector();
+	if (direction & DIR_DOWN	) shift -= GetUpVector();
+	Move(XMVector3Normalize(shift) * distance, updateVelocity);
 }
 
 void Player::Move(FXMVECTOR shift, bool updateVelocity)
@@ -163,15 +163,16 @@ void Player::Update(const milliseconds timeElapsed)
 	{
 		mVelocity.y *= mMaxVelocityY / length;
 	}
+	
 	XMVECTOR vel{ GetVelocity() };
 	Move(vel * timeE);
+	
 	if (mPlayerUpdateContext)PlayerUpdateCallback(timeElapsed);
 
 	/* friction */
-	length = XMVectorGetX(XMVector3Length(vel));
 	float deceleration{ mFriction * timeE };
-	if (length < deceleration)deceleration = length;
-	SetVelocity(vel + XMVector3Normalize(vel * -deceleration));
+	cout << deceleration<<" ";
+	SetVelocity(vel - (vel * deceleration));
 
 	/* camera */
 	CAMERA_MODE camMode{ mCamera->GetMode() };
@@ -436,7 +437,7 @@ Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds time
 		mCamera->SetScissorRect(0, 0, W, H);
 	}break;
 	case CAMERA_MODE::THIRD_PERSON: {
-		SetFriction(250.0f);
+		SetFriction(2.5f);
 		SetGravity({ 0.0f,-250.0f,0.0f });
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
