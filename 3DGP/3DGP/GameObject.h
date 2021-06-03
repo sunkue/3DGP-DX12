@@ -89,21 +89,10 @@ private:
 public:
 	void SetRotationSpeed(float rotationSpeed) { mRotationSpeed = rotationSpeed; }
 	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mRotationAxis, rotationAxis); }
-	void Reset();
+
 	XMVECTOR XM_CALLCONV GetDir() { return XMLoadFloat3A(&mDir); }
 	void XM_CALLCONV SetDir(FXMVECTOR dir) { XMStoreFloat3A(&mDir, dir); }
 	virtual void Animate(milliseconds timeElapsed);
-};
-
-class WallObject : public GameObject
-{
-public:
-	WallObject();
-	virtual ~WallObject() {};
-	virtual void Animate(milliseconds timeElapsed);
-
-private:
-
 };
 
 

@@ -158,7 +158,7 @@ bool Scene::ProcessInput()
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
 	for (auto& shader : mShaders)shader.AnimateObjects(timeElapsed);
-	//CheckCollision(timeElapsed);
+	CheckCollision(timeElapsed);
 };
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
@@ -178,28 +178,14 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 void Scene::CheckCollision(const milliseconds timeElapsed)
 {
-	assert(false);
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {
 		for (const auto& obj : mObjects) {
 			if (obj->mOOBB.Intersects(mPlayer->mOOBB)) {
+				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.15f);
+				reinterpret_cast<AirPlanePlayer*>(mPlayer)->Crash();
 			}
-		}
-	}
-
-	// wall obj
-	for (const auto& wall : mWalls) {
-		for (const auto& obj : mObjects) {
-			if (wall->mOOBB.Intersects(obj->mOOBB)) {
-				assert((void*)obj != (void*)mPlayer);
-			}
-		}
-	}
-
-	// wall player
-	for (const auto& wall : mWalls) {
-		if (wall->mOOBB.Intersects(mPlayer->mOOBB)) {
 		}
 	}
 }

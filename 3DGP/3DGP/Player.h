@@ -26,7 +26,7 @@ public:
 
 	void SetFriction(float friction) { mFriction = friction; }
 	void XM_CALLCONV SetGravity(FXMVECTOR gravity) { XMStoreFloat3A(&mGravity, gravity); }
-	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityZ = maxVelocity; }
+	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityXZ = maxVelocity; }
 	void SetMaxVelocityY(float maxVelocity) { mMaxVelocityY = maxVelocity; }
 	void XM_CALLCONV SetVelocity(FXMVECTOR velocity) { XMStoreFloat3A(&mVelocity, velocity); }
 	XMVECTOR XM_CALLCONV GetVelocity()const { return XMLoadFloat3A(&mVelocity); }
@@ -62,7 +62,6 @@ public:
 	virtual void PrepareRender()override;
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera = nullptr)override;
 
-	void ReRoll(milliseconds timeElapsed);
 	bool Collable() { return mInvincible | mStealth; }
 	void SetEffect(Effect* eff) { mEffect = eff; }
 protected:
@@ -78,7 +77,7 @@ protected:
 	XMFLOAT3A mVelocity;
 	XMFLOAT3A mGravity;
 
-	float mMaxVelocityZ;
+	float mMaxVelocityXZ;
 	float mMaxVelocityY;
 	float mFriction;
 

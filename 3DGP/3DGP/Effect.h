@@ -3,8 +3,8 @@
 struct PS_VB_EFFECT
 {
 	float mTime{ 0.0f };
-	float mLifeTime{ 5.0f };
-	XMFLOAT3 mPosition;
+	float mLifeTime{ 0.0f };
+	XMFLOAT3 mPosition{ 0.0f,0.0f,0.0f };
 };
 // 0 wall	 1 Obj
 

@@ -374,6 +374,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
 				mObjects.push_back(Eobj);
+				Scene::SCENE->AddObject(Eobj.get());
 			}
 		}
 	}
@@ -387,11 +388,6 @@ void InstancingShader::ReleaseObjects()
 void InstancingShader::AnimateObjects(milliseconds timeElapsed)
 {
 	ObjectsShader::AnimateObjects(timeElapsed);
-	for (auto& obj : mObjects) { 
-		if (XMVectorGetZ(obj->GetPosition()) < XMVectorGetZ(Player::PLAYER->GetPosition()) - 120.0f) {
-			reinterpret_cast<EnemyObject*>(obj.get())->Reset();
-		}
-	}
 }
 
 D3D12_INPUT_LAYOUT_DESC InstancingShader::CreateInputLayout()

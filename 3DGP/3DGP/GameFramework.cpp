@@ -511,7 +511,7 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
-		//OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
+		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
 		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);

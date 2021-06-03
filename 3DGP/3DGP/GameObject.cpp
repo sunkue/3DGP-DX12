@@ -209,16 +209,11 @@ EnemyObject::EnemyObject(int meshes)
 	: GameObject(meshes)
 	, mRotationSpeed{ 90.0f }
 	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
-	, mSpeed{ Rand() * 10.0f + 10.0f }
+	, mSpeed{ 0.0f }
 {
 	XMStoreFloat3A(&mDir, XMVectorZero());
 }
 
-void EnemyObject::Reset()
-{
-	SetPosition(Rand() * 50.0f, 0.0f
-		, XMVectorGetZ(Player::PLAYER->GetPosition()) + EnemyObject::RESETZPOSITION);
-}
 
 EnemyObject::~EnemyObject()
 {
@@ -228,25 +223,13 @@ EnemyObject::~EnemyObject()
 void EnemyObject::Animate(milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
-
 	RotateByAxis(XMLoadFloat3A(&mRotationAxis), mRotationSpeed * timeE);
 	Move(XMLoadFloat3A(&mDir) * mSpeed * timeE);
 	
 	UpdateBoundingBox();
-	
 }
 
 ////////////////////
-WallObject::WallObject()
-{
-	XMStoreFloat4x4A(&mWorldMat, XMMatrixScaling(0.5f, 2.2f, 500.0f) * XMLoadFloat4x4A(&mWorldMat));
-}
-
-
-void WallObject::Animate(milliseconds timeElapsed) {
-	SetPosition(XMVectorGetX(GetPosition()), 0.0f, XMVectorGetZ(Player::PLAYER->GetPosition()));
-	UpdateBoundingBox();
-}
 
 
 ///////////////////////////////////
