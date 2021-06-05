@@ -99,16 +99,16 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 		  device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
-		, 257, 257, 257, 257, scale, color);
+		, 256, 256, 256, 256, scale, color);
 #endif
 
 
 	assert(mShaders.empty());
-	mShaders.emplace_back();
+	mShaders.push_back(new InstancingShader);
 	assert(mShaders.size() == 1);
 
-	mShaders[0].CreateShader(device, mGraphicsRootSignature.Get());
-	mShaders[0].BuildObjects(device, commandList, mTerrain);
+	mShaders[0]->CreateShader(device, mGraphicsRootSignature.Get());
+	mShaders[0]->BuildObjects(device, commandList, mTerrain);
 };
 
 void Scene::ReleaseObjects()
@@ -116,15 +116,15 @@ void Scene::ReleaseObjects()
 	mGraphicsRootSignature.Reset();
 	for (auto& shader : mShaders)
 	{
-		shader.ReleaseShaderVariables();
-		shader.ReleaseObjects();
+		shader->ReleaseShaderVariables();
+		shader->ReleaseObjects();
 	}
 	delete mTerrain;
 };
 
 void Scene::ReleaseUploadBuffers()
 {
-	for (auto& shader : mShaders)shader.ReleaseUploadBuffers();
+	for (auto& shader : mShaders)shader->ReleaseUploadBuffers();
 	if (mTerrain)mTerrain->ReleaseUploadBuffers();
 }
 
@@ -157,7 +157,7 @@ bool Scene::ProcessInput()
 
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
-	for (auto& shader : mShaders)shader.AnimateObjects(timeElapsed);
+	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
 	CheckCollision(timeElapsed);
 };
 
@@ -169,7 +169,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 
-	for (auto& shader : mShaders)shader.Render(commandList, camera);
+	for (auto& shader : mShaders)shader->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);
@@ -181,11 +181,34 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {
-		for (const auto& obj : mObjects) {
+		for (const auto& obj : mEnemys) {
 			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB())) {
 				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
 			}
 		}
 	}
+}
+
+pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTOR direction, float dist)
+{
+	// obj player
+	vector<GameObject*> temp;
+	for (const auto& obj : mEnemys) {
+		if (obj->GetOOBB().Intersects(origin, direction, dist)) {
+			temp.push_back(obj);
+		}
+	}
+	if (mPlayer->GetOOBB().Intersects(origin, direction, dist)) {
+		//temp.push_back(mPlayer);
+	}
+
+	XMVECTOR ret;
+	float minDistance{ FLT_MAX };
+	for (const auto& obj : temp) {
+		XMVECTOR pos{ (obj->GetPosition()) };
+		float const distance{ XMVectorGetX(XMVector3Length(obj->GetPosition() - mPlayer->GetCamera()->GetPosition())) };
+		if (distance < minDistance) ret = pos;
+	}
+	return make_pair(!temp.empty(), ret);
 }

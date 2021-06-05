@@ -28,7 +28,7 @@ public:
 	UINT GetWidth()const { return mWndClientWidth; }
 	UINT GetHeight()const { return mWndClientHeight; }
 	GameTimer* GetTimer() { return &mGameTimer; }
-
+	RECT GetRECT()const { return mWndRect; }
 protected:
 	void OnCreate();
 	void OnDestroy();
@@ -59,7 +59,8 @@ protected:
 
 public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
-
+	pair<XMVECTOR, XMVECTOR> XM_CALLCONV MouseRay();
+	pair<bool, XMVECTOR> XM_CALLCONV RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist);
 protected:
 	void ChanegeFullScreenMode();
 
@@ -68,6 +69,7 @@ protected:
 	HINSTANCE	mhInstance;
 	int			mShowCmd;
 
+	RECT			mWndRect;
 	UINT			mWndClientWidth;
 	UINT			mWndClientHeight;
 	float			mAspectRatio;
@@ -110,5 +112,6 @@ protected:
 
 	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
+	GameObject* m_Picking;
 };
 

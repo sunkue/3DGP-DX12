@@ -113,8 +113,8 @@ CubeMeshDiffused::CubeMeshDiffused(
 	float z = depth	 * 0.5f;
 	DiffusedVertex vertices[]{
 		 {-x, +y ,-z, Colors::Gray}
-		,{+x, +y ,-z, Colors::Red}
-		,{+x, +y ,+z, Colors::Red}
+		,{+x, +y ,-z, Colors::DarkRed}
+		,{+x, +y ,+z, Colors::DarkRed}
 		,{-x, +y ,+z, Colors::Blue}
 		,{-x, -y ,-z, Colors::ForestGreen}
 		,{+x, -y ,-z, Colors::ForestGreen}

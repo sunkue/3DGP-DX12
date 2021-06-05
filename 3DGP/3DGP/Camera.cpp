@@ -93,9 +93,16 @@ void Camera::CreateShaderVariables(
 
 void Camera::GenerateViewMatrix()
 {
+	XMMATRIX Q{ XMMatrixRotationQuaternion({ mPitch ,mYaw,mRoll }) };
+	XMMATRIX LatLH{ XMMatrixLookAtLH(XMLoadFloat3A(&mPosition), XMLoadFloat3A(&mLookAt), XMLoadFloat3A(&mUpV)) };
+	XMVECTOR ONE{ XMVectorSplatOne() };
+	XMVECTOR q{ XMMatrixDeterminant(Q) };
+	Q = XMMatrixInverse(&q, Q);
+	XMMATRIX m = XMMatrixMultiply(LatLH, Q);
+	assert(XMVectorGetX(XMVectorEqual(XMVector3Transform(ONE, m), ONE)) != 0.0f);
 	XMStoreFloat4x4A(
 		  &mViewMat
-		, XMMatrixLookAtLH(XMLoadFloat3A(&mPosition), XMLoadFloat3A(&mLookAt), XMLoadFloat3A(&mUpV)));
+		, XMMatrixRotationQuaternion({ mPitch ,mYaw, mRoll }));
 }
 
 void Camera::GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up)
@@ -115,7 +122,6 @@ void Camera::RegenerateViewMatrix()
 	XMStoreFloat3A(&mLookV, look);
 	XMStoreFloat3A(&mRightV, right);
 	XMStoreFloat3A(&mUpV, up);
-
 	XMVECTOR pos{ XMLoadFloat3A(&mPosition) };
 	mViewMat =
 	{

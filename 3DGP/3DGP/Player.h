@@ -9,6 +9,7 @@
 #define DIR_RIGHT		0x08
 #define DIR_UP			0x10
 #define DIR_DOWN		0x20
+#define DIR_JUMP		0x40
 
 class Effect;
 
@@ -16,6 +17,9 @@ class Player : public GameObject
 {
 public:
 	static Player* PLAYER;
+public:
+	static void SetStaticPlayer(Player* p);
+
 public:
 	Player(int meshes = 1);
 	virtual ~Player();
@@ -26,6 +30,7 @@ public:
 
 	void SetFriction(float friction) { mFriction = friction; }
 	void XM_CALLCONV SetGravity(FXMVECTOR gravity) { XMStoreFloat3A(&mGravity, gravity); }
+	XMVECTOR XM_CALLCONV GetGravity()const { return XMLoadFloat3A(&mGravity); }
 	void SetMaxVelocityXZ(float maxVelocity) { mMaxVelocityXZ = maxVelocity; }
 	void SetMaxVelocityY(float maxVelocity) { mMaxVelocityY = maxVelocity; }
 	void XM_CALLCONV SetVelocity(FXMVECTOR velocity) { XMStoreFloat3A(&mVelocity, velocity); }
@@ -42,6 +47,8 @@ public:
 
 	void Move(BYTE direction, float distance, bool updateVelocity = false);
 	void XM_CALLCONV Move(FXMVECTOR shift, bool updateVelocity = false);
+	void Jump(float height);
+	void Jump(milliseconds flightTime);
 	void Move(float xOffset = 0.0f, float yOffset = 0.0f, float zOffset = 0.0f);
 
 	void Rotate(float x, float y, float z);
@@ -91,6 +98,7 @@ protected:
 	Effect* mEffect;
 	bool mInvincible;
 	bool mStealth;
+	bool m_flight;
 };
 
 class AirPlanePlayer :public Player

@@ -35,19 +35,32 @@ protected:
 
 public:
 	void SetPlayer(Player* player) { mPlayer = player; };
-	void AddObject(EnemyObject* obj) { mObjects.push_back(obj); }
+	void AddObject(EnemyObject* obj) { mEnemys.push_back(obj); }
 	
 	void SetEffect(Effect* eff) { mEffect = eff; }
 	HeightMapTerrain* GetTerrain()const { return mTerrain; }
 
+	pair<bool, XMVECTOR> XM_CALLCONV RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist);
+public:
+	void TeamAddCount(EnemyObject::TEAM team, int count = 1) {
+		m_Team[static_cast<int>(team)].m_count += count;
+	}
+	auto TeamGetCount(EnemyObject::TEAM team) {
+		return m_Team[static_cast<int>(team)].m_count;
+	}
 protected:
-	vector<InstancingShader>	mShaders;
+	struct TEAM {
+		int m_count{ 0 };
+	}m_Team[static_cast<int>(EnemyObject::TEAM::ENDCOUNT)];
+
+protected:
+	vector<ObjectsShader*>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 	Player* mPlayer;
-	vector<EnemyObject*> mObjects;
+	vector<EnemyObject*> mEnemys;
 
 	Effect* mEffect;
 	HeightMapTerrain* mTerrain;
 
+	vector<UI*> m_UI;
 };
-

@@ -45,10 +45,10 @@ void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 
 void Effect::NewWallEffect(FXMVECTOR pos, float lifeTime)
 {
-	if (alive(&mcbMappedEffects[0]))return;
 	mcbMappedEffects[0].mLifeTime = mcbMappedEffects[0].mTime + lifeTime;
 	XMStoreFloat3(&mcbMappedEffects[0].mPosition, pos);
 }
+
 void Effect::NewObjEffect(FXMVECTOR pos, float lifeTime)
 {
 	mcbMappedEffects[1].mLifeTime = mcbMappedEffects[1].mTime + lifeTime;

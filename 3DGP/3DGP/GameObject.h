@@ -38,6 +38,7 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 public:
+	vector<Mesh*> const& GetMesh() { return mMesh; }
 	XMVECTOR XM_CALLCONV GetPosition()	const;
 	XMVECTOR XM_CALLCONV GetLook() const;
 	XMVECTOR XM_CALLCONV GetUp() const;
@@ -63,6 +64,9 @@ public:
 	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }
 	void SetOOBB(BoundingOrientedBox&& OOBB) { mOOBB = OOBB; }
 
+protected:
+	BoundingOrientedBox mOOBB;
+
 public:
 	bool const IsVisible(Camera const* const camera = nullptr);
 
@@ -73,7 +77,29 @@ protected:
 	float mOptionColor;
 	XMFLOAT3A mScale;
 
-	BoundingOrientedBox mOOBB;
+public:
+	template<typename Pred, typename... Args>
+	void ForFamily(Pred funct, Args&&... args)
+	{
+		if (nullptr != m_child)
+		{
+			funct(*m_child, std::forward<Args>(args)...);
+		}
+		if (nullptr != m_brother)
+		{
+			funct(*m_brother, std::forward<Args>(args)...);
+		}
+	}
+	/*
+	 void f(int a, int b) {
+        cout << x + a + b << "!\n";
+        ForFamily([](A& obj, int AAA, int BBB) { obj.f(AAA, BBB); }, a, b);
+	 }
+
+	*/
+protected:
+	GameObject* m_brother;
+	GameObject* m_child;
 };
 
 
@@ -86,13 +112,19 @@ public:
 	EnemyObject(int meshes = 1);
 	virtual ~EnemyObject();
 
+	
+	enum class TEAM { RED, GREEN, BLUE, YELLOW, ENDCOUNT };
+	
 private:
 	XMFLOAT3A mRotationAxis;
 	float mRotationSpeed;
 	XMFLOAT3A mDir;
 	float mSpeed;
-
+	TEAM m_team{ EnemyObject::TEAM::ENDCOUNT };
 public:
+	TEAM const GetTeam()const { return m_team; }
+	void SetTeam(TEAM t) { m_team = t; }
+
 	void SetRotationSpeed(float rotationSpeed) { mRotationSpeed = rotationSpeed; }
 	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mRotationAxis, rotationAxis); }
 
@@ -101,7 +133,8 @@ public:
 	virtual void Animate(milliseconds timeElapsed);
 };
 
-
+EnemyObject::TEAM& operator++(EnemyObject::TEAM& t);
+EnemyObject::TEAM operator++(EnemyObject::TEAM& t, int);
 
 class HeightMapTerrain : public GameObject
 {
@@ -128,5 +161,18 @@ private:
 	int mWidth;
 	int mLength;
 	XMFLOAT3A mScale;
+
+};
+
+class UI : public GameObject
+{
+	virtual void Animate(const milliseconds timeElapsed)override;
+
+protected:
+	virtual void PrepareRender()override;
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseShaderVariables()override;
+
 
 };

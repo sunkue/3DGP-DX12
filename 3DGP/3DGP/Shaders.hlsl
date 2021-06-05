@@ -139,7 +139,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 
-	output += Effect0Wall(input.originPosition);
+	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
 	
 	
@@ -149,7 +149,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 float4 PSInstancing(VS_INSTANCING_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
-	output += Effect0Wall(input.originPosition);
+	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
 	//output = float4(input.position.x / viewport.x, input.position.y / viewport.y, 0.0f, 0.0f);
 	
@@ -160,7 +160,7 @@ float4 PSTerrain(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 
-	output += Effect0Wall(input.originPosition);
+	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
 	
 	

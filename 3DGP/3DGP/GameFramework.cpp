@@ -111,10 +111,10 @@ bool GameFramework::InitMainWindow()
 {
 	// 데스크탑 해상도를 받아온다
 	HWND hDesktop = GetDesktopWindow();
-	RECT rDesktopRect;
-	GetWindowRect(hDesktop, &rDesktopRect);
-	mWndClientWidth = rDesktopRect.right - rDesktopRect.left;
-	mWndClientHeight = rDesktopRect.bottom - rDesktopRect.top;
+
+	GetWindowRect(hDesktop, &mWndRect);
+	mWndClientWidth = mWndRect.right - mWndRect.left;
+	mWndClientHeight = mWndRect.bottom - mWndRect.top;
 	mAspectRatio = static_cast<float>(mWndClientWidth) / mWndClientHeight;
 	if (!MyRegisterClass(mhInstance))
 	{
@@ -130,17 +130,16 @@ bool GameFramework::InitMainWindow()
 		| WS_CAPTION 
 		| WS_BORDER 
 	};
-	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwStyle);
-	int width	{ rc.right - rc.left };
-	int height	{ rc.bottom - rc.top };
+	AdjustWindowRectEx(&mWndRect, dwStyle, FALSE, dwStyle);
+	
 	mhWnd = CreateWindowW(
 		  L"MainWnd"
 		, L"SUNKUE D3D12 App"
 		, dwStyle
 		, CW_USEDEFAULT
 		, CW_USEDEFAULT
-		, width
-		, height
+		, mWndClientWidth
+		, mWndClientHeight
 		, nullptr
 		, nullptr
 		, mhInstance
@@ -162,7 +161,7 @@ bool GameFramework::InitDirect3D()
 	CreateSwapChain();
 	CreateDepthStencilView();
 	BuildObjects();
-
+	
 	return true;
 }
 
@@ -447,18 +446,29 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	switch (messageID)
 	{
 	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
 		SetCapture(hWnd);
 		GetCursorPos(&mOldCusorPos);
 		break;
 	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
 		ReleaseCapture();
 		break;
+	case WM_RBUTTONDOWN: {
+		GetCursorPos(&mOldCusorPos);
+		auto ray{ MouseRay() };
+		auto result{ RayCollapsePos(ray.first, ray.second, FLT_MAX) };
+		if (true == result.first) mEffect->NewWallEffect(result.second, 1.5f);
+	}break;
+	case WM_RBUTTONUP:
+		break;
 	case WM_MOUSEMOVE:
+
 		break;
-	case WM_MOUSEWHEEL:
-		break;
+	case WM_MOUSEWHEEL: {
+		XMVECTOR offSet{ mCamera->GetOffset() };
+		float Z{ XMVectorGetZ(offSet) - std::copysignf(10.0f, -static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam))) };
+		offSet = XMVectorSetZ(offSet, clamp(Z, -200.0f, -1.0f));
+		mCamera->SetOffset(offSet);
+	}break;
 	default:break;
 	}
 }
@@ -473,12 +483,15 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 		case VK_ESCAPE:
 			DestroyWindow(hWnd);
 			break;
+		case VK_SPACE:
+			//mPlayer->Jump(10.0f);
+			mPlayer->Jump(250ms);
+			break;
 		case VK_RETURN:
 			break;
-		case VK_F1:
-		case VK_F2:
-		case VK_F3:
-			//if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(wParam - VK_F1 + 1), mGameTimer.GetTimeElapsed());
+		case VK_TAB:
+			if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(
+				mPlayer->GetCamera()->GetMode() == static_cast <CAMERA_MODE>(3) ? (1) : (3)), mGameTimer.GetTimeElapsed());
 			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
@@ -511,6 +524,7 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
+	case WM_MOUSEWHEEL:
 		OnProcessingMouseMessage(hWnd, messageID, wParam, lParam);
 		return 0;
 	case WM_DESTROY:
@@ -524,6 +538,9 @@ LRESULT CALLBACK GameFramework::MsgProc(HWND hWnd, UINT messageID, WPARAM wParam
 		return 0;
 	case WM_PAINT:
 		if (READY) FrameAdvance();
+		return 0;
+	case WM_MOVE:
+		assert(GetWindowRect(mhWnd, &mWndRect));
 		return 0;
 	}
 	return DefWindowProc(hWnd, messageID, wParam, lParam);
@@ -652,9 +669,40 @@ void GameFramework::ShowFPS()
 	SetWindowText(mhWnd, mStrFrameRate.data());
 }
 
+pair<XMVECTOR, XMVECTOR> GameFramework::MouseRay()
+{
+	auto viewport(mCamera->GetViewPort());
+	XMMATRIX VM{ mCamera->GetViewMatrix() };
+	XMMATRIX PM{ mCamera->GetProjectionMatrix() };
+
+	GetWindowRect(mhWnd, &mWndRect);
+	LONG width{ mWndRect.right - mWndRect.left };
+	LONG height{ mWndRect.bottom - mWndRect.top };
+
+	float x{ (((2.0f * (float)mOldCusorPos.x) / viewport.Width) - 1.0f) / PM.r[0].m128_f32[0] };
+	float y{ (((-2.0f * (float)mOldCusorPos.y) / viewport.Height) + 1.0f) / PM.r[1].m128_f32[1] };
+	XMVECTOR origin{ 0.0f, 0.0f, 0.0f, 1.0f };
+	XMVECTOR dirPoint{ x, y, 1.0f, 0.0f };
+	
+	XMMATRIX IVM{ XMMatrixInverse(nullptr, VM) };
+	origin = XMVector3Transform(origin, IVM);
+	dirPoint = XMVector3Transform(dirPoint, IVM);
+	auto cameraPos{ mCamera->GetPosition() };
+	XMVECTOR dir{ XMVector3Normalize(dirPoint - origin) };
+
+	return make_pair<>(origin, dir);
+}
+
+pair<bool, XMVECTOR> GameFramework::RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist)
+{
+	return mScene->RayCollapsePos(origin, direction, dist);
+}
+
+
 void GameFramework::FrameAdvance()
 {
 	/* 벽 뚫 방지 */
+	
 	constexpr int TIMES{ 1 };
 	for (int i = 0; i < TIMES; ++i) {
 		mGameTimer.Tick();

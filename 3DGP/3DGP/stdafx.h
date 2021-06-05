@@ -53,6 +53,7 @@ using Microsoft::WRL::ComPtr;
 #include <filesystem>
 #include <fstream>
 #include <string_view>
+#include <ranges>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
@@ -101,7 +102,11 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b){
 		&& IsZero(XMVectorGetY(val))
 		&& IsZero(XMVectorGetZ(val));
 }
+extern constexpr XMVECTOR yAxis{ 0.0f,1.0f,0.0f };
 
+inline float ToSec(milliseconds time) {
+	return time.count() / 1000.0f;
+}
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 //#define WITH_TERRAIN_PARITION

@@ -4,7 +4,18 @@
 #include "Player.h"
 #include "Shader.h"
 
+/// //////////////
 
+EnemyObject::TEAM& operator++(EnemyObject::TEAM& t) {
+	if (EnemyObject::TEAM::ENDCOUNT == t)t = static_cast<EnemyObject::TEAM>(0);
+	else t = static_cast<EnemyObject::TEAM>((int)t + 1);
+	return t;
+}
+EnemyObject::TEAM operator++(EnemyObject::TEAM& t, int) {
+	auto temp = t;
+	++t;
+	return temp;
+}
 /// ////////////////////////////////////////
 
 GameObject::GameObject(int meshes)
@@ -12,6 +23,8 @@ GameObject::GameObject(int meshes)
 	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
 	, mOptionColor{ 1.0f }
+	, m_brother{ nullptr }
+	, m_child{ nullptr }
 {
 	XMStoreFloat4x4A(&mWorldMat, XMMatrixIdentity());
 	assert(0 <= meshes);
@@ -27,6 +40,7 @@ GameObject::~GameObject()
 		mShader->ReleaseShaderVariables();
 		mShader->Release();
 	}
+	ForFamily([](GameObject& a) {a.~GameObject(); });
 }
 
 /// ////////////////////////////////////////
@@ -75,6 +89,8 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	mShader->Render(commandList, camera);
 
 	for (auto& m : mMesh)m->Render(commandList);
+
+	//ForFamily([=](GameObject& F_F) {F_F.Render(commandList, camera); });
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)

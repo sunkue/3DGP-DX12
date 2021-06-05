@@ -259,7 +259,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 	int const xObjects{ static_cast<int>(terrainWidth / xPitch) };
 	int const yObjects{ 2 };
 	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
-	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
+	mEnemys.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
 
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
@@ -277,9 +277,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 				float const height{ terrain->GetHeight(xPosition,zPosition) };
 				constexpr float magicNum0{ 10.0f };
 				constexpr float magicNum1{ 6.0f };
-				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + magicNum1, zPosition);
-				
-				constexpr XMVECTOR yAxis{ 0.0f,1.0f,0.0f };
+				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + magicNum1, zPosition);		
 				if (0 == y) {
 					surfaceNormal = terrain->GetNormal(xPosition, zPosition);
 					rotateAxis = XMVector3Cross(yAxis, surfaceNormal);
@@ -289,7 +287,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 				}
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
-				mObjects.push_back(Eobj);
+				mEnemys.push_back(Eobj);
 			}
 		}
 	}
@@ -298,23 +296,23 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 
 void ObjectsShader::ReleaseObjects()
 {
-	mObjects.clear();
+	mEnemys.clear();
 }
 
 void ObjectsShader::AnimateObjects(milliseconds timeElapsed)
 {
-	for (const auto& obj : mObjects)obj->Animate(timeElapsed);
+	for (const auto& obj : mEnemys)obj->Animate(timeElapsed);
 }
 
 void ObjectsShader::ReleaseUploadBuffers()
 {
-	for (const auto& obj : mObjects)obj->ReleaseUploadBuffers();
+	for (const auto& obj : mEnemys)obj->ReleaseUploadBuffers();
 }
 
 void ObjectsShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	Shader::Render(commandList, camera);
-	for (const auto& obj : mObjects)obj->Render(commandList, camera);
+	for (const auto& obj : mEnemys)obj->Render(commandList, camera);
 }
 
 ////////////////////////////////////
@@ -341,9 +339,11 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 	float constexpr zPitch{ 12.0f * 3.5f };
 
 	int const xObjects{ static_cast<int>(terrainWidth / xPitch) };
-	int const yObjects{ 2 };
+	int const yObjects{ 1 };
 	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
-	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
+	size_t size{ static_cast<size_t>(xObjects) * yObjects * zObjects };
+
+	mEnemys.reserve(size);
 
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
@@ -373,11 +373,29 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 				}
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
-				mObjects.push_back(Eobj);
+				mEnemys.push_back(Eobj);
 				Scene::SCENE->AddObject(Eobj.get());
 			}
 		}
 	}
+	int quadSize{ static_cast<int>(size / ((int)EnemyObject::TEAM::ENDCOUNT)) };
+	vector<EnemyObject*> temps;
+	transform(begin(mEnemys), end(mEnemys), back_inserter(temps), [](auto& a) {return reinterpret_cast<EnemyObject*>(a.get()); });
+	auto t{ static_cast<EnemyObject::TEAM>(0) };
+	ranges::shuffle(temps, default_random_engine{ random_device{}() });
+	for (int i = 0; auto & temp : temps) {
+		assert(t != EnemyObject::TEAM::ENDCOUNT);
+		temp->SetTeam(t); ++i;
+		if (i == quadSize)t++, i = 0;
+	}
+	
+	t = static_cast<EnemyObject::TEAM>(0);
+	for (; t != EnemyObject::TEAM::ENDCOUNT; t++) {
+		Scene::SCENE->TeamAddCount(t, quadSize);
+	}
+
+	assert(size == (size_t)Scene::SCENE->TeamGetCount(static_cast<EnemyObject::TEAM>(0)) * 4);
+
 	CreateShaderVariables(device, commandList);
 }
 
@@ -425,7 +443,7 @@ void InstancingShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* r
 
 void InstancingShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mObjects.size()) };
+	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mEnemys.size()) };
 	mcbGameObjects = CreateBufferResource(device, commandList, nullptr, buffeSize
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
 	mcbGameObjects->Map(0, nullptr, (void**)&mcbMappedGameObjects);
@@ -439,12 +457,28 @@ void InstancingShader::ReleaseShaderVariables()
 	}
 }
 
+
+namespace tc {
+	inline XMFLOAT4A teamColor(EnemyObject::TEAM t)
+	{
+		XMFLOAT4A retCol{ 0.0f,0.0f,0.0f,0.5f };
+		switch (t)
+		{
+		case EnemyObject::TEAM::RED:retCol.x = 1.0f; break;
+		case EnemyObject::TEAM::GREEN:retCol.y = 1.0f; break;
+		case EnemyObject::TEAM::BLUE:retCol.z = 1.0f; break;
+		case EnemyObject::TEAM::YELLOW:retCol.x = 1.0f; retCol.y = 1.0f; break;
+		}
+		return retCol;
+	}
+}
+
 void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootShaderResourceView(2, mcbGameObjects->GetGPUVirtualAddress());
-	for (int i = 0; i < mObjects.size(); ++i) {
-		mcbMappedGameObjects[i].mColor = (i % 2) ? (XMFLOAT4A{ 0.5f,0.0f,0.0f,0.0f }) : (XMFLOAT4A{ 0.0f,0.0f,0.5f,0.0f });
-		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
+	for (int i = 0; i < mEnemys.size(); ++i) {
+		mcbMappedGameObjects[i].mColor = tc::teamColor(reinterpret_cast<EnemyObject*>(mEnemys[i].get())->GetTeam());
+		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mEnemys[i]->GetWM()));
 	}
 }
 
@@ -453,7 +487,7 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
 	
-	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
+	mEnemys[0]->Render(commandList, camera, static_cast<UINT>(mEnemys.size()));
 }
 
 ///////////////////////////////////////////////////
@@ -500,4 +534,89 @@ D3D12_SHADER_BYTECODE TerrainShader::CreatePixelShader(ID3DBlob** shaderBlob)
 {
 	return CompileShaderFromFile(const_cast<WCHAR*>
 		(L"Shaders.hlsl"), "PSTerrain", "ps_5_1", shaderBlob);
+}
+
+
+////////////////////////
+
+UIShader::UIShader()
+{
+	
+}
+
+UIShader::~UIShader()
+{
+
+}
+
+void UIShader::BuildObjects(
+	ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, void* context
+)
+{
+
+}
+
+void UIShader::ReleaseObjects()
+{
+
+}
+
+void UIShader::AnimateObjects(milliseconds timeElapsed)
+{
+
+}
+
+void UIShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
+{
+
+}
+
+void UIShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+{
+
+}
+
+void UIShader::ReleaseShaderVariables()
+{
+
+}
+
+void UIShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
+{
+
+}
+
+void UIShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
+{
+
+}
+
+
+D3D12_INPUT_LAYOUT_DESC UIShader::CreateInputLayout()
+{
+	constexpr UINT InputElemDescsCount{ 2 };
+	D3D12_INPUT_ELEMENT_DESC* InputElemDescs =
+		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
+	{
+	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
+	InputLayoutDesc.pInputElementDescs = InputElemDescs;
+	InputLayoutDesc.NumElements = InputElemDescsCount;
+	return InputLayoutDesc;
+}
+
+D3D12_SHADER_BYTECODE UIShader::CreateVertexShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "VSUI", "vs_5_1", shaderBlob);
+}
+
+D3D12_SHADER_BYTECODE UIShader::CreatePixelShader(ID3DBlob** shaderBlob)
+{
+	return CompileShaderFromFile(const_cast<WCHAR*>
+		(L"Shaders.hlsl"), "PSUI", "ps_5_1", shaderBlob);
 }
