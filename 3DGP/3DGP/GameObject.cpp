@@ -78,6 +78,13 @@ void GameObject::PrepareRender()
 
 }
 
+
+void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
+{
+	PrepareRender();
+	for (auto& m : mMesh)m->Render(commandList, instanceCount);
+}
+
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	if (false == IsVisible(camera))return;
@@ -92,13 +99,6 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 
 	//ForFamily([=](GameObject& F_F) {F_F.Render(commandList, camera); });
 }
-
-void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
-{
-	PrepareRender();
-	for (auto& m : mMesh)m->Render(commandList, instanceCount);
-}
-
 
 void GameObject::Render(
 	  ID3D12GraphicsCommandList* commandList
@@ -232,6 +232,9 @@ bool const GameObject::IsVisible(Camera const* const camera)
 
 //////////////////////////////
 
+
+
+/////////////////////////////
 EnemyObject::EnemyObject(int meshes)
 	: GameObject(meshes)
 	, mRotationSpeed{ 90.0f }
@@ -308,4 +311,35 @@ HeightMapTerrain::HeightMapTerrain(
 HeightMapTerrain::~HeightMapTerrain()
 {
 	
+}
+
+bool const HeightMapTerrain::IsVisible(Camera const* const camera)
+{
+	return true;
+}
+
+
+////////////////////////
+
+
+UIObject::UIObject(int meshes)
+	: GameObject{ meshes }
+{
+
+}
+
+UIObject::~UIObject()
+{
+
+}
+
+void UIObject::Animate(const milliseconds timeElapsed)
+{
+
+}
+
+
+bool const UIObject::IsVisible(Camera const* const camera)
+{
+	return true;
 }

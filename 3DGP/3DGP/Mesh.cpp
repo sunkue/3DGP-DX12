@@ -357,7 +357,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 		}
 	}
 	
-	mOOBB = { {0.0f,0.0f,0.0f},{(scale.x * width),max(minH,maxH),(scale.z * length)},{0.0f,0.0f,0.0f,1.0f} };
+	//mOOBB = { {0.0f,0.0f,0.0f},{(scale.x * width),max(minH,maxH),(scale.z * length)},{0.0f,0.0f,0.0f,1.0f} };
 
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
@@ -440,4 +440,58 @@ XMVECTORF32 const HeighMapGridMesh::OnGetColor(int x, int z, void* context)const
 	XMVECTORF32 color;
 	color.v = { fScale * incidentLightColor };
 	return color;
+}
+
+/////////////////////////////////
+
+SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+	: Mesh{ device,commandList }
+{
+	float x = 1000.0f;
+	float y = 1000.0f;
+	DiffusedVertex vertices[]{
+		 {-x, +y ,1.0f, Colors::Red}
+		,{+x, +y ,1.0f, Colors::Red}
+		,{+x, -y ,1.0f, Colors::Red}
+		,{-x, -y ,1.0f, Colors::Red}
+	};
+	mStride = sizeof(decltype(vertices[0]));
+	mVerticesCount = _countof(vertices);
+	UINT bufferSize{ mStride * mVerticesCount };
+	mVertexBuffer = CreateBufferResource(
+		  device
+		, commandList
+		, vertices
+		, bufferSize
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, mVertexUploadBuffer.GetAddressOf());
+	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
+	mVertexBufferView.StrideInBytes = mStride;
+	mVertexBufferView.SizeInBytes = bufferSize;
+
+	mOOBB = { {0.0f,0.0f,0.0f},{x,y,0.0f},{0.0f,0.0f,0.0f,1.0f} };
+
+	UINT indices[]{
+		 0,1,2
+		,0,2,3
+	};
+	mIndicesCount = _countof(indices);
+	bufferSize = sizeof(UINT) * mIndicesCount;
+	mIndexBuffer = CreateBufferResource(
+		  device
+		, commandList
+		, indices
+		, bufferSize
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_INDEX_BUFFER
+		, mIndexUploadBuffer.GetAddressOf());
+	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
+	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	mIndexBufferView.SizeInBytes = bufferSize;
+}
+
+SquareMesh::~SquareMesh()
+{
+
 }

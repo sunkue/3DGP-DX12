@@ -68,7 +68,7 @@ protected:
 	BoundingOrientedBox mOOBB;
 
 public:
-	bool const IsVisible(Camera const* const camera = nullptr);
+	virtual bool const IsVisible(Camera const* const camera = nullptr);
 
 protected:
 	XMFLOAT4X4A	mWorldMat;
@@ -101,7 +101,6 @@ protected:
 	GameObject* m_brother;
 	GameObject* m_child;
 };
-
 
 class EnemyObject : public GameObject
 {
@@ -155,6 +154,8 @@ public:
 	XMFLOAT3A GetScale()const { return mScale; }
 	float GetWidth()const { return mWidth * mScale.x; }
 	float GetLength()const { return mLength * mScale.z; }
+	
+	virtual bool const IsVisible(Camera const* const camera = nullptr)final;
 
 private:
 	unique_ptr<HeightMapImage> mHeightMapImage;
@@ -164,15 +165,16 @@ private:
 
 };
 
-class UI : public GameObject
+class UIObject : public GameObject
 {
+public:
+	UIObject(int meshes = 1);
+	virtual ~UIObject();
+
 	virtual void Animate(const milliseconds timeElapsed)override;
 
 protected:
-	virtual void PrepareRender()override;
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables()override;
 
+	virtual bool const IsVisible(Camera const* const camera = nullptr)final;
 
 };

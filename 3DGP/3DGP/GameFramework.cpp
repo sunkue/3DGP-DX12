@@ -53,7 +53,8 @@ GameFramework::~GameFramework()
 int GameFramework::Run()
 {
 	MSG msg{};
-
+	SetCursorPos(mWndClientWidth / 2, mWndClientHeight / 2);
+	GetCursorPos(&mOldCusorPos);
 	HACCEL hAccelTable = LoadAccelerators(mhInstance, MAKEINTRESOURCE(IDC_MY3DGP1));
 
 	while (msg.message != WM_QUIT)
@@ -384,7 +385,7 @@ void GameFramework::BuildObjects()
 	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
 	mPlayer->SetEffect(mEffect);
 	mScene->SetEffect(mEffect);
-
+	
 	mCommandList->Close();
 	ExecuteComandLists();
 	WaitForGpuComplete();
@@ -445,18 +446,19 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 {
 	switch (messageID)
 	{
-	case WM_LBUTTONDOWN:
-		SetCapture(hWnd);
-		GetCursorPos(&mOldCusorPos);
-		break;
-	case WM_LBUTTONUP:
-		ReleaseCapture();
-		break;
-	case WM_RBUTTONDOWN: {
+	case WM_LBUTTONDOWN: {
 		GetCursorPos(&mOldCusorPos);
 		auto ray{ MouseRay() };
 		auto result{ RayCollapsePos(ray.first, ray.second, FLT_MAX) };
 		if (true == result.first) mEffect->NewWallEffect(result.second, 1.5f);
+		//SetCapture(hWnd);
+		//GetCursorPos(&mOldCusorPos);
+	}break;
+	case WM_LBUTTONUP:
+		//ReleaseCapture();
+		break;
+	case WM_RBUTTONDOWN: {
+		
 	}break;
 	case WM_RBUTTONUP:
 		break;
@@ -558,27 +560,27 @@ void GameFramework::ProcessInput()
 		if (key['A'] & 0xf0)dir |= DIR_LEFT;
 		if (key['D'] & 0xf0)dir |= DIR_RIGHT;
 
-		if (key[VK_UP]		& 0xf0)dir |= DIR_FORWARD;
-		if (key[VK_DOWN]	& 0xf0)dir |= DIR_BACKWARD;
-		if (key[VK_LEFT]	& 0xf0)dir |= DIR_LEFT;
-		if (key[VK_RIGHT]	& 0xf0)dir |= DIR_RIGHT;
+		if (key[VK_UP] & 0xf0)dir |= DIR_FORWARD;
+		if (key[VK_DOWN] & 0xf0)dir |= DIR_BACKWARD;
+		if (key[VK_LEFT] & 0xf0)dir |= DIR_LEFT;
+		if (key[VK_RIGHT] & 0xf0)dir |= DIR_RIGHT;
 
-		if (key[VK_SHIFT]	& 0xf0)dir |= DIR_UP;
-		if (key[VK_CONTROL]	& 0xf0)dir |= DIR_DOWN;
+		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
+		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
 	}
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };
 	POINT cursorPos;
-	if (GetCapture() == mhWnd) {
-		GetCursorPos(&cursorPos);
-		deltaX = static_cast<float>((cursorPos.x - mOldCusorPos.x) / 3.0f);
-		deltaY = static_cast<float>((cursorPos.y - mOldCusorPos.y) / 3.0f);
-		SetCursorPos(mOldCusorPos.x, mOldCusorPos.y);
-	}
+	if (IsRButtonDown()) dir = 0;
+	GetCursorPos(&cursorPos);
+	deltaX = static_cast<float>((cursorPos.x - mOldCusorPos.x) / 3.0f);
+	deltaY = static_cast<float>((cursorPos.y - mOldCusorPos.y) / 3.0f);
+	SetCursorPos(mOldCusorPos.x, mOldCusorPos.y);
+
 	if ((dir != 0) || (deltaX != 0.0f) || (deltaY != 0.0f)) {
 		if (deltaX || deltaY) {
-			if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
-			else mPlayer->Rotate(deltaY, deltaX, 0.0f);
+			//if (key[VK_RBUTTON] & 0xF0)mPlayer->Rotate(deltaY, 0.0f, -deltaX);
+			mPlayer->Rotate(deltaY, deltaX, 0.0f);
 		}
 		if (dir) {
 			constexpr float MagicSpeed{ 400.0f };

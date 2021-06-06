@@ -259,7 +259,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 	int const xObjects{ static_cast<int>(terrainWidth / xPitch) };
 	int const yObjects{ 2 };
 	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
-	mEnemys.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
+	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
 
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
@@ -287,7 +287,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 				}
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
-				mEnemys.push_back(Eobj);
+				mObjects.push_back(Eobj);
 			}
 		}
 	}
@@ -296,23 +296,23 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 
 void ObjectsShader::ReleaseObjects()
 {
-	mEnemys.clear();
+	mObjects.clear();
 }
 
 void ObjectsShader::AnimateObjects(milliseconds timeElapsed)
 {
-	for (const auto& obj : mEnemys)obj->Animate(timeElapsed);
+	for (const auto& obj : mObjects)obj->Animate(timeElapsed);
 }
 
 void ObjectsShader::ReleaseUploadBuffers()
 {
-	for (const auto& obj : mEnemys)obj->ReleaseUploadBuffers();
+	for (const auto& obj : mObjects)obj->ReleaseUploadBuffers();
 }
 
 void ObjectsShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	Shader::Render(commandList, camera);
-	for (const auto& obj : mEnemys)obj->Render(commandList, camera);
+	for (const auto& obj : mObjects)obj->Render(commandList, camera);
 }
 
 ////////////////////////////////////
@@ -343,7 +343,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
 	size_t size{ static_cast<size_t>(xObjects) * yObjects * zObjects };
 
-	mEnemys.reserve(size);
+	mObjects.reserve(size);
 
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
@@ -373,14 +373,14 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 				}
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
-				mEnemys.push_back(Eobj);
+				mObjects.push_back(Eobj);
 				Scene::SCENE->AddObject(Eobj.get());
 			}
 		}
 	}
 	int quadSize{ static_cast<int>(size / ((int)EnemyObject::TEAM::ENDCOUNT)) };
 	vector<EnemyObject*> temps;
-	transform(begin(mEnemys), end(mEnemys), back_inserter(temps), [](auto& a) {return reinterpret_cast<EnemyObject*>(a.get()); });
+	transform(begin(mObjects), end(mObjects), back_inserter(temps), [](auto& a) {return reinterpret_cast<EnemyObject*>(a.get()); });
 	auto t{ static_cast<EnemyObject::TEAM>(0) };
 	ranges::shuffle(temps, default_random_engine{ random_device{}() });
 	for (int i = 0; auto & temp : temps) {
@@ -443,7 +443,7 @@ void InstancingShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* r
 
 void InstancingShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mEnemys.size()) };
+	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_INSTANCE) * mObjects.size()) };
 	mcbGameObjects = CreateBufferResource(device, commandList, nullptr, buffeSize
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
 	mcbGameObjects->Map(0, nullptr, (void**)&mcbMappedGameObjects);
@@ -476,9 +476,9 @@ namespace tc {
 void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootShaderResourceView(2, mcbGameObjects->GetGPUVirtualAddress());
-	for (int i = 0; i < mEnemys.size(); ++i) {
-		mcbMappedGameObjects[i].mColor = tc::teamColor(reinterpret_cast<EnemyObject*>(mEnemys[i].get())->GetTeam());
-		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mEnemys[i]->GetWM()));
+	for (int i = 0; i < mObjects.size(); ++i) {
+		mcbMappedGameObjects[i].mColor = tc::teamColor(reinterpret_cast<EnemyObject*>(mObjects[i].get())->GetTeam());
+		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
 	}
 }
 
@@ -487,7 +487,7 @@ void InstancingShader::Render(ID3D12GraphicsCommandList* commandList, Camera* ca
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
 	
-	mEnemys[0]->Render(commandList, camera, static_cast<UINT>(mEnemys.size()));
+	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
 ///////////////////////////////////////////////////
@@ -540,8 +540,10 @@ D3D12_SHADER_BYTECODE TerrainShader::CreatePixelShader(ID3DBlob** shaderBlob)
 ////////////////////////
 
 UIShader::UIShader()
+	: mcb_MappedUIs{ nullptr }
+	, m_UIBufferView{}
 {
-	
+	CreateShaderVariables(device, commandList);
 }
 
 UIShader::~UIShader()
@@ -555,42 +557,65 @@ void UIShader::BuildObjects(
 	, void* context
 )
 {
+	constexpr size_t size{ 4 };
 
-}
+	mObjects.reserve(size);
 
-void UIShader::ReleaseObjects()
-{
+	SquareMesh* square{ new SquareMesh(device,commandList) };
 
-}
+	shared_ptr<UIObject> Eobj{ nullptr };
+	for (int i = 0; i < 4; i++) {
+		Eobj = make_shared<UIObject>();
+		Eobj->SetMesh(0, square);
+		float const x = 0.25f * i;
+		float const y = 0.25f;
+		Eobj->SetPosition(x, y, 0.0f);
+		mObjects.push_back(Eobj);
+		Scene::SCENE->AddUI(Eobj.get());
+	}
 
-void UIShader::AnimateObjects(milliseconds timeElapsed)
-{
 
+	CreateShaderVariables(device, commandList);
 }
 
 void UIShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
 {
-
+	mPipelineStates.emplace_back();
+	Shader::CreateShader(device, rootSignature);
 }
 
 void UIShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
+	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_UI) * mObjects.size()) };
+	mcb_UIs = CreateBufferResource(device, commandList, nullptr, buffeSize
+		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+	mcb_UIs->Map(0, nullptr, (void**)&mcb_MappedUIs);
 
 }
 
 void UIShader::ReleaseShaderVariables()
 {
-
+	if (mcb_UIs) {
+		mcb_UIs->Unmap(0, nullptr);
+		mcb_UIs.Reset();
+	}
 }
 
 void UIShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-
+	commandList->SetGraphicsRootShaderResourceView(3, mcb_UIs->GetGPUVirtualAddress());
+	for (int i = 0; i < 4; ++i) {
+		mcb_MappedUIs[i].m_samplerIndex = i;
+		mcb_MappedUIs[i].m_effectOn = false;
+	}
 }
 
 void UIShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
+	Shader::Render(commandList, camera);
+	UpdateShaderVariables(commandList);
 
+	for (auto obj : mObjects)obj->Render(commandList, camera, 1);
 }
 
 

@@ -16,7 +16,8 @@ struct VS_VB_INSTANCE
 
 struct VS_VB_UI
 {
-
+	UINT m_samplerIndex;
+	bool m_effectOn;
 };
 
 class Shader
@@ -89,7 +90,7 @@ protected:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
 	
 protected:
-	vector<shared_ptr<GameObject>> mEnemys;
+	vector<shared_ptr<GameObject>> mObjects;
 };
 
 class InstancingShader : public ObjectsShader
@@ -135,8 +136,9 @@ protected:
 	
 };
 
-class UIShader : public InstancingShader
+class UIShader : public Shader
 {
+public:
 	UIShader();
 	virtual ~UIShader();
 

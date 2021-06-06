@@ -140,6 +140,12 @@ void Camera::RegenerateViewMatrix()
 void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 {
 	XMStoreFloat4x4A(&mProjectionMat, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
+	GenerateOrthographicMatrix(n, f);
+}
+
+void Camera::GenerateOrthographicMatrix(float n, float f)
+{
+	XMStoreFloat4x4A(&m_OrthographicMat, XMMatrixOrthographicLH(mViewport.Width, mViewport.Height, n, f));
 }
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
@@ -147,17 +153,20 @@ void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	//cout <<"POS x:"<< mPosition.x <<"\ty:"<< mPosition.y <<"\tz:"<< mPosition.z<<"\n";
 	/* 다렉은 행우선, 셰이더는 열우선 행렬. Transpose해주어야 함. */
 	XMFLOAT4X4A view;
-	XMStoreFloat4x4A(&view, XMMatrixTranspose(XMLoadFloat4x4A(&mViewMat)));
+	XMStoreFloat4x4A(&view, XMMatrixTranspose(GetViewMatrix()));
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &view, 0);
 	XMFLOAT4X4A proj;
-	XMStoreFloat4x4A(&proj, XMMatrixTranspose(XMLoadFloat4x4A(&mProjectionMat)));
+	XMStoreFloat4x4A(&proj, XMMatrixTranspose(GetProjectionMatrix()));
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &proj, 16);
+	XMFLOAT4X4A orth;
+	XMStoreFloat4x4A(&orth, XMMatrixTranspose(GetOrthographicMatrix()));
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &orth, 32);
 	struct V {
 		float x;
 		float y;
 	} v{ mViewport.Width,mViewport.Height };
 	//cout << v.x << v.y << " ";
-	commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 32);
+	commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 48);
 }
 
 void Camera::ReleaseShaderVariables()
@@ -280,8 +289,8 @@ void ThirdPersonCamera::Update(FXMVECTOR lookAt, milliseconds timeElapsed)
 	XMVECTOR dir{ XMVectorSubtract(pos,this->GetPosition()) };
 	float length{ XMVectorGetX(XMVector3Length(dir)) };
 	dir = XMVector3Normalize(dir);
-
-	milliseconds timeLagScale = (mTimeLag.count()) ? timeElapsed * (1s / mTimeLag) : 1000ms;
+	
+	milliseconds timeLagScale = (0 < mTimeLag.count()) ? timeElapsed * (1s / mTimeLag) : 1000ms;
 	float distance{ length * timeLagScale.count() / 1000 };
 	if (length < distance)distance = length;
 	if (length < 0.01f)distance = length;

@@ -102,11 +102,20 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 		, 256, 256, 256, 256, scale, color);
 #endif
 
+	SquareMesh* square{ new SquareMesh(device,commandList) };
+	UIObject* Eobj{ nullptr };
+	for (int i = 0; i < 4; i++) {
+		Eobj = new UIObject;
+		Eobj->SetMesh(0, square);
+		float const x = 0.25f * i;
+		float const y = 0.25f;
+		Eobj->SetPosition(x, y, 0.0f);
+		AddUI(Eobj);
+	}
 
 	assert(mShaders.empty());
 	mShaders.push_back(new InstancingShader);
 	assert(mShaders.size() == 1);
-
 	mShaders[0]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[0]->BuildObjects(device, commandList, mTerrain);
 };
@@ -169,7 +178,8 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 
-	for (auto& shader : mShaders)shader->Render(commandList, camera);
+	//for (auto& shader : mShaders)shader->Render(commandList, camera);
+	mShaders[0]->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);
@@ -181,7 +191,7 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {
-		for (const auto& obj : mEnemys) {
+		for (const auto& obj : mObjects) {
 			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB())) {
 				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
@@ -194,7 +204,7 @@ pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTO
 {
 	// obj player
 	vector<GameObject*> temp;
-	for (const auto& obj : mEnemys) {
+	for (const auto& obj : mObjects) {
 		if (obj->GetOOBB().Intersects(origin, direction, dist)) {
 			temp.push_back(obj);
 		}

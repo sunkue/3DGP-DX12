@@ -35,8 +35,8 @@ protected:
 
 public:
 	void SetPlayer(Player* player) { mPlayer = player; };
-	void AddObject(EnemyObject* obj) { mEnemys.push_back(obj); }
-	
+	void AddObject(EnemyObject* obj) { mObjects.push_back(obj); }
+	void AddUI(UIObject* ui) { m_UIs.push_back(ui); }
 	void SetEffect(Effect* eff) { mEffect = eff; }
 	HeightMapTerrain* GetTerrain()const { return mTerrain; }
 
@@ -54,13 +54,13 @@ protected:
 	}m_Team[static_cast<int>(EnemyObject::TEAM::ENDCOUNT)];
 
 protected:
-	vector<ObjectsShader*>	mShaders;
+	vector<InstancingShader*>	mShaders;
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 	Player* mPlayer;
-	vector<EnemyObject*> mEnemys;
+	vector<EnemyObject*> mObjects;
 
 	Effect* mEffect;
 	HeightMapTerrain* mTerrain;
 
-	vector<UI*> m_UI;
+	vector<UIObject*> m_UIs;
 };

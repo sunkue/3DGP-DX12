@@ -154,3 +154,10 @@ protected:
 	XMFLOAT3A mScale;
 
 };
+
+class SquareMesh : public Mesh
+{
+public:
+	SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual ~SquareMesh();
+};

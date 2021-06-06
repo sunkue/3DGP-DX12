@@ -9,7 +9,8 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix viewMat : packoffset(c0);
 	matrix projMat : packoffset(c4);
-	float2 viewport : packoffset(c8.x);
+	matrix orthMat : packoffset(c8);
+	float2 viewport : packoffset(c12.x);
 }
 
 /////////////////////////////////////////
@@ -27,6 +28,13 @@ struct EFFECT_INFO
 	float3 mPosition;
 };
 StructuredBuffer<EFFECT_INFO> effectInfos : register(t1);
+
+struct UI_INFO
+{
+	uint mSamplerIndex;
+	bool mEffectOn;
+};
+StructuredBuffer<UI_INFO> UIInfos : register(t2);
 //////////////////////////////////////////
 
 struct VS_INPUT
@@ -42,18 +50,6 @@ struct VS_OUTPUT
 	float4 color : COLOR;
 };
 
-struct VS_INSTANCING_INPUT
-{
-	float3 position : POSITION;
-	float4 color : COLOR;
-};
-
-struct VS_INSTANCING_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float3 originPosition : POSITION;
-	float4 color : COLOR;
-};
 //////////////////////////////////////
 
 float4 WVP(float3 position)
@@ -67,7 +63,10 @@ float4 VP(float3 position)
 	return mul(mul(float4(position, 1.0f)
 	, viewMat), projMat);
 }
-
+float4 Orth(float3 position)
+{
+	return mul(float4(position, 1.0f), orthMat);
+}
 ///////////////////////////////////////
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {
@@ -81,7 +80,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	return output;
 }
 
-VS_INSTANCING_OUTPUT VSInstancing(VS_INSTANCING_INPUT input, uint instanceID : SV_InstanceID)
+VS_OUTPUT VSInstancing(VS_INPUT input, uint instanceID : SV_InstanceID)
 {
 	VS_OUTPUT output;
 	output.originPosition = mul(float4(input.position, 1.0f), gameObjectInfos[instanceID].mTransform).xyz;
@@ -105,12 +104,26 @@ VS_OUTPUT VSTerrain(VS_INPUT input)
 
 	return output;
 }
+
+VS_OUTPUT VSUI(VS_INPUT input)
+{
+	VS_OUTPUT output;
+	output.originPosition = mul(float4(input.position, 1.0f), worldMat).xyz;
+	
+	output.position = float4(input.position, 1.0f);
+	//Orth(output.originPosition);
+
+	output.color = input.color;
+
+	return output;
+}
+
 /////////////////////////////////////////
 
 float4 Effect0Wall(float3 originPos)
 {
 	float t = effectInfos[0].mLifeTime - effectInfos[0].mTime;
-	if (15.0f > distance(effectInfos[0].mPosition, originPos))
+	if (15.0f > distance(effectInfos[0].mPosition, originPos) && 0.0f < t)
 	{
 		return float4(t, t, t, 0.0f);
 	}
@@ -146,7 +159,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 	return output;
 }
 
-float4 PSInstancing(VS_INSTANCING_OUTPUT input) : SV_TARGET
+float4 PSInstancing(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 	output -= Effect0Wall(input.originPosition);
@@ -163,6 +176,13 @@ float4 PSTerrain(VS_OUTPUT input) : SV_TARGET
 	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
 	
+	
+	return output;
+}
+
+float4 PSUI(VS_OUTPUT input) : SV_TARGET
+{
+	float4 output = input.color;
 	
 	return output;
 }

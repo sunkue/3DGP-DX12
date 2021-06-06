@@ -201,7 +201,9 @@ void Player::Update(const milliseconds timeElapsed)
 	CAMERA_MODE camMode{ mCamera->GetMode() };
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->Update(GetPosition(), timeElapsed); }
 	if (mCameraUpdateContext)CameraUpdateCallback(timeElapsed);
-	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition()); }
+	XMVECTOR add{ XMVectorZero() };
+	if (IsRButtonDown())add = GetLookVector() * 100.0f;
+	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition() + add); }
 	mCamera->RegenerateViewMatrix();
 
 
@@ -450,9 +452,9 @@ Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds time
 		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode);
 		mCamera->SetTimeLag(milliseconds::zero());
 		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 		mCamera->SetViewport(0, 0, W, H);
 		mCamera->SetScissorRect(0, 0, W, H);
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 	}break;
 	case CAMERA_MODE::SPACESHIP: {
 		assert(0);
@@ -466,9 +468,9 @@ Camera* TerrainPlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds time
 		mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
 		mCamera->SetTimeLag(250ms);
 		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
-		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 		mCamera->SetViewport(0, 0, W, H);
 		mCamera->SetScissorRect(0, 0, W, H);
+		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
 	}break;
 	}
 	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
