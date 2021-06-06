@@ -468,7 +468,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	case WM_MOUSEWHEEL: {
 		XMVECTOR offSet{ mCamera->GetOffset() };
 		float Z{ XMVectorGetZ(offSet) - std::copysignf(10.0f, -static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam))) };
-		offSet = XMVectorSetZ(offSet, clamp(Z, -200.0f, -1.0f));
+		offSet = XMVectorSetZ(offSet, clamp(Z, -500.0f, -1.0f));
 		mCamera->SetOffset(offSet);
 	}break;
 	default:break;
@@ -571,7 +571,7 @@ void GameFramework::ProcessInput()
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };
 	POINT cursorPos;
-	if (IsRButtonDown()) dir = 0;
+	
 	GetCursorPos(&cursorPos);
 	deltaX = static_cast<float>((cursorPos.x - mOldCusorPos.x) / 3.0f);
 	deltaY = static_cast<float>((cursorPos.y - mOldCusorPos.y) / 3.0f);
@@ -708,7 +708,7 @@ void GameFramework::FrameAdvance()
 	constexpr int TIMES{ 1 };
 	for (int i = 0; i < TIMES; ++i) {
 		mGameTimer.Tick();
-		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
 		ProcessInput();
 		AnimateObjects();
 	}

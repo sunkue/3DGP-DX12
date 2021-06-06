@@ -71,7 +71,7 @@ public:
 
 	bool Collable() { return mInvincible | mStealth; }
 	void SetEffect(Effect* eff) { mEffect = eff; }
-
+	void AddScore(int score = 1);
 	void Crash();
 
 protected:
@@ -83,6 +83,8 @@ protected:
 	float mPitch;
 	float mYaw;
 	float mRoll;
+
+	float m_score;
 
 	XMFLOAT3A mVelocity;
 	XMFLOAT3A mGravity;

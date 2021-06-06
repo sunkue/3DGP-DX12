@@ -111,6 +111,10 @@ protected:
 	float	mYaw;
 	float	mRoll;
 
+
+	float m_n;
+	float m_f;
+
 	CAMERA_MODE	mMode;
 
 	// 3인친용 소스

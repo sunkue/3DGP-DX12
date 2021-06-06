@@ -140,6 +140,8 @@ void Camera::RegenerateViewMatrix()
 void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 {
 	XMStoreFloat4x4A(&mProjectionMat, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
+	m_n = n;
+	m_f = f;
 	GenerateOrthographicMatrix(n, f);
 }
 

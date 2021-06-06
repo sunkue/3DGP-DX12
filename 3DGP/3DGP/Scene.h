@@ -45,12 +45,25 @@ public:
 	void TeamAddCount(EnemyObject::TEAM team, int count = 1) {
 		m_Team[static_cast<int>(team)].m_count += count;
 	}
-	auto TeamGetCount(EnemyObject::TEAM team) {
+	auto TeamGetCount(EnemyObject::TEAM team)const {
 		return m_Team[static_cast<int>(team)].m_count;
+	}
+	void TeamAddCount(int team, int count = 1) {
+		m_Team[team].m_count += count;
+	}
+	auto TeamGetCount(int team)const {
+		return m_Team[team].m_count;
+	}
+	auto TeamMaxCount()const {
+		return TEAM::MAXCOUNT;
+	}
+	auto TeamSetMaxCount(int max)const {
+		TEAM::MAXCOUNT = max;
 	}
 protected:
 	struct TEAM {
 		int m_count{ 0 };
+		static inline int MAXCOUNT{ 10 };
 	}m_Team[static_cast<int>(EnemyObject::TEAM::ENDCOUNT)];
 
 protected:

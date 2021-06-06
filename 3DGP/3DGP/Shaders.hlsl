@@ -31,8 +31,8 @@ StructuredBuffer<EFFECT_INFO> effectInfos : register(t1);
 
 struct UI_INFO
 {
-	uint mSamplerIndex;
-	bool mEffectOn;
+	matrix mTransform;
+	float4 mColor;
 };
 StructuredBuffer<UI_INFO> UIInfos : register(t2);
 //////////////////////////////////////////
@@ -63,9 +63,15 @@ float4 VP(float3 position)
 	return mul(mul(float4(position, 1.0f)
 	, viewMat), projMat);
 }
-float4 Orth(float3 position)
+float4 WVO(float3 position)
 {
-	return mul(float4(position, 1.0f), orthMat);
+	return mul(mul(mul(float4(position, 1.0f)
+	, worldMat), viewMat), orthMat);
+}
+float4 VO(float3 position)
+{
+	return mul(mul(float4(position, 1.0f)
+	, viewMat), orthMat);
 }
 ///////////////////////////////////////
 VS_OUTPUT VSDiffused(VS_INPUT input)
@@ -73,7 +79,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	VS_OUTPUT output;
 	output.originPosition = mul(float4(input.position, 1.0f), worldMat).xyz;
 	
-	output.position = WVP(input.position);
+	output.position = VP(output.originPosition);
 
 	output.color = input.color;
 
@@ -83,13 +89,12 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 VS_OUTPUT VSInstancing(VS_INPUT input, uint instanceID : SV_InstanceID)
 {
 	VS_OUTPUT output;
-	output.originPosition = mul(float4(input.position, 1.0f), gameObjectInfos[instanceID].mTransform).xyz;
+	output.originPosition = mul(float4(input.position, 1.0f)
+	, gameObjectInfos[instanceID].mTransform).xyz;
 	
-	output.position = mul(mul(mul(float4(input.position, 1.0f)
-	, gameObjectInfos[instanceID].mTransform), viewMat), projMat);
+	output.position = VP(output.originPosition);
 
 	output.color = input.color + gameObjectInfos[instanceID].mColor;
-	
 	return output;
 }
 
@@ -98,22 +103,21 @@ VS_OUTPUT VSTerrain(VS_INPUT input)
 	VS_OUTPUT output;
 	output.originPosition = mul(float4(input.position, 1.0f), worldMat).xyz;
 	
-	output.position = WVP(input.position);
+	output.position = VP(output.originPosition);
 
 	output.color = input.color;
 
 	return output;
 }
 
-VS_OUTPUT VSUI(VS_INPUT input)
+VS_OUTPUT VSUI(VS_INPUT input, uint instanceID : SV_InstanceID)
 {
 	VS_OUTPUT output;
-	output.originPosition = mul(float4(input.position, 1.0f), worldMat).xyz;
+	output.originPosition = mul(float4(input.position, 1.0f), UIInfos[instanceID].mTransform).xyz;
 	
-	output.position = float4(input.position, 1.0f);
-	//Orth(output.originPosition);
-
-	output.color = input.color;
+	output.position = float4(output.originPosition, 1.0f);
+	output.position.z = 0.0f;
+	output.color = input.color + UIInfos[instanceID].mColor;
 
 	return output;
 }
@@ -164,7 +168,6 @@ float4 PSInstancing(VS_OUTPUT input) : SV_TARGET
 	float4 output = input.color;
 	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
-	//output = float4(input.position.x / viewport.x, input.position.y / viewport.y, 0.0f, 0.0f);
 	
 	return output;
 }

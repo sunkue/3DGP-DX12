@@ -44,9 +44,9 @@ public:
 	XMVECTOR XM_CALLCONV GetUp() const;
 	XMVECTOR XM_CALLCONV GetRight() const;
 	XMVECTOR XM_CALLCONV GetScale() const { return XMLoadFloat3A(&mScale); }
-	void XM_CALLCONV SetScale(FXMVECTOR scale) { return XMStoreFloat3A(&mScale, scale); }
+	void XM_CALLCONV SetScale(FXMVECTOR scale) { XMStoreFloat3A(&mScale, scale); }
 
-	XMMATRIX XM_CALLCONV GetWM()const { return XMLoadFloat4x4A(&mWorldMat); }
+	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*XMLoadFloat4x4A(&mWorldMat); }
 
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(FXMVECTOR position);
@@ -120,7 +120,10 @@ private:
 	XMFLOAT3A mDir;
 	float mSpeed;
 	TEAM m_team{ EnemyObject::TEAM::ENDCOUNT };
+	bool m_able;
 public:
+	bool const IsAble()const { return m_able; }
+	void SetAbleState(bool able) { m_able = able; }
 	TEAM const GetTeam()const { return m_team; }
 	void SetTeam(TEAM t) { m_team = t; }
 

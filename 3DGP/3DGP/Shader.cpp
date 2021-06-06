@@ -344,7 +344,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 	size_t size{ static_cast<size_t>(xObjects) * yObjects * zObjects };
 
 	mObjects.reserve(size);
-
+	Scene::SCENE->TeamSetMaxCount(size);
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
 
@@ -543,7 +543,7 @@ UIShader::UIShader()
 	: mcb_MappedUIs{ nullptr }
 	, m_UIBufferView{}
 {
-	CreateShaderVariables(device, commandList);
+	
 }
 
 UIShader::~UIShader()
@@ -551,31 +551,49 @@ UIShader::~UIShader()
 
 }
 
-void UIShader::BuildObjects(
-	ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, void* context
-)
+void UIShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
 {
-	constexpr size_t size{ 4 };
-
-	mObjects.reserve(size);
-
 	SquareMesh* square{ new SquareMesh(device,commandList) };
-
-	shared_ptr<UIObject> Eobj{ nullptr };
+	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,0.2f,0.2f,0.2f) };
+	shared_ptr<UIObject> UIobj{ nullptr };	
 	for (int i = 0; i < 4; i++) {
-		Eobj = make_shared<UIObject>();
-		Eobj->SetMesh(0, square);
-		float const x = 0.25f * i;
-		float const y = 0.25f;
-		Eobj->SetPosition(x, y, 0.0f);
-		mObjects.push_back(Eobj);
-		Scene::SCENE->AddUI(Eobj.get());
+		UIobj = make_shared<UIObject>();
+		UIobj->SetMesh(0, square);
+		float const x = -0.8f + 0.5f * i;
+		float const y = 0.95f;
+		UIobj->SetPosition(x, y, 0.0f);
+		UIobj->SetScale({ 0.12f, 0.025f, 1.0f });
+		Scene::SCENE->AddUI(UIobj.get());
+		mObjects.push_back(UIobj);
 	}
-
-
+	UIobj = make_shared<UIObject>();
+	UIobj->SetMesh(0, square);
+	float const x = 0.0f;
+	float const y = -0.95f;
+	UIobj->SetPosition(x, y, 0.0f);
+	UIobj->SetScale({ 0.3f, 0.025f, 1.0f });
+	Scene::SCENE->AddUI(UIobj.get());
+	mObjects.push_back(UIobj);
 	CreateShaderVariables(device, commandList);
+}
+
+void UIShader::ReleaseObjects()
+{
+
+}
+
+void UIShader::AnimateObjects(milliseconds timeElapsed)
+{
+	auto max = Scene::SCENE->TeamMaxCount() / 4.0f;
+
+	for (int i = 0; i < 4; ++i) {
+		auto ratio = Scene::SCENE->TeamGetCount(i) / max;
+		
+		auto scale{ mObjects[i]->GetScale() };
+		scale = XMVectorSetX(scale, 0.12f * ratio);
+		mObjects[i]->SetScale(scale);
+	}
+	ObjectsShader::AnimateObjects(timeElapsed);
 }
 
 void UIShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
@@ -590,7 +608,6 @@ void UIShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommand
 	mcb_UIs = CreateBufferResource(device, commandList, nullptr, buffeSize
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
 	mcb_UIs->Map(0, nullptr, (void**)&mcb_MappedUIs);
-
 }
 
 void UIShader::ReleaseShaderVariables()
@@ -603,10 +620,10 @@ void UIShader::ReleaseShaderVariables()
 
 void UIShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	commandList->SetGraphicsRootShaderResourceView(3, mcb_UIs->GetGPUVirtualAddress());
-	for (int i = 0; i < 4; ++i) {
-		mcb_MappedUIs[i].m_samplerIndex = i;
-		mcb_MappedUIs[i].m_effectOn = false;
+	commandList->SetGraphicsRootShaderResourceView(4, mcb_UIs->GetGPUVirtualAddress());
+	for (int i = 0; i < mObjects.size(); ++i) {
+		XMStoreFloat4x4A(&mcb_MappedUIs[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
+		mcb_MappedUIs[i].mColor = tc::teamColor(static_cast<EnemyObject::TEAM>(i));
 	}
 }
 
@@ -614,8 +631,7 @@ void UIShader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	Shader::Render(commandList, camera);
 	UpdateShaderVariables(commandList);
-
-	for (auto obj : mObjects)obj->Render(commandList, camera, 1);
+	mObjects[0]->Render(commandList, camera, static_cast<UINT>(mObjects.size()));
 }
 
 

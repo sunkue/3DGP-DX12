@@ -447,16 +447,16 @@ XMVECTORF32 const HeighMapGridMesh::OnGetColor(int x, int z, void* context)const
 SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 	: Mesh{ device,commandList }
 {
-	float x = 1000.0f;
-	float y = 1000.0f;
+	float x = 1.0f;
+	float y = 1.0f;
 	DiffusedVertex vertices[]{
-		 {-x, +y ,1.0f, Colors::Red}
-		,{+x, +y ,1.0f, Colors::Red}
-		,{+x, -y ,1.0f, Colors::Red}
-		,{-x, -y ,1.0f, Colors::Red}
+		 {-x, +y ,1.0f, Colors::Gray}
+		,{+x, +y ,1.0f, Colors::Black}
+		,{+x, -y ,1.0f, Colors::Black}
+		,{-x, -y ,1.0f, Colors::Black}
 	};
 	mStride = sizeof(decltype(vertices[0]));
-	mVerticesCount = _countof(vertices);
+	mVerticesCount = 4;
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
 		  device
@@ -476,7 +476,7 @@ SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 		 0,1,2
 		,0,2,3
 	};
-	mIndicesCount = _countof(indices);
+	mIndicesCount = 6;
 	bufferSize = sizeof(UINT) * mIndicesCount;
 	mIndexBuffer = CreateBufferResource(
 		  device

@@ -70,7 +70,6 @@ void GameObject::ReleaseUploadBuffers()
 
 void GameObject::Animate(milliseconds timeElapsed)
 {
-
 }
 
 void GameObject::PrepareRender()
@@ -197,7 +196,8 @@ void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsComma
 void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMFLOAT4X4A world;
-	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
+//	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
+	XMStoreFloat4x4A(&world, XMMatrixTranspose(GetWM()));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
 	/*
 	cout << world._11 << "\t" << world._12 << "\t" << world._13 << "\t" << world._14 << "\n";

@@ -240,7 +240,14 @@ void Player::Update(const milliseconds timeElapsed)
 void Player::Crash()
 {
 	//SetVelocity({ 0.0f,0.0f,0.0f });
-	mStealth = true;
+}
+void Player::AddScore(int score)
+{
+	float rtio{ 1.02f };
+	rtio *= sqrtf(score);
+	m_score += score;
+	if(10.0f< XMVectorGetX(GetScale()))return;
+	SetScale(GetScale() * rtio);
 }
 
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
@@ -482,7 +489,7 @@ void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
 {
 	XMVECTOR pos{ GetPosition() };
 	HeightMapTerrain const* const terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
-	constexpr float magicNum{ 2.0f };
+	float magicNum{ 2.0f*XMVectorGetY(GetScale()) };
 	float const terrainHeight{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + magicNum };
 	float const playeHeight{ XMVectorGetY(pos) };
 
@@ -511,3 +518,4 @@ void TerrainPlayer::CameraUpdateCallback(milliseconds timeElapsed)
 		}
 	}
 }
+

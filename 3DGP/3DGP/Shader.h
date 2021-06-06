@@ -16,8 +16,8 @@ struct VS_VB_INSTANCE
 
 struct VS_VB_UI
 {
-	UINT m_samplerIndex;
-	bool m_effectOn;
+	XMFLOAT4X4A mTransform;
+	XMFLOAT4A	mColor;
 };
 
 class Shader
@@ -136,7 +136,7 @@ protected:
 	
 };
 
-class UIShader : public Shader
+class UIShader : public InstancingShader
 {
 public:
 	UIShader();

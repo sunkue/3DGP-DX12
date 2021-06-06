@@ -25,7 +25,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
-	CD3DX12_ROOT_PARAMETER RootParameters[4];
+	CD3DX12_ROOT_PARAMETER RootParameters[5];
 	/* 앞쪽이 접근속도가 빠름 */
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
@@ -53,6 +53,12 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
 	
+	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
+		RootParameters[4]
+		, 2						//t2 UI
+		, 0
+		, D3D12_SHADER_VISIBILITY_ALL);
+
 	D3D12_ROOT_SIGNATURE_FLAGS RSFlags{
 		  D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
 	};
@@ -83,41 +89,35 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
-	
+
 	XMFLOAT3A scale{ 8.0f,2.0f,8.0f };
 	XMVECTORF32 color{ 0.0f,0.2f,0.0f,0.0f };
 
 
 #ifdef WITH_TERRAIN_PARITION
 	mTerrain = new HeightMapTerrain(
-		  device, commandList
+		device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
 		, 257, 257, 17, 17, scale, color);
 #else
 	mTerrain = new HeightMapTerrain(
-		  device, commandList
+		device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
 		, 256, 256, 256, 256, scale, color);
 #endif
-
-	SquareMesh* square{ new SquareMesh(device,commandList) };
-	UIObject* Eobj{ nullptr };
-	for (int i = 0; i < 4; i++) {
-		Eobj = new UIObject;
-		Eobj->SetMesh(0, square);
-		float const x = 0.25f * i;
-		float const y = 0.25f;
-		Eobj->SetPosition(x, y, 0.0f);
-		AddUI(Eobj);
-	}
 
 	assert(mShaders.empty());
 	mShaders.push_back(new InstancingShader);
 	assert(mShaders.size() == 1);
 	mShaders[0]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[0]->BuildObjects(device, commandList, mTerrain);
+	
+	mShaders.push_back(new UIShader);
+	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
+	mShaders[1]->BuildObjects(device, commandList, nullptr);
+
 };
 
 void Scene::ReleaseObjects()
@@ -178,12 +178,11 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 
-	//for (auto& shader : mShaders)shader->Render(commandList, camera);
-	mShaders[0]->Render(commandList, camera);
+	for (auto& shader : mShaders)shader->Render(commandList, camera);
+	//mShaders[0]->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);
-
 };
 
 void Scene::CheckCollision(const milliseconds timeElapsed)
@@ -192,9 +191,22 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	// obj player
 	if (!mPlayer->Collable()) {
 		for (const auto& obj : mObjects) {
+			if (false == obj->IsAble())continue;
 			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB())) {
 				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
+				if (obj->GetTeam() == EnemyObject::TEAM::ENDCOUNT) {
+					obj->SetScale(XMVectorZero());
+					obj->SetAbleState(false);
+					mPlayer->AddScore();
+
+				}
+				else if (2.5f < XMVectorGetX(mPlayer->GetScale())) {
+					auto rr = reinterpret_cast<EnemyObject*>(obj);
+					TeamAddCount(rr->GetTeam(), -1);
+					rr->SetTeam(EnemyObject::TEAM::ENDCOUNT);
+				}
+				else mPlayer->Jump(1500ms);
 			}
 		}
 	}
@@ -205,6 +217,7 @@ pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTO
 	// obj player
 	vector<GameObject*> temp;
 	for (const auto& obj : mObjects) {
+		if (false == obj->IsAble())continue;
 		if (obj->GetOOBB().Intersects(origin, direction, dist)) {
 			temp.push_back(obj);
 		}
@@ -213,12 +226,21 @@ pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTO
 		//temp.push_back(mPlayer);
 	}
 
-	XMVECTOR ret;
+	GameObject* ret{ nullptr };
+	XMVECTOR pos{};
 	float minDistance{ FLT_MAX };
 	for (const auto& obj : temp) {
+		auto team = reinterpret_cast<EnemyObject*>(obj)->GetTeam();
+		if (team == EnemyObject::TEAM::ENDCOUNT)continue;
 		XMVECTOR pos{ (obj->GetPosition()) };
 		float const distance{ XMVectorGetX(XMVector3Length(obj->GetPosition() - mPlayer->GetCamera()->GetPosition())) };
-		if (distance < minDistance) ret = pos;
+		if (distance < minDistance) ret = obj;
 	}
-	return make_pair(!temp.empty(), ret);
+	if (ret) {
+		auto rr = reinterpret_cast<EnemyObject*>(ret);
+		TeamAddCount(rr->GetTeam(), -1);
+		rr->SetTeam(EnemyObject::TEAM::ENDCOUNT);
+		pos = ret->GetPosition();
+	}
+	return make_pair(!temp.empty(), pos);
 }
