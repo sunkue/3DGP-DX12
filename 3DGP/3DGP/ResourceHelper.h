@@ -8,11 +8,3 @@ ID3D12Resource* CreateBufferResource(
 	, D3D12_HEAP_TYPE d3dHeapType
 	, D3D12_RESOURCE_STATES d3dResourceStates
 	, ID3D12Resource** ppd3dUploadBuffer);
-
-
-
-#include <string_view>
-
-
-
-bool ReadObj(std::string_view fileName);

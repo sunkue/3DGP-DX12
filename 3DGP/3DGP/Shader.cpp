@@ -344,7 +344,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 	size_t size{ static_cast<size_t>(xObjects) * yObjects * zObjects };
 
 	mObjects.reserve(size);
-	Scene::SCENE->TeamSetMaxCount(size);
+	Scene::SCENE->TeamSetMaxCount((int)size);
 	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
 		,12.0f,12.0f,12.0f) };
 

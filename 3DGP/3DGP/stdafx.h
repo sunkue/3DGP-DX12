@@ -54,6 +54,7 @@ using Microsoft::WRL::ComPtr;
 #include <fstream>
 #include <string_view>
 #include <ranges>
+#include <map>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"

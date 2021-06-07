@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "GameFramework.h"
 #include "Effect.h"
+#include "ObjReader.hpp"
 
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -371,8 +372,25 @@ void GameFramework::CreateDepthStencilView()
 	mDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, d3dDsvCPUDescriptorHandle);
 }
 
+void GameFramework::BuildMeshes()
+{
+	auto d{ mDevice.Get() };
+	auto c{ mCommandList.Get() };
+	vector<DiffusedVertex> v;
+	string file;
+	string dir{ "Assets/Model/" };
+	string ext{ ".bin" };
+
+	file = "tree"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	m_Meshes.emplace(file, new Mesh{d,c,v});
+	//file = "onj";
+	//m_Meshes.emplace(file, new Mesh{d,c,v});
+}
+
 void GameFramework::BuildObjects()
 {
+	BuildMeshes();
+
 	mGameTimer.Reset();
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
 
@@ -380,6 +398,7 @@ void GameFramework::BuildObjects()
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
 	mPlayer = new TerrainPlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature(), mScene->GetTerrain(), 1);
+	mPlayer->SetMesh(0, m_Meshes["tree"]);
 	mCamera = mPlayer->GetCamera();
 
 	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);

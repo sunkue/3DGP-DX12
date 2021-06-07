@@ -163,6 +163,7 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="D3DX12Helper.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ObjReader.hpp" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ResourceHelper.h" />
     <ClInclude Include="Scene.h" />

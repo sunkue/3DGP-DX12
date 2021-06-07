@@ -244,7 +244,7 @@ void Player::Crash()
 void Player::AddScore(int score)
 {
 	float rtio{ 1.02f };
-	rtio *= sqrtf(score);
+	rtio *= sqrtf((float)score);
 	m_score += score;
 	if(10.0f< XMVectorGetX(GetScale()))return;
 	SetScale(GetScale() * rtio);

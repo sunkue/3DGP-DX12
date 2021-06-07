@@ -27,6 +27,42 @@ Mesh::Mesh(
 	assert(commandList);
 }
 
+Mesh::Mesh(
+	  ID3D12Device* device
+	, ID3D12GraphicsCommandList* commandList
+	, vector<DiffusedVertex>& v
+)
+	: mSlot{ 0 }
+	, mOffset{ 0 }
+	, mIndicesCount{ 0 }
+	, mStartIndex{ 0 }
+	, mBaseVertex{ 0 }
+	, mReferences{ 0 }
+	, mPrimitiveToplogy{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST }
+	, mIndexBuffer{ nullptr }
+	, mIndexUploadBuffer{ nullptr }
+	, mIndexBufferView{}
+	, mOOBB{}
+{
+	mVerticesCount = v.size();
+	mStride = sizeof(decltype(*v.data()));
+	
+	UINT bufferSize{ mStride * mVerticesCount };
+	mVertexBuffer = CreateBufferResource(
+		device
+		, commandList
+		, v.data()
+		, bufferSize
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, mVertexUploadBuffer.GetAddressOf());
+	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
+	mVertexBufferView.StrideInBytes = mStride;
+	mVertexBufferView.SizeInBytes = bufferSize;
+
+	//mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
+}
+
 Mesh::~Mesh()
 {
 }
@@ -456,7 +492,7 @@ SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 		,{-x, -y ,1.0f, Colors::Black}
 	};
 	mStride = sizeof(decltype(vertices[0]));
-	mVerticesCount = 4;
+	mVerticesCount = _countof(vertices);
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
 		  device
@@ -476,7 +512,7 @@ SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 		 0,1,2
 		,0,2,3
 	};
-	mIndicesCount = 6;
+	mIndicesCount = _countof(indices);
 	bufferSize = sizeof(UINT) * mIndicesCount;
 	mIndexBuffer = CreateBufferResource(
 		  device

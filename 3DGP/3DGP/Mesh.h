@@ -10,41 +10,44 @@ public:
 
 protected:
 	XMFLOAT3A mPosition;
+	XMFLOAT3A mNormal{ 0.0f,0.0f,0.0f };
+	XMFLOAT2A mTexture{ 0.0f,0.0f };
 };
 
 class DiffusedVertex : public Vertex
 {
 public:
-	DiffusedVertex() : mxmf4Diffuse{ 0.0f,0.0f,0.0f,0.0f } {}
+	DiffusedVertex() : mDiffuse{ 0.0f,0.0f,0.0f,0.0f } {}
 	DiffusedVertex(float x, float y, float z, XMFLOAT4A diffuse)
 		: Vertex{ x,y,z }
-		, mxmf4Diffuse{ diffuse } {}
+		, mDiffuse{ diffuse } {}
 	DiffusedVertex(float x, float y, float z, XMVECTORF32 diffuse)
 		: Vertex{ x,y,z }
-		, mxmf4Diffuse{ diffuse } {}
+		, mDiffuse{ diffuse } {}
 	DiffusedVertex(float x, float y, float z, FXMVECTOR diffuse)
 		: Vertex{ x,y,z }
 	{
-		XMStoreFloat4A(&mxmf4Diffuse, diffuse);
+		XMStoreFloat4A(&mDiffuse, diffuse);
 	}
 	DiffusedVertex(float x, float y, float z, float r, float g, float b, float a)
 		: Vertex{ x,y,z }
-		, mxmf4Diffuse{ r,g,b,a } {}
+		, mDiffuse{ r,g,b,a } {}
 	DiffusedVertex(XMFLOAT3A pos, XMFLOAT4A diffuse)
 		: Vertex{ pos }
-		, mxmf4Diffuse{ diffuse } {}
+		, mDiffuse{ diffuse } {}
 	DiffusedVertex(XMVECTOR pos, XMVECTORF32 diffuse)
 		: Vertex{ pos }
-		, mxmf4Diffuse{ diffuse } {}
+		, mDiffuse{ diffuse } {}
 
 protected:
-	XMFLOAT4A mxmf4Diffuse;
+	XMFLOAT4A mDiffuse{ Colors::Gray };
 };
 
 class Mesh
 {
 public:
 	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, vector<DiffusedVertex>& v);
 	virtual ~Mesh();
 
 public:
