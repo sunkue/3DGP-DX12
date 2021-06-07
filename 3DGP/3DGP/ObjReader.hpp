@@ -11,25 +11,10 @@
 using namespace DirectX;
 using namespace std::literals::string_view_literals;
 
-//∨∨∨ 버텍스 구조체
-//struct Vertex
-//{
-//	XMFLOAT3A pos;
-//};
-//struct NormalVertex : Vertex
-//{
-//	XMFLOAT3A nor;
-//};
-//struct TextureNormalVertex : NormalVertex
-//{
-//	XMFLOAT2A tex;
-//};
-//∧∧∧
-
 //∨∨∨ 수동 템플릿 ㅋㅋ
-using STRUCT = Vertex;//TextureNormalVertex;
+using STRUCT = DiffusedVertex;
 #define POS mPosition 
-#define NOR mNormal
+#define NOR mDiffuse
 #define TEX mTexture
 //∧∧∧
 template<typename VERTEX = STRUCT>
@@ -51,7 +36,7 @@ std::vector<VERTEX> LoadObj(std::string_view fileName, size_t reserve_hint = 10'
 		smatch matches;
 		if (regex_match(line, matches, vertexPattern)) {
 			if ("v" == matches[1]) { v_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4])); }
-			else if ("vn" == matches[1]) { vn_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4])); }
+			else if ("vn" == matches[1]) { vn_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4]),1.0f); }
 			else if ("vt" == matches[1]) { vt_list.emplace_back(stof(matches[2]), stof(matches[3])); }
 		}
 		else if (regex_match(line, matches, fragmentPattern))
@@ -66,7 +51,7 @@ std::vector<VERTEX> LoadObj(std::string_view fileName, size_t reserve_hint = 10'
 				ret.push_back(vertex);
 			}
 			if (false != matches[11]) { //사각형 123,134
-				ret.push_back(*prev(ret.end(), 2));
+				ret.push_back(*prev(ret.end(), 3));
 				ret.push_back(vertex);
 				if (matches[11] != "") assert(stoi(matches[11]) < size[0]), vertex.POS = v_list[stoi(matches[11])];
 				if (matches[12] != "") assert(stoi(matches[12]) < size[1]), vertex.TEX = vt_list[stoi(matches[12])];
@@ -94,12 +79,14 @@ template<typename VERTEX = STRUCT>
 std::vector<VERTEX> LoadMeshFromBinary(std::string_view fileName)noexcept
 {
 	using namespace std;
-	const size_t vertexCount{ filesystem::file_size(fileName) / sizeof(VERTEX) };
+	const size_t fileSize{ filesystem::file_size(fileName) };
+	const size_t vertexCount{ fileSize / sizeof(VERTEX) };
 	vector<VERTEX> ret(vertexCount);
 	ifstream objBinFile{ fileName, ios::binary };
-	objBinFile.read(reinterpret_cast<char*>(ret.data()), vertexCount);
+	objBinFile.read(reinterpret_cast<char*>(ret.data()), fileSize);
 	return ret;
 }
+
 /*
 * =======================================================
 * matches2Float 	stof(matches[]);

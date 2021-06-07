@@ -54,28 +54,29 @@ public:
 	CAMERA_MODE GetMode()const { return mMode; }
 
 	void XM_CALLCONV SetPosition(FXMVECTOR position) { XMStoreFloat3A(&mPosition, position); }
-	FXMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3A(&mPosition); }
+	XMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3A(&mPosition); }
 
 	virtual void XM_CALLCONV SetLookAt(FXMVECTOR lookAt) { XMStoreFloat3A(&mLookAt, lookAt); }
-	FXMVECTOR XM_CALLCONV GetLookAt()const { return XMLoadFloat3A(&mLookAt); }
+	XMVECTOR XM_CALLCONV GetLookAt()const { return XMLoadFloat3A(&mLookAt); }
 
-	FXMVECTOR XM_CALLCONV GetRightVector()const { return XMLoadFloat3A(&mRightV); }
-	FXMVECTOR XM_CALLCONV GetUpVector()const { return XMLoadFloat3A(&mUpV); }
-	FXMVECTOR XM_CALLCONV GetLookVector()const { return XMLoadFloat3A(&mLookV); }
+	XMVECTOR XM_CALLCONV GetRightVector()const { return XMLoadFloat3A(&mRightV); }
+	XMVECTOR XM_CALLCONV GetUpVector()const { return XMLoadFloat3A(&mUpV); }
+	XMVECTOR XM_CALLCONV GetLookVector()const { return XMLoadFloat3A(&mLookV); }
 
 	float GetPitch()const { return mPitch; }
 	float GetYaw()const { return mYaw; }
 	float GetRoll()const { return mRoll; }
 	
 	void XM_CALLCONV SetOffset(FXMVECTOR offset) { XMStoreFloat3A(&mOffset, offset); }
-	FXMVECTOR XM_CALLCONV GetOffset()const { return XMLoadFloat3A(&mOffset); }
+	XMVECTOR XM_CALLCONV GetOffset()const { return XMLoadFloat3A(&mOffset); }
+	float ClampOffset(float z)const { return clamp(z, m_minOffsetZ, m_maxOffsetZ); }
 
 	void SetTimeLag(milliseconds timeLag) { mTimeLag = timeLag; }
 	milliseconds GetTimeLag()const { return mTimeLag; }
 
-	FXMMATRIX XM_CALLCONV GetViewMatrix()const { return XMLoadFloat4x4A(&mViewMat); }
-	FXMMATRIX XM_CALLCONV GetProjectionMatrix()const { return XMLoadFloat4x4A(&mProjectionMat); }
-	FXMMATRIX XM_CALLCONV GetOrthographicMatrix()const { return XMLoadFloat4x4A(&m_OrthographicMat); }
+	XMMATRIX XM_CALLCONV GetViewMatrix()const { return XMLoadFloat4x4A(&mViewMat); }
+	XMMATRIX XM_CALLCONV GetProjectionMatrix()const { return XMLoadFloat4x4A(&mProjectionMat); }
+	XMMATRIX XM_CALLCONV GetOrthographicMatrix()const { return XMLoadFloat4x4A(&m_OrthographicMat); }
 	D3D12_VIEWPORT GetViewPort()const { return mViewport; }
 	D3D12_RECT GetScissorRect()const { return mScissorRect; }
 	
@@ -114,6 +115,8 @@ protected:
 
 	float m_n;
 	float m_f;
+	float m_minOffsetZ{ -500.0f };
+	float m_maxOffsetZ{ -20.0f };
 
 	CAMERA_MODE	mMode;
 

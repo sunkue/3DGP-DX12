@@ -8,7 +8,7 @@ public:
 	explicit Vertex(XMFLOAT3A pos) : mPosition{ pos.x,pos.y,pos.z } {}
 	explicit Vertex(XMVECTOR pos) { XMStoreFloat3A(&mPosition, pos); }
 
-protected:
+
 	XMFLOAT3A mPosition;
 	XMFLOAT3A mNormal{ 0.0f,0.0f,0.0f };
 	XMFLOAT2A mTexture{ 0.0f,0.0f };
@@ -39,7 +39,7 @@ public:
 		: Vertex{ pos }
 		, mDiffuse{ diffuse } {}
 
-protected:
+
 	XMFLOAT4A mDiffuse{ Colors::Gray };
 };
 
@@ -52,7 +52,7 @@ public:
 
 public:
 	void AddRef()	{ ++mReferences; assert(0 < mReferences); }
-	void Release()	{ assert(0 < mReferences); if (--mReferences == 0)delete this; }
+	void Release()	{ assert(0 < mReferences); /*if (--mReferences == 0)delete this;*/ }
 
 private:
 	int mReferences;

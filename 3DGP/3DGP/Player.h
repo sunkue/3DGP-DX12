@@ -69,10 +69,30 @@ public:
 	virtual void PrepareRender()override;
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera = nullptr)override;
 
+public:
 	bool Collable() { return mInvincible | mStealth; }
 	void SetEffect(Effect* eff) { mEffect = eff; }
 	void AddScore(int score = 1);
 	void Crash();
+
+	void UpdateState(milliseconds timeElapsed);
+
+	void SetEvolve(bool evole) { m_OnEvolving = evole; }
+	bool IsEvolving()const { return m_OnEvolving; }
+	void FinishEvolving();
+
+	void SetPrevOffZ(float offZ) { mPrevOffsetZ = offZ; }
+	float GetPrevOffZ()const { return mPrevOffsetZ; }
+	Mesh* GetPrevMesh() { return mPrevMesh; }
+
+protected:
+	Mesh* mPrevMesh{ nullptr };
+	float mPrevOffsetZ;
+	bool m_OnEvolving{ false };
+	bool mInvincible;
+	bool mStealth;
+	bool m_flight;
+	float m_maxScale{ 10.0f };
 
 protected:
 	XMFLOAT3A mPosition;
@@ -98,9 +118,7 @@ protected:
 
 	Camera* mCamera;
 	Effect* mEffect;
-	bool mInvincible;
-	bool mStealth;
-	bool m_flight;
+
 };
 
 class AirPlanePlayer :public Player

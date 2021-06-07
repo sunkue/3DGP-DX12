@@ -374,31 +374,42 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::BuildMeshes()
 {
-	auto d{ mDevice.Get() };
-	auto c{ mCommandList.Get() };
+	auto const d{ mDevice.Get() };
+	auto const c{ mCommandList.Get() };
 	vector<DiffusedVertex> v;
 	string file;
-	string dir{ "Assets/Model/" };
-	string ext{ ".bin" };
+	string const dir{ "Assets/Model/" };
+	string const ext{ ".bin" };
+	string const ext2{ ".obj" };
 
+	//file = "cube"; v = LoadObj<DiffusedVertex>(dir + file + ext2);
+	//SaveMeshAsBinary(v, dir + file + ext);
 	file = "tree"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{d,c,v});
+
+	file = "cube"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	m_Meshes.emplace(file, new Mesh{ d,c,v });
+
+	file = "sphere"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	m_Meshes.emplace(file, new Mesh{ d,c,v });
+
+	cout << "meshes:" << m_Meshes.size() << '\n';
 	//file = "onj";
 	//m_Meshes.emplace(file, new Mesh{d,c,v});
 }
 
 void GameFramework::BuildObjects()
 {
-	BuildMeshes();
-
 	mGameTimer.Reset();
 	mCommandList->Reset(mCommandAllocator.Get(), nullptr);
+
+	BuildMeshes();
 
 	mScene = new Scene();
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
 	mPlayer = new TerrainPlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature(), mScene->GetTerrain(), 1);
-	mPlayer->SetMesh(0, m_Meshes["tree"]);
+	//mPlayer->SetMesh(0, m_Meshes["tree"]);
 	mCamera = mPlayer->GetCamera();
 
 	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
@@ -466,7 +477,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	switch (messageID)
 	{
 	case WM_LBUTTONDOWN: {
-		GetCursorPos(&mOldCusorPos);
+		//GetCursorPos(&mOldCusorPos);
 		auto ray{ MouseRay() };
 		auto result{ RayCollapsePos(ray.first, ray.second, FLT_MAX) };
 		if (true == result.first) mEffect->NewWallEffect(result.second, 1.5f);
@@ -487,7 +498,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	case WM_MOUSEWHEEL: {
 		XMVECTOR offSet{ mCamera->GetOffset() };
 		float Z{ XMVectorGetZ(offSet) - std::copysignf(10.0f, -static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam))) };
-		offSet = XMVectorSetZ(offSet, clamp(Z, -500.0f, -1.0f));
+		offSet = XMVectorSetZ(offSet, clamp(Z, -500.0f, -20.0f));
 		mCamera->SetOffset(offSet);
 	}break;
 	default:break;
@@ -514,6 +525,9 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 			if (mPlayer)mCamera = mPlayer->ChangeCamera(static_cast<CAMERA_MODE>(
 				mPlayer->GetCamera()->GetMode() == static_cast <CAMERA_MODE>(3) ? (1) : (3)), mGameTimer.GetTimeElapsed());
 			break;
+		case VK_SHIFT:
+			if (mPlayer) { mPlayer->SetEvolve(true); }
+			break;
 		case VK_F9:
 			ChanegeFullScreenMode();
 			break;
@@ -523,7 +537,8 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARA
 	case WM_KEYUP:
 		switch (wParam)
 		{
-		case VK_F3:
+		case VK_SHIFT:
+			if (mPlayer) { mPlayer->FinishEvolving(); }
 			break;
 		default:break;
 		}
@@ -571,7 +586,7 @@ void GameFramework::ProcessInput()
 {
 	static UCHAR key[256];
 	BYTE dir{ 0 };
-
+	
 	if (GetKeyboardState(key))
 	{
 		if (key['W'] & 0xf0)dir |= DIR_FORWARD;
@@ -586,6 +601,8 @@ void GameFramework::ProcessInput()
 
 		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
 		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
+
+		if (key[VK_SHIFT] & 0xf0)dir = 0;
 	}
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };
@@ -675,7 +692,6 @@ void GameFramework::MoveToNextFrame()
 		WaitForSingleObject(mhFenceEvent, INFINITE);
 	}
 }
-
 void GameFramework::ExecuteComandLists()
 {
 	ID3D12CommandList* comD3dCommandLists[]{ mCommandList.Get() };
@@ -727,7 +743,7 @@ void GameFramework::FrameAdvance()
 	constexpr int TIMES{ 1 };
 	for (int i = 0; i < TIMES; ++i) {
 		mGameTimer.Tick();
-		cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
+		//cout << "TICK:" << mGameTimer.GetTimeElapsed() << "\n";
 		ProcessInput();
 		AnimateObjects();
 	}

@@ -240,6 +240,7 @@ EnemyObject::EnemyObject(int meshes)
 	, mRotationSpeed{ 90.0f }
 	, mRotationAxis{ 0.0f, 1.0f, 0.0f }
 	, mSpeed{ 0.0f }
+	, m_able{ true }
 {
 	XMStoreFloat3A(&mDir, XMVectorZero());
 }

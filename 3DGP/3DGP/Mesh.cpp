@@ -45,8 +45,7 @@ Mesh::Mesh(
 	, mOOBB{}
 {
 	mVerticesCount = v.size();
-	mStride = sizeof(decltype(*v.data()));
-	
+	mStride = sizeof(*v.data());
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
 		device
@@ -60,7 +59,7 @@ Mesh::Mesh(
 	mVertexBufferView.StrideInBytes = mStride;
 	mVertexBufferView.SizeInBytes = bufferSize;
 
-	//mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
+	mOOBB = { {0.0f,0.0f,0.0f},{1,1,1},{0.0f,0.0f,0.0f,1.0f} };
 }
 
 Mesh::~Mesh()

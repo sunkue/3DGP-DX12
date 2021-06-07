@@ -166,8 +166,22 @@ bool Scene::ProcessInput()
 
 void Scene::AnimateObjects(milliseconds timeElapsed)
 {
+	const float timeE{ timeElapsed.count() / 1000.0f };
 	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
 	CheckCollision(timeElapsed);
+
+	if (mPlayer->IsEvolving()) {
+		XMVECTOR playerPos{ mPlayer->GetPosition() };
+		float const MaxDist{ 100.0f*sqrtf(mPlayer->GetScale().m128_f32[0]) };
+		for (auto& obj : mObjects) {
+			XMVECTOR const dir{ playerPos- obj->GetPosition() };
+			float distance{ XMVectorGetX(XMVector3Length(dir)) };
+			if (distance < MaxDist) {
+				obj->Move(dir * (MaxDist / distance/2.0f) * timeE);
+			}
+		}
+	}
+
 };
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)

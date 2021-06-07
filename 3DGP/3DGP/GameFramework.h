@@ -110,9 +110,10 @@ protected:
 	Camera*						mCamera;
 	Player*						mPlayer;
 	Effect*						mEffect;
-	map<string, Mesh*>			m_Meshes;
 	POINT						mOldCusorPos;
 	array<wchar_t, 50>			mStrFrameRate;
 	GameObject* m_Picking;
+public:
+	map<string, Mesh*>			m_Meshes;
 };
 

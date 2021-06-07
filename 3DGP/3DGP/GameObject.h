@@ -13,7 +13,7 @@ public:
 
 public:
 	void AddRef()	{ ++mReferences; assert(0 < mReferences); }
-	void Release()	{ assert(0 < mReferences);  if (--mReferences == 0)delete this; }
+	void Release() { assert(0 < mReferences); /* if (--mReferences == 0); /*delete this*/; }
 
 private:
 	int mReferences;

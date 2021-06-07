@@ -206,6 +206,41 @@ void Player::Update(const milliseconds timeElapsed)
 	if (camMode == CAMERA_MODE::THIRD_PERSON) { mCamera->SetLookAt(GetPosition() + add); }
 	mCamera->RegenerateViewMatrix();
 
+	UpdateState(timeElapsed);
+	
+	UpdateBoundingBox();
+}
+void Player::FinishEvolving()
+{
+	SetEvolve(false);
+	if (m_maxScale < mScale.x) {
+		mPrevMesh = GameFramework::GetApp()->m_Meshes["tree"];
+		SetScale({ 1.0f,1.0f,1.0f });
+	}
+	SetMesh(0, GetPrevMesh());
+	XMVECTOR offSet{ mCamera->GetOffset() };
+	float prevZ{ GetPrevOffZ() };
+	offSet = XMVectorSetZ(offSet, mCamera->ClampOffset(prevZ));
+	mCamera->SetOffset(offSet);
+	SetPrevOffZ(0.0f);
+}
+
+void Player::UpdateState(milliseconds const timeElapsed)
+{
+	const float timeE{ timeElapsed.count() / 1000.0f };
+
+	/*evolve*/
+	if (mPrevMesh == nullptr)mPrevMesh = GetMesh().at(0);
+	if (m_OnEvolving) {
+		SetMesh(0, GameFramework::GetApp()->m_Meshes["sphere"]);
+		XMVECTOR offSet{ mCamera->GetOffset() };
+		if (mPrevOffsetZ == 0.0f)SetPrevOffZ(XMVectorGetZ(offSet));
+		constexpr float uint{ 10.0f };
+		float Z{ XMVectorGetZ(offSet) - uint };
+		offSet = XMVectorSetZ(offSet, mCamera->ClampOffset(Z));
+		mCamera->SetOffset(offSet);
+	}
+	
 
 	/*stealth*/
 	if (mStealth) {
@@ -217,7 +252,7 @@ void Player::Update(const milliseconds timeElapsed)
 		static float time2{ MTP2 };
 		t += timeE;
 		if (t < t2)mOptionColor = 0.25f;
-		else if (time2 < MTP2/2.0f) {
+		else if (time2 < MTP2 / 2.0f) {
 			mOptionColor = 0.5f;
 		}
 		else {
@@ -234,19 +269,17 @@ void Player::Update(const milliseconds timeElapsed)
 
 		}
 	}
-	UpdateBoundingBox();
 }
-
 void Player::Crash()
 {
 	//SetVelocity({ 0.0f,0.0f,0.0f });
 }
 void Player::AddScore(int score)
 {
-	float rtio{ 1.02f };
+	float rtio{ 1.1f };
 	rtio *= sqrtf((float)score);
 	m_score += score;
-	if(10.0f< XMVectorGetX(GetScale()))return;
+	if(m_maxScale < XMVectorGetX(GetScale()))return;
 	SetScale(GetScale() * rtio);
 }
 
@@ -418,8 +451,7 @@ TerrainPlayer::TerrainPlayer(
 	: Player{ meshes }
 {
 	mCamera = ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero());
-	PlayerMeshDiffused* cube{ new PlayerMeshDiffused(device,commandList,4.0f,4.0f,4.0f) };
-	SetMesh(0, cube);
+	SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
 	SetStaticPlayer(this);
 
 	const HeightMapTerrain* const terrain{ reinterpret_cast<HeightMapTerrain*>(context) };
