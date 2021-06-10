@@ -300,10 +300,7 @@ HeightMapImage::HeightMapImage(
 		for (size_t x = 0; x < width; x++) {
 			mHeightMapPixels[x + (((size_t)length - 1 - y) * width)]
 				= HMPixels[x + ((size_t)y * width)];
-			assert(mHeightMapPixels[x + (((size_t)length - 1 - y) * width)]);
-			//cout << mHeightMapPixels[x + (((size_t)length - 1 - y) * width)] << ' ';
 		}
-		//cout << "\n";
 	}
 }
 

@@ -132,6 +132,7 @@ public:
 
 	XMVECTOR XM_CALLCONV GetDir() { return XMLoadFloat3A(&mDir); }
 	void XM_CALLCONV SetDir(FXMVECTOR dir) { XMStoreFloat3A(&mDir, dir); }
+	void SetRotateSpeed(float speed) { mRotationSpeed = speed; };
 	virtual void Animate(milliseconds timeElapsed);
 };
 

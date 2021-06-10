@@ -93,6 +93,7 @@ protected:
 	bool mStealth;
 	bool m_flight;
 	float m_maxScale{ 10.0f };
+	bool m_flying{ false };
 
 protected:
 	XMFLOAT3A mPosition;
@@ -118,20 +119,8 @@ protected:
 
 	Camera* mCamera;
 	Effect* mEffect;
-
 };
 
-class AirPlanePlayer :public Player
-{
-public:
-	AirPlanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, int meshes = 1);
-	virtual ~AirPlanePlayer();
-
-	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
-	virtual void PrepareRender();
-
-	
-};
 
 class TerrainPlayer : public Player
 {

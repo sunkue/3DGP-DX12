@@ -393,7 +393,12 @@ void GameFramework::BuildMeshes()
 	file = "sphere"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	cout << "meshes:" << m_Meshes.size() << '\n';
+	file = "girl"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	m_Meshes.emplace(file, new Mesh{ d,c,v });
+
+	//file = "car"; v = LoadObj<DiffusedVertex>(dir + file + ext2);
+	//SaveMeshAsBinary(v, dir + file + ext);
+
 	//file = "onj";
 	//m_Meshes.emplace(file, new Mesh{d,c,v});
 }
@@ -498,7 +503,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 	case WM_MOUSEWHEEL: {
 		XMVECTOR offSet{ mCamera->GetOffset() };
 		float Z{ XMVectorGetZ(offSet) - std::copysignf(10.0f, -static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam))) };
-		offSet = XMVectorSetZ(offSet, clamp(Z, -500.0f, -20.0f));
+		offSet = XMVectorSetZ(offSet, mCamera->ClampOffset(Z));
 		mCamera->SetOffset(offSet);
 	}break;
 	default:break;
@@ -601,8 +606,6 @@ void GameFramework::ProcessInput()
 
 		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
 		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
-
-		if (key[VK_SHIFT] & 0xf0)dir = 0;
 	}
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };
@@ -644,7 +647,7 @@ void GameFramework::PopulateCommandList()
 		static_cast<INT>(mFrameIndex), mRtvDescriptorIncrementSize };
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUDescH{ mDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
-	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::DarkCyan, 0, nullptr);
+	mCommandList->ClearRenderTargetView(rtvCPUDescH, Colors::Black, 0, nullptr);
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);

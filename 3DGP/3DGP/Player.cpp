@@ -96,6 +96,7 @@ void Player::Move(FXMVECTOR shift, bool updateVelocity)
 	{
 		//cout << XMVectorGetY(GetPosition()) << " ";
 		XMStoreFloat3A(&mPosition, GetPosition() + shift);
+		ForFamily([=](auto& obj) {obj.SetPosition(GetPosition() + shift); });
 		mCamera->Move(shift);
 	}
 }
@@ -209,13 +210,36 @@ void Player::Update(const milliseconds timeElapsed)
 	UpdateState(timeElapsed);
 	
 	UpdateBoundingBox();
+	ForFamily([=](auto& obj) {obj.Animate(timeElapsed); });
 }
 void Player::FinishEvolving()
 {
 	SetEvolve(false);
 	if (m_maxScale < mScale.x) {
-		mPrevMesh = GameFramework::GetApp()->m_Meshes["tree"];
-		SetScale({ 1.0f,1.0f,1.0f });
+		if (mPrevMesh == GameFramework::GetApp()->m_Meshes["cube"]) {
+			mPrevMesh = GameFramework::GetApp()->m_Meshes["tree"];
+			SetScale({ 1.0f,1.0f,1.0f });
+		}
+		else if (mPrevMesh == GameFramework::GetApp()->m_Meshes["tree"]) {
+			mPrevMesh = GameFramework::GetApp()->m_Meshes["sphere"];
+			m_child = new EnemyObject;
+			m_child->SetMesh(0, GameFramework::GetApp()->m_Meshes["girl"]);
+			m_child->SetScale({ 15.0f,15.0f,15.0f });
+			m_child->SetShader(mShader);
+
+			SetScale({ 1.0f,1.0f,1.0f });
+		}
+		else {
+			if (nullptr == m_brother) {
+				m_brother = new EnemyObject;
+				m_brother->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
+				m_brother->SetScale({ 90.0f,90.0f,90.0f });
+				Beep(500, 50);
+				m_brother->SetShader(mShader);
+				reinterpret_cast<EnemyObject*>(m_brother)->SetRotateSpeed(0.0f);
+			}
+			mCamera->SetMinMaxOffset(-1200.0f, -500.0f);
+		}
 	}
 	SetMesh(0, GetPrevMesh());
 	XMVECTOR offSet{ mCamera->GetOffset() };
@@ -239,6 +263,16 @@ void Player::UpdateState(milliseconds const timeElapsed)
 		float Z{ XMVectorGetZ(offSet) - uint };
 		offSet = XMVectorSetZ(offSet, mCamera->ClampOffset(Z));
 		mCamera->SetOffset(offSet);
+
+		if (m_brother && m_child) {
+			m_flying = true;
+			reinterpret_cast<EnemyObject*>(m_child)->SetRotateSpeed(1360.0f);
+			Move(DIR_UP, (500.0f) * timeE, true);
+		}
+	}
+	else {
+		m_flying = false;
+		if (m_child)reinterpret_cast<EnemyObject*>(m_child)->SetRotateSpeed(90.0f);
 	}
 	
 
@@ -281,6 +315,7 @@ void Player::AddScore(int score)
 	m_score += score;
 	if(m_maxScale < XMVectorGetX(GetScale()))return;
 	SetScale(GetScale() * rtio);
+	ForFamily([=](auto& obj) {obj.SetScale(obj.GetScale() * rtio); });
 }
 
 Camera* Player::ChangeCamera(CAMERA_MODE newCameraMode, CAMERA_MODE currentCameraMode)
@@ -334,7 +369,6 @@ void Player::PrepareRender()
 	up = XMVector3Normalize(XMVector3Cross(look, right));
 	XMVECTORF32 u;
 	u.v = up;
-	
 	mWorldMat =
 	{
 		mRightV.x, mRightV.y, mRightV.z , mWorldMat._14,
@@ -346,6 +380,7 @@ void Player::PrepareRender()
 
 void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
+	//PrepareRender();
 	CAMERA_MODE cameraMode{ (camera) ? (camera->GetMode()) : (CAMERA_MODE::NO_CAMERA) };
 	if (cameraMode == CAMERA_MODE::THIRD_PERSON) {
 		if (mShader)mShader->Render(commandList, camera);
@@ -354,90 +389,6 @@ void Player::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 }
 
 ////////////////////////////////////////////
-
-AirPlanePlayer::AirPlanePlayer(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, ID3D12RootSignature* rootSignature
-	, int meshes
-)
-	: Player{ meshes }
-{
-	Mesh* airplaneMesh{ new PlayerMeshDiffused(device,commandList) };
-	SetMesh(0, airplaneMesh);
-	SetCamera(ChangeCamera(CAMERA_MODE::THIRD_PERSON, milliseconds::zero()));
-	CreateShaderVariables(device, commandList);
-	SetPosition({ 0.0f,0.0f,-50.0f });
-	PlayerShader* shader{ new PlayerShader() };
-	shader->CreateShader(device, rootSignature);
-	SetShader(shader);
-	SetScale({ 0.5f,1.0f,1.0f });
-}
-
-AirPlanePlayer::~AirPlanePlayer()
-{
-
-}
-
-void AirPlanePlayer::PrepareRender()
-{
-	Player::PrepareRender();
-	XMMATRIX rotate{ XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f),0.0f,0.0f) };
-	XMMATRIX scale{ XMMatrixScalingFromVector(GetScale()) };
-	XMStoreFloat4x4A(&mWorldMat, scale * rotate * XMLoadFloat4x4A(&mWorldMat));
-}
-
-Camera* AirPlanePlayer::ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed)
-{
-	CAMERA_MODE currentCameraMode{ (mCamera) ? (mCamera->GetMode()) : (CAMERA_MODE::NO_CAMERA) };
-	if (currentCameraMode == newCameraMode)return mCamera;
-	GameFramework* app{ GameFramework::GetApp() };
-	UINT W{ app->GetWidth() };
-	UINT H{ app->GetHeight() };
-	switch (newCameraMode)
-	{
-	case CAMERA_MODE::FIRST_PERSON: {
-		SetFriction(200.0f);
-		SetGravity({ 0.0f,0.0f,0.0f });
-		SetMaxVelocityXZ(125.0f);
-		SetMaxVelocityY(400.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::FIRST_PERSON, currentCameraMode);
-		mCamera->SetTimeLag(milliseconds::zero());
-		mCamera->SetOffset({ 0.0f,20.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
-		mCamera->SetViewport(0, 0, W, H);
-		mCamera->SetScissorRect(0, 0, W, H);
-	}break;
-	case CAMERA_MODE::SPACESHIP: {
-		SetFriction(125.0f);
-		SetGravity({ 0.0f,0.0f,0.0f });
-		SetMaxVelocityXZ(400.0f);
-		SetMaxVelocityY(400.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::SPACESHIP, currentCameraMode);
-		mCamera->SetTimeLag(milliseconds::zero());
-		mCamera->SetOffset({ 0.0f,0.0f,0.0f });
-		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
-		mCamera->SetViewport(0, 0, W, H);
-		mCamera->SetScissorRect(0, 0, W, H);
-	}break;
-	case CAMERA_MODE::THIRD_PERSON: {
-		SetFriction(250.0f);
-		SetGravity({ 0.0f,0.0f,1.0f });
-		SetMaxVelocityXZ(500.0f);
-		SetMaxVelocityY(0.0f);
-		mCamera = Player::ChangeCamera(CAMERA_MODE::THIRD_PERSON, currentCameraMode);
-		mCamera->SetTimeLag(250ms);
-		mCamera->SetOffset({ 0.0f,20.0f,-50.0f });
-		mCamera->GenerateProjectionMatrix(45.0f, app->GetAspectRatio(), 1.01f, 5000.0f);
-		mCamera->SetViewport(0, 0, W, H);
-		mCamera->SetScissorRect(0, 0, W, H);
-	}break;
-	}
-	mCamera->SetPosition(GetPosition() + mCamera->GetOffset());
-
-	return mCamera;
-}
-
 
 ////////////////////////////////
 
@@ -467,6 +418,8 @@ TerrainPlayer::TerrainPlayer(
 	shader->CreateShader(device, rootSignature);
 	SetShader(shader);
 	CreateShaderVariables(device, commandList);
+
+
 }
 
 TerrainPlayer::~TerrainPlayer()
@@ -525,13 +478,13 @@ void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
 	float const terrainHeight{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + magicNum };
 	float const playeHeight{ XMVectorGetY(pos) };
 
-	if (playeHeight < terrainHeight) {
+	if ((playeHeight < terrainHeight)) {
 		m_flight = false;
 		pos = XMVectorSetY(pos, terrainHeight);
 		SetPosition(pos);
 	}
 	else {
-		m_flight = true;
+		m_flight = m_flying ? false : true;
 	}
 }
 

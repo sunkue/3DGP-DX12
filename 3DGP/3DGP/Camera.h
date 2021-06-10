@@ -70,7 +70,7 @@ public:
 	void XM_CALLCONV SetOffset(FXMVECTOR offset) { XMStoreFloat3A(&mOffset, offset); }
 	XMVECTOR XM_CALLCONV GetOffset()const { return XMLoadFloat3A(&mOffset); }
 	float ClampOffset(float z)const { return clamp(z, m_minOffsetZ, m_maxOffsetZ); }
-
+	void SetMinMaxOffset(float min, float max) { m_minOffsetZ = min; m_maxOffsetZ = max; }
 	void SetTimeLag(milliseconds timeLag) { mTimeLag = timeLag; }
 	milliseconds GetTimeLag()const { return mTimeLag; }
 

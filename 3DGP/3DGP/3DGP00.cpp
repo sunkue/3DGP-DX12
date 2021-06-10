@@ -35,12 +35,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int showCmd)
 	catch (const DxException& e)
 	{
 		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
-		return 0;
+		return 1;
 	}
 	catch (const exception* e)
 	{
 		cout << "( " << e->what() << " ) exception";
-		return 0;
+		return 1;
 	}
 
 	assert(0);

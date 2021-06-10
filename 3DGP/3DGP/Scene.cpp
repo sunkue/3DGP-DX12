@@ -105,7 +105,7 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 		device, commandList
 		, mGraphicsRootSignature.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
-		, 256, 256, 256, 256, scale, color);
+		, 257, 257, 257, 257, scale, color);
 #endif
 
 	assert(mShaders.empty());

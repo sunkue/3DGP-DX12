@@ -63,6 +63,8 @@ void GameObject::SetShader(Shader* shader)
 void GameObject::ReleaseUploadBuffers()
 {
 	for (auto& m : mMesh)m->ReleaseUploadBuffers();
+	ForFamily([](auto& obj) {obj.ReleaseUploadBuffers(); });
+
 }
 
 
@@ -70,6 +72,7 @@ void GameObject::ReleaseUploadBuffers()
 
 void GameObject::Animate(milliseconds timeElapsed)
 {
+	ForFamily([=](auto& obj) {obj.Animate(timeElapsed); });
 }
 
 void GameObject::PrepareRender()
@@ -82,6 +85,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, 
 {
 	PrepareRender();
 	for (auto& m : mMesh)m->Render(commandList, instanceCount);
+	ForFamily([=](auto& obj) {obj.Render(commandList, camera, instanceCount); });
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
@@ -95,8 +99,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	mShader->Render(commandList, camera);
 
 	for (auto& m : mMesh)m->Render(commandList);
-
-	//ForFamily([=](GameObject& F_F) {F_F.Render(commandList, camera); });
+	ForFamily([=](auto& obj) {obj.Render(commandList, camera); });
 }
 
 void GameObject::Render(
@@ -107,9 +110,10 @@ void GameObject::Render(
 {
 	PrepareRender();
 	for (auto& m : mMesh)m->Render(commandList, instanceCount, instancingBufferView);
+	ForFamily([=](auto& obj) {obj.Render(commandList, camera, instanceCount, instancingBufferView); });
 }
 
-void XM_CALLCONV GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
+void GameObject::RotateByAxis(FXMVECTOR axis, const float angle)
 {
 	XMMATRIX rotate{ XMMatrixRotationAxis(axis,XMConvertToRadians(angle)) };
 	XMStoreFloat4x4A(&mWorldMat, rotate * XMLoadFloat4x4A(&mWorldMat));
@@ -131,6 +135,7 @@ void GameObject::SetPosition(float x, float y, float z)
 void GameObject::SetPosition(FXMVECTOR position)
 {
 	SetPosition(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
+	
 }
 
 XMVECTOR GameObject::GetPosition()	const
@@ -258,6 +263,7 @@ void EnemyObject::Animate(milliseconds timeElapsed)
 	Move(XMLoadFloat3A(&mDir) * mSpeed * timeE);
 	
 	UpdateBoundingBox();
+
 }
 
 ////////////////////
