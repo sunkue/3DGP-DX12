@@ -22,7 +22,6 @@ GameObject::GameObject(int meshes)
 	: mShader{ nullptr }
 	, mScale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
-	, mOptionColor{ 1.0f }
 	, m_brother{ nullptr }
 	, m_child{ nullptr }
 {

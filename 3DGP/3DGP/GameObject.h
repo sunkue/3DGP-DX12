@@ -7,9 +7,9 @@ class Camera;
 
 struct Meterial
 {
-	XMFLOAT4A m_diffuse{ 0.3f,0.3f,0.3f,0.0f };
-	XMFLOAT4A m_ambient{ 0.7f,0.4f,0.4f,0.0f };
-	XMFLOAT4A m_specular{ 0.0f,0.0f,0.0f,0.0f };
+	XMFLOAT4A m_ambient{ 0.3f,0.4f,0.4f,0.0f };
+	XMFLOAT4A m_diffuse{ 0.7f,0.3f,0.3f,0.0f };
+	XMFLOAT4A m_specular{ 1.0f,1.0f,1.0f,0.0f };
 	XMFLOAT4A m_emessive{ 0.0f,0.0f,0.0f,0.0f };
 	float m_specualrPower{ 0.0f };
 };
@@ -30,8 +30,8 @@ private:
 public:
 	void ReleaseUploadBuffers();
 	
-	virtual void SetMesh(int index, Mesh* mesh);
-	virtual void SetShader(Shader* shader);
+	void SetMesh(int index, Mesh* mesh);
+	void SetShader(Shader* shader);
 
 	virtual void Animate(const milliseconds timeElapsed);
 
@@ -70,9 +70,9 @@ public:
 	void UpdateBoundingBox();
 
 public:
-	void SetMeterial(XMFLOAT4A d, XMFLOAT4A a, float sp = 0.0f, XMFLOAT4A s = { 1.0f,1.0f,1.0f,0.0f }) {
-		m_meterial.m_diffuse = d;
+	void SetMeterial(XMFLOAT4A a, XMFLOAT4A d, float sp = 0.0f, XMFLOAT4A s = { 1.0f,1.0f,1.0f,0.0f }) {
 		m_meterial.m_ambient = a;
+		m_meterial.m_diffuse = d;
 		m_meterial.m_specular = s;
 		m_meterial.m_specualrPower = sp;
 	}
@@ -95,7 +95,6 @@ protected:
 	XMFLOAT4X4A	mWorldMat;
 	vector<Mesh*>	mMesh;
 	Shader*	mShader;
-	float mOptionColor;
 	XMFLOAT3A mScale;
 
 public:

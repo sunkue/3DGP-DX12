@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "GameFramework.h"
 #include "Player.h"
+#include "Light.h"
 #include "Effect.h"
 
 Scene* Scene::SCENE = nullptr;
@@ -25,7 +26,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
-	CD3DX12_ROOT_PARAMETER RootParameters[5];
+	CD3DX12_ROOT_PARAMETER RootParameters[6];
 	/* 앞쪽이 접근속도가 빠름 */
 	//64개가 한계임. SRV는 두칸차지.
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
@@ -57,6 +58,12 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		RootParameters[4]
 		, 2						//t2 UI
+		, 0
+		, D3D12_SHADER_VISIBILITY_ALL);
+
+	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
+		RootParameters[5]
+		, 3						//t3 light
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
 
@@ -93,8 +100,6 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 
 	XMFLOAT3A scale{ 8.0f,2.0f,8.0f };
 	XMVECTORF32 color{ 0.0f,0.2f,0.0f,0.0f };
-
-
 #ifdef WITH_TERRAIN_PARITION
 	mTerrain = new HeightMapTerrain(
 		device, commandList
@@ -119,6 +124,8 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[1]->BuildObjects(device, commandList, nullptr);
 
+	m_lights.emplace_back(new LightObj{ LightFactory::MakePointLight({0.0f,2000.0f,0.0f},5000.0f) });
+	m_lights[0]->SetLightColor(Colors::Chocolate);
 };
 
 void Scene::ReleaseObjects()
@@ -169,6 +176,9 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
+
+	for (auto& light : m_lights)light->Animate(timeElapsed);
+
 	CheckCollision(timeElapsed);
 
 	if (mPlayer->IsEvolving()) {
@@ -192,9 +202,10 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
+	for (auto& light : m_lights)light->UpdateShaderVariables(commandList);
 
 	for (auto& shader : mShaders)shader->Render(commandList, camera);
-	//mShaders[0]->Render(commandList, camera);
+	for (auto& light : m_lights)light->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);

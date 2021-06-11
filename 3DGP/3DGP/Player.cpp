@@ -277,30 +277,7 @@ void Player::UpdateState(milliseconds const timeElapsed)
 
 	/*stealth*/
 	if (mStealth) {
-		static float t{ 0.0f };
-		constexpr float t2{ 0.01f };
-		constexpr float MTP{ 0.5f };
-		constexpr float MTP2{ 0.2f };
-		static float time{ MTP };
-		static float time2{ MTP2 };
-		t += timeE;
-		if (t < t2)mOptionColor = 0.25f;
-		else if (time2 < MTP2 / 2.0f) {
-			mOptionColor = 0.5f;
-		}
-		else {
-			mOptionColor = 0.25f;
-		}
-		time -= timeE;
-		time2 = (time2 < 0.0f) ? MTP2 : time2 - timeE;
-		if (time < 0) {
-			if (mInvincible) {
-				time = MTP;
-				return;
-			}
-			t = 0.0f; mStealth = false; time = MTP; mOptionColor = 1.0f;
-
-		}
+		
 	}
 }
 void Player::Crash()
