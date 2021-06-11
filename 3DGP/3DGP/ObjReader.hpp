@@ -12,7 +12,7 @@ using namespace DirectX;
 using namespace std::literals::string_view_literals;
 
 //¡ý¡ý¡ý ¼öµ¿ ÅÛÇÃ¸´ ¤»¤»
-using STRUCT = DiffusedVertex;
+using STRUCT = LightAttributeVertex;
 #define POS mPosition 
 #define NOR mDiffuse
 #define TEX mTexture

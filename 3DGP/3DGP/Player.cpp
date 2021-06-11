@@ -234,7 +234,6 @@ void Player::FinishEvolving()
 				m_brother = new EnemyObject;
 				m_brother->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
 				m_brother->SetScale({ 90.0f,90.0f,90.0f });
-				Beep(500, 50);
 				m_brother->SetShader(mShader);
 				reinterpret_cast<EnemyObject*>(m_brother)->SetRotateSpeed(0.0f);
 			}

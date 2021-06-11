@@ -27,16 +27,17 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	HRESULT hResult;
 	CD3DX12_ROOT_PARAMETER RootParameters[5];
 	/* 앞쪽이 접근속도가 빠름 */
+	//64개가 한계임. SRV는 두칸차지.
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
-		, 16
+		, 36
 		, 0						//b0 Player
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
 	
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[1]
-		, 34
+		, 18
 		, 1						//b1 Camera
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);

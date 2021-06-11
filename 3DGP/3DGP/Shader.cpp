@@ -137,9 +137,12 @@ void Shader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 
 void Shader::UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world)
 {
+	
 	XMFLOAT4X4A w;
 	XMStoreFloat4x4A(&w, XMMatrixTranspose(XMLoadFloat4x4A(world)));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &w, 0);
+
+	//commandList->SetGraphicsRoot32BitConstants(0, sizeof(Meterial), , 0);
 }
 
 void Shader::ReleaseShaderVariables()
@@ -461,7 +464,7 @@ void InstancingShader::ReleaseShaderVariables()
 namespace tc {
 	inline XMFLOAT4A teamColor(EnemyObject::TEAM t)
 	{
-		XMFLOAT4A retCol{ 0.0f,0.0f,0.0f,0.5f };
+		XMFLOAT4A retCol{ 0.2f,0.2f,0.2f,0.5f };
 		switch (t)
 		{
 		case EnemyObject::TEAM::RED:retCol.x = 1.0f; break;
@@ -477,7 +480,8 @@ void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandL
 {
 	commandList->SetGraphicsRootShaderResourceView(2, mcbGameObjects->GetGPUVirtualAddress());
 	for (int i = 0; i < mObjects.size(); ++i) {
-		mcbMappedGameObjects[i].mColor = tc::teamColor(reinterpret_cast<EnemyObject*>(mObjects[i].get())->GetTeam());
+		XMFLOAT4A col{ tc::teamColor(reinterpret_cast<EnemyObject*>(mObjects[i].get())->GetTeam()) };
+		mcbMappedGameObjects[i].mMeterial = Meterial{ col, col, {1.0f,1.0f,1.0f,0.0f},{ 0.0f,0.0f,0.0f,0.0f },60.0f };
 		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
 	}
 }

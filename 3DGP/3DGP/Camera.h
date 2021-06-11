@@ -39,7 +39,6 @@ public:
 	void RegenerateViewMatrix();
 
 	void GenerateProjectionMatrix(float fov, float aspect, float n, float f);
-	void GenerateOrthographicMatrix(float n, float f);
 
 	void SetViewport(int xTopLeft, int yTopLeft, int width, int height
 		, float minZ = 0.0f, float maxZ = 1.0f);
@@ -76,7 +75,6 @@ public:
 
 	XMMATRIX XM_CALLCONV GetViewMatrix()const { return XMLoadFloat4x4A(&mViewMat); }
 	XMMATRIX XM_CALLCONV GetProjectionMatrix()const { return XMLoadFloat4x4A(&mProjectionMat); }
-	XMMATRIX XM_CALLCONV GetOrthographicMatrix()const { return XMLoadFloat4x4A(&m_OrthographicMat); }
 	D3D12_VIEWPORT GetViewPort()const { return mViewport; }
 	D3D12_RECT GetScissorRect()const { return mScissorRect; }
 	
@@ -130,7 +128,6 @@ protected:
 	// 변환행렬
 	XMFLOAT4X4A mViewMat;
 	XMFLOAT4X4A mProjectionMat;
-	XMFLOAT4X4A m_OrthographicMat;
 	D3D12_VIEWPORT mViewport;
 	D3D12_RECT mScissorRect;
 

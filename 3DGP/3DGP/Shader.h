@@ -3,15 +3,10 @@
 #include "Camera.h"
 #include "GameObject.h"
 
-struct CB_GAMEOBJECT_INFO
-{
-	XMFLOAT4X4A mWorldMat;
-};
-
 struct VS_VB_INSTANCE
 {
 	XMFLOAT4X4A mTransform;
-	XMFLOAT4A	mColor;
+	Meterial	mMeterial;
 };
 
 struct VS_VB_UI

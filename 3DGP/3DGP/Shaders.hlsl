@@ -1,23 +1,31 @@
 
 //////////////////////////////////////
-cbuffer cbPlayerInfo : register(b0)
+struct Meterial
+{
+	float4 diffuse;
+	float4 ambient;
+	float4 specular;
+	float4 emmesive;
+	float specularPower;
+	float3 _padd;
+};
+
+cbuffer cbObjInfo : register(b0)
 {
 	matrix worldMat : packoffset(c0);
+	Meterial meterial : packoffset(c4);
 }
 
 cbuffer cbCameraInfo : register(b1)
 {
-	matrix viewMat : packoffset(c0);
-	matrix projMat : packoffset(c4);
-	matrix orthMat : packoffset(c8);
-	float2 viewport : packoffset(c12.x);
+	matrix viewProj : packoffset(c0);
+	float2 viewport : packoffset(c4.x);
 }
 
-/////////////////////////////////////////
 struct INSTANCED_GAMEOBJECT_INFO
 {
 	matrix mTransform;
-	float4 mColor;
+	Meterial meterial;
 };
 StructuredBuffer<INSTANCED_GAMEOBJECT_INFO> gameObjectInfos : register(t0);
 
@@ -52,27 +60,11 @@ struct VS_OUTPUT
 
 //////////////////////////////////////
 
-float4 WVP(float3 position)
-{
-	return mul(mul(mul(float4(position, 1.0f)
-	, worldMat), viewMat), projMat);
-}
-
 float4 VP(float3 position)
 {
-	return mul(mul(float4(position, 1.0f)
-	, viewMat), projMat);
+	return mul(float4(position, 1.0f), viewProj);
 }
-float4 WVO(float3 position)
-{
-	return mul(mul(mul(float4(position, 1.0f)
-	, worldMat), viewMat), orthMat);
-}
-float4 VO(float3 position)
-{
-	return mul(mul(float4(position, 1.0f)
-	, viewMat), orthMat);
-}
+
 ///////////////////////////////////////
 VS_OUTPUT VSDiffused(VS_INPUT input)
 {
@@ -82,7 +74,7 @@ VS_OUTPUT VSDiffused(VS_INPUT input)
 	output.position = VP(output.originPosition);
 
 	output.color = input.color;
-
+	
 	return output;
 }
 
@@ -94,7 +86,7 @@ VS_OUTPUT VSInstancing(VS_INPUT input, uint instanceID : SV_InstanceID)
 	
 	output.position = VP(output.originPosition);
 
-	output.color = input.color + gameObjectInfos[instanceID].mColor;
+	output.color = gameObjectInfos[instanceID].meterial.ambient;
 	return output;
 }
 

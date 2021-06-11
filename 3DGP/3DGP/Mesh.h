@@ -14,28 +14,28 @@ public:
 	XMFLOAT2A mTexture{ 0.0f,0.0f };
 };
 
-class DiffusedVertex : public Vertex
+class LightAttributeVertex : public Vertex
 {
 public:
-	DiffusedVertex() : mDiffuse{ 0.0f,0.0f,0.0f,0.0f } {}
-	DiffusedVertex(float x, float y, float z, XMFLOAT4A diffuse)
+	LightAttributeVertex() : mDiffuse{ 0.0f,0.0f,0.0f,0.0f } {}
+	LightAttributeVertex(float x, float y, float z, XMFLOAT4A diffuse)
 		: Vertex{ x,y,z }
 		, mDiffuse{ diffuse } {}
-	DiffusedVertex(float x, float y, float z, XMVECTORF32 diffuse)
+	LightAttributeVertex(float x, float y, float z, XMVECTORF32 diffuse)
 		: Vertex{ x,y,z }
 		, mDiffuse{ diffuse } {}
-	DiffusedVertex(float x, float y, float z, FXMVECTOR diffuse)
+	LightAttributeVertex(float x, float y, float z, FXMVECTOR diffuse)
 		: Vertex{ x,y,z }
 	{
 		XMStoreFloat4A(&mDiffuse, diffuse);
 	}
-	DiffusedVertex(float x, float y, float z, float r, float g, float b, float a)
+	LightAttributeVertex(float x, float y, float z, float r, float g, float b, float a)
 		: Vertex{ x,y,z }
 		, mDiffuse{ r,g,b,a } {}
-	DiffusedVertex(XMFLOAT3A pos, XMFLOAT4A diffuse)
+	LightAttributeVertex(XMFLOAT3A pos, XMFLOAT4A diffuse)
 		: Vertex{ pos }
 		, mDiffuse{ diffuse } {}
-	DiffusedVertex(XMVECTOR pos, XMVECTORF32 diffuse)
+	LightAttributeVertex(XMVECTOR pos, XMVECTORF32 diffuse)
 		: Vertex{ pos }
 		, mDiffuse{ diffuse } {}
 
@@ -43,11 +43,13 @@ public:
 	XMFLOAT4A mDiffuse{ Colors::Gray };
 };
 
+
+
 class Mesh
 {
 public:
 	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, vector<DiffusedVertex>& v);
+	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, vector<LightAttributeVertex>& v);
 	virtual ~Mesh();
 
 public:
@@ -81,7 +83,6 @@ protected:
 	UINT mSlot;
 	UINT mStride;
 	UINT mOffset;
-
 	BoundingOrientedBox mOOBB;
 };
 

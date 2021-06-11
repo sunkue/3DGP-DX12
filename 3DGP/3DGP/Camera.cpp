@@ -142,33 +142,23 @@ void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 	XMStoreFloat4x4A(&mProjectionMat, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
 	m_n = n;
 	m_f = f;
-	GenerateOrthographicMatrix(n, f);
-}
-
-void Camera::GenerateOrthographicMatrix(float n, float f)
-{
-	XMStoreFloat4x4A(&m_OrthographicMat, XMMatrixOrthographicLH(mViewport.Width, mViewport.Height, n, f));
 }
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	//cout <<"POS x:"<< mPosition.x <<"\ty:"<< mPosition.y <<"\tz:"<< mPosition.z<<"\n";
 	/* 다렉은 행우선, 셰이더는 열우선 행렬. Transpose해주어야 함. */
-	XMFLOAT4X4A view;
-	XMStoreFloat4x4A(&view, XMMatrixTranspose(GetViewMatrix()));
-	commandList->SetGraphicsRoot32BitConstants(1, 16, &view, 0);
-	XMFLOAT4X4A proj;
-	XMStoreFloat4x4A(&proj, XMMatrixTranspose(GetProjectionMatrix()));
-	commandList->SetGraphicsRoot32BitConstants(1, 16, &proj, 16);
-	XMFLOAT4X4A orth;
-	XMStoreFloat4x4A(&orth, XMMatrixTranspose(GetOrthographicMatrix()));
-	commandList->SetGraphicsRoot32BitConstants(1, 16, &orth, 32);
+	XMMATRIX VP = XMMatrixTranspose(GetViewMatrix()) * XMMatrixTranspose(GetProjectionMatrix());
+	XMMATRIX VP2 = XMMatrixTranspose(GetViewMatrix() * GetProjectionMatrix());
+	XMFLOAT4X4A viewProj;
+	XMStoreFloat4x4A(&viewProj, VP2);
+	commandList->SetGraphicsRoot32BitConstants(1, 16, &viewProj, 0);
 	struct V {
 		float x;
 		float y;
 	} v{ mViewport.Width,mViewport.Height };
 	//cout << v.x << v.y << " ";
-	commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 48);
+	commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 16);
 }
 
 void Camera::ReleaseShaderVariables()

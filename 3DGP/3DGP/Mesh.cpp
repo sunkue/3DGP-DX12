@@ -30,7 +30,7 @@ Mesh::Mesh(
 Mesh::Mesh(
 	  ID3D12Device* device
 	, ID3D12GraphicsCommandList* commandList
-	, vector<DiffusedVertex>& v
+	, vector<LightAttributeVertex>& v
 )
 	: mSlot{ 0 }
 	, mOffset{ 0 }
@@ -101,11 +101,11 @@ TriangleMesh::TriangleMesh(
 {
 	constexpr UINT VC{ 3 };
 	mVerticesCount = VC;
-	mStride = sizeof(DiffusedVertex);
+	mStride = sizeof(LightAttributeVertex);
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	
-	DiffusedVertex vertices[VC]
+	LightAttributeVertex vertices[VC]
 	{
 		  { XMFLOAT3A{  0.0f, +0.5f, 0.0f }, XMFLOAT4A{ Colors::Red }}
 		, { XMFLOAT3A{ +0.5f, -0.5f, 0.0f }, XMFLOAT4A{ Colors::Green }}
@@ -142,11 +142,11 @@ CubeMeshDiffused::CubeMeshDiffused(
 {
 	// 개노가다 우씨,, 오브젝트 리더 만들자.
 	mVerticesCount = 8;
-	mStride = sizeof(DiffusedVertex);
+	mStride = sizeof(LightAttributeVertex);
 	float x = width  * 0.5f;
 	float y = height * 0.5f;
 	float z = depth	 * 0.5f;
-	DiffusedVertex vertices[]{
+	LightAttributeVertex vertices[]{
 		 {-x, +y ,-z, Colors::Gray}
 		,{+x, +y ,-z, Colors::DarkRed}
 		,{+x, +y ,+z, Colors::DarkRed}
@@ -215,11 +215,11 @@ PlayerMeshDiffused::PlayerMeshDiffused(
 	: Mesh{ device,commandList }
 {
 	mVerticesCount = 8;
-	mStride = sizeof(DiffusedVertex);
+	mStride = sizeof(LightAttributeVertex);
 	float x = width * 0.5f;
 	float y = height * 0.5f;
 	float z = depth * 0.5f;
-	DiffusedVertex vertices[]{
+	LightAttributeVertex vertices[]{
 		 {-x, +y ,-z, Colors::Aquamarine}
 		,{+x, +y ,-z, Colors::Aquamarine + color}
 		,{+x, +y ,+z, Colors::Aquamarine}
@@ -374,15 +374,15 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	// vertex 
 	mVerticesCount = width * length;
-	mStride = sizeof(DiffusedVertex);
-	unique_ptr<DiffusedVertex[]> vertices = make_unique<DiffusedVertex[]>(mVerticesCount);
+	mStride = sizeof(LightAttributeVertex);
+	unique_ptr<LightAttributeVertex[]> vertices = make_unique<LightAttributeVertex[]>(mVerticesCount);
 	float height{ 0.0f }, minH{ +FLT_MAX }, maxH{ -FLT_MAX };
 	for (int i = 0, z = Zstart; z < (Zstart + length); z++) {
 		for (int x = Xstart; x < (Xstart + width); x++, i++) {
 			XMVECTOR pos{ scale.x * x,OnGetHeight(x,z,context),scale.z * z };
 			XMVECTORF32 col;
 			col.v = { OnGetColor(x,z,context).v + color.v };
-			vertices[i] = DiffusedVertex{ pos, col };
+			vertices[i] = LightAttributeVertex{ pos, col };
 	
 			minH = min(minH, height);
 			maxH = max(maxH, height);
@@ -481,7 +481,7 @@ SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 {
 	float x = 1.0f;
 	float y = 1.0f;
-	DiffusedVertex vertices[]{
+	LightAttributeVertex vertices[]{
 		 {-x, +y ,1.0f, Colors::Gray}
 		,{+x, +y ,1.0f, Colors::Black}
 		,{+x, -y ,1.0f, Colors::Black}

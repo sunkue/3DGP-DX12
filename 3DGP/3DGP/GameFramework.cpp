@@ -44,6 +44,8 @@ GameFramework::GameFramework(HINSTANCE hInstance, int showCmd)
 {
 	APP = this;
 	READY = false;
+
+	
 }
 
 GameFramework::~GameFramework()
@@ -376,7 +378,7 @@ void GameFramework::BuildMeshes()
 {
 	auto const d{ mDevice.Get() };
 	auto const c{ mCommandList.Get() };
-	vector<DiffusedVertex> v;
+	vector<LightAttributeVertex> v;
 	string file;
 	string const dir{ "Assets/Model/" };
 	string const ext{ ".bin" };
@@ -384,16 +386,16 @@ void GameFramework::BuildMeshes()
 
 	//file = "cube"; v = LoadObj<DiffusedVertex>(dir + file + ext2);
 	//SaveMeshAsBinary(v, dir + file + ext);
-	file = "tree"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	file = "tree"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{d,c,v});
 
-	file = "cube"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	file = "cube"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	file = "sphere"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	file = "sphere"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	file = "girl"; v = LoadMeshFromBinary<DiffusedVertex>(dir + file + ext);
+	file = "girl"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
 	//file = "car"; v = LoadObj<DiffusedVertex>(dir + file + ext2);

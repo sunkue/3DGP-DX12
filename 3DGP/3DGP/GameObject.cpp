@@ -201,16 +201,9 @@ void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsComma
 void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMFLOAT4X4A world;
-//	XMStoreFloat4x4A(&world, XMMatrixTranspose(XMLoadFloat4x4A(&mWorldMat)));
 	XMStoreFloat4x4A(&world, XMMatrixTranspose(GetWM()));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
-	/*
-	cout << world._11 << "\t" << world._12 << "\t" << world._13 << "\t" << world._14 << "\n";
-	cout << world._21 << "\t" << world._22 << "\t" << world._23 << "\t" << world._14 << "\n";
-	cout << world._31 << "\t" << world._32 << "\t" << world._33 << "\t" << world._14 << "\n";
-	cout << world._41 << "\t" << world._42 << "\t" << world._43 << "\t" << world._14 << "\n";
-	cout << "\n\n\n";
-	*/
+	commandList->SetGraphicsRoot32BitConstants(0, sizeof(Meterial)/sizeof(float), &m_meterial, 16);
 }
 
 void GameObject::ReleaseShaderVariables()
