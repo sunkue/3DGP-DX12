@@ -396,15 +396,19 @@ void GameFramework::BuildMeshes()
 
 	file = "tree"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{d,c,v});
+	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 
 	file = "cube"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 
 	file = "sphere"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 
 	file = "girl"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes[file]->SetMeterial({ 0.2f,0.5f,0.6f,0.0f }, { 0.5f,0.7f,0.8f,0.0f });
 
 
 
@@ -423,7 +427,6 @@ void GameFramework::BuildObjects()
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
 	mPlayer = new TerrainPlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature(), mScene->GetTerrain(), 1);
-	mPlayer->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 	//mPlayer->SetMesh(0, m_Meshes["tree"]);
 	mCamera = mPlayer->GetCamera();
 
@@ -616,6 +619,12 @@ void GameFramework::ProcessInput()
 
 		if (key[VK_SHIFT] & 0xf0)dir |= DIR_UP;
 		if (key[VK_CONTROL] & 0xf0)dir |= DIR_DOWN;
+
+
+		if (key['1'] & 0xf0)mScene->SetFactorMode(FACTOR_MODE::DEFAULT);
+		if (key['2'] & 0xf0)mScene->SetFactorMode(FACTOR_MODE::CATOON);
+		if (key['3'] & 0xf0)mScene->SetFactorMode(FACTOR_MODE::SMOOTH);
+
 	}
 	float deltaX{ 0.0f };
 	float deltaY{ 0.0f };

@@ -20,6 +20,7 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix viewProj : packoffset(c0);
 	float3 cameraPos : packoffset(c4);
+	int diffuse_factor_mode : packoffset(c4.w);
 }
 
 struct INSTANCED_GAMEOBJECT_INFO
@@ -121,7 +122,7 @@ INSTANCING_VS_OUTPUT VSInstancing(INSTANCING_VS_INPUT input, uint instanceID : S
 {
 	INSTANCING_VS_OUTPUT output;
 	output.originPosition = mul(float4(input.position, 1.0f)
-	, gameObjectInfos[instanceID].mTransform).xyz;	
+	, gameObjectInfos[instanceID].mTransform).xyz;
 	output.position = VP(output.originPosition);
 	output.normal = normalize(mul(float4(input.normal, 0.0f), gameObjectInfos[instanceID].mTransform).xyz);
 	output.index = instanceID;
@@ -170,14 +171,38 @@ float4 Effect1Obj(float3 originPos)
 		return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 /////////////////////////////////////////
+
 float cellSmooth(float x)
 {
-	return smoothstep(0.33f, 0.67f, x);
+	const int slice = 3;
+	const float t = (1.0f / slice);
+	const float R = (1.0f / (slice - 1));
+	float ret = 0.0f;
+	for (int i = 0; i < slice; i++)
+	{
+		ret += smoothstep(t * i, t * (i + 1), x) * (R * i);
+	}
+	return ret;
 }
-float cellShading(float x)
+float cellStatic(float x)
 {
-	const float slice = 3.0f;
+	const int slice = 3;
 	return ceil(x * slice) / slice;
+}
+float factorMode(int mode, float x)
+{
+	switch (mode)
+	{
+		case 1:
+			x = cellStatic(x);
+			break;
+		case 2:
+			x = cellSmooth(x);
+			break;
+		default:
+			break;
+	}
+	return x;
 }
 //////////////////////////////
 float4 ComputeDirectionalLight(
@@ -234,7 +259,7 @@ float4 ComputePointLight(
 			float4 specFactor = pow(max(dot(reflection, toCamera), 0.0f), material.specularPower);
 			//float3 Half = normalize(toCamera + toLight);
 			//float4 specFactor = pow(max(dot(Half, normal), 0.0f), material.specularPower);
-			diffuseFactor = cellShading(diffuseFactor);
+			diffuseFactor = factorMode(diffuse_factor_mode, diffuseFactor);
 			diffuse = material.diffuse * (pointLight.diffuse * diffuseFactor);
 			specular = material.specular * (pointLight.specualr * specFactor);
 		}

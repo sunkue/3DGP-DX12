@@ -158,6 +158,8 @@ void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 		float x;
 		float y;
 	} v{ mViewport.Width,mViewport.Height };
+	
+
 	//cout << v.x << v.y << " ";
 	//commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 16);
 }

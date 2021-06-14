@@ -14,7 +14,7 @@ LightObj::LightObj(shared_ptr<LightInfo> light, int meshes)
 
 //////////////////////////////////
 
-Light::Light(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+Light::Light(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) :m_factorMode{ FACTOR_MODE::DEFAULT }
 {
 	CreateShaderVariables(device, commandList);
 }
@@ -42,6 +42,7 @@ void Light::ReleaseShaderVariables()
 
 void Light::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
+	commandList->SetGraphicsRoot32BitConstants(1, 1, &m_factorMode, 19);
 	commandList->SetGraphicsRootShaderResourceView(5, mcbLights->GetGPUVirtualAddress());
 	for (int i = 0; i < MaxLights; ++i) {
 		if (i < Lights.size())mcbMappedLights[i] = *Lights[i];

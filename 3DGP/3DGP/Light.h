@@ -11,6 +11,13 @@ enum class LIGHT_TYPE : __int32
 	DIRECTIONAL
 };
 
+enum class FACTOR_MODE : __int32
+{
+	DEFAULT,
+	CATOON,
+	SMOOTH
+};
+
 struct LightInfo
 {
 	LIGHT_TYPE m_type;
@@ -120,11 +127,12 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
 
 	void AddLight(shared_ptr<LightInfo> lightInfo) { Lights.push_back(lightInfo); }
-
+	void SetFactorMode(FACTOR_MODE fm) { m_factorMode = fm; }
 protected:
 	ComPtr<ID3D12Resource>	mcbLights;
 	LightInfo* mcbMappedLights;
 	vector<shared_ptr<LightInfo>> Lights;
+	FACTOR_MODE m_factorMode;
 };
 
 

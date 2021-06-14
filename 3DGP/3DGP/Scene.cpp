@@ -39,7 +39,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[1]
-		, 19
+		, 20
 		, 1						//b1 Camera
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
@@ -115,7 +115,8 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 		, "Assets/Image/Terrain/heightMap.raw"sv
 		, 257, 257, 257, 257, scale, color);
 #endif
-	
+	mTerrain->GetMesh()[0]->SetMeterial({ 0.45f,0.4f,0.2f,1.0f }, { 0.45f,0.4f,0.2f,1.0f }, 600.0f, { 0.45f,0.4f,0.2f,1.0f });
+
 	assert(mShaders.empty());
 	mShaders.push_back(new InstancingShader);
 	assert(mShaders.size() == 1);

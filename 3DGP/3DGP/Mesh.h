@@ -16,11 +16,11 @@ public:
 
 struct Meterial
 {
-	XMFLOAT4A m_ambient{ 0.45f,0.4f,0.2f,0.0f };
-	XMFLOAT4A m_diffuse{ 0.45f,0.4f,0.2f,0.0f };
-	XMFLOAT4A m_specular{ 0.45f,0.4f,0.2f,0.0f };
-	XMFLOAT4A m_emessive{ 0.0f,0.0f,0.0f,0.0f };
-	float m_specualrPower{ 600.0f };
+	XMFLOAT4A m_ambient{};
+	XMFLOAT4A m_diffuse{};
+	XMFLOAT4A m_specular{};
+	XMFLOAT4A m_emessive{};
+	float m_specualrPower{};
 };
 
 class Mesh

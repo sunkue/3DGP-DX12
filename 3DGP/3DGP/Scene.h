@@ -40,7 +40,7 @@ public:
 	void AddUI(UIObject* ui) { m_UIs.push_back(ui); }
 	void SetEffect(Effect* eff) { mEffect = eff; }
 	HeightMapTerrain* GetTerrain()const { return mTerrain; }
-
+	void SetFactorMode(FACTOR_MODE fm) { m_light->SetFactorMode(fm); }
 	pair<bool, XMVECTOR> XM_CALLCONV RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist);
 public:
 	void TeamAddCount(EnemyObject::TEAM team, int count = 1) {
