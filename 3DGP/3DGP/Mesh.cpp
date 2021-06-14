@@ -30,7 +30,7 @@ Mesh::Mesh(
 Mesh::Mesh(
 	  ID3D12Device* device
 	, ID3D12GraphicsCommandList* commandList
-	, vector<LightAttributeVertex>& v
+	, vector<Vertex>& v
 )
 	: mSlot{ 0 }
 	, mOffset{ 0 }
@@ -44,7 +44,7 @@ Mesh::Mesh(
 	, mIndexBufferView{}
 	, mOOBB{}
 {
-	mVerticesCount = v.size();
+	mVerticesCount = static_cast<UINT>(v.size());
 	mStride = sizeof(*v.data());
 	UINT bufferSize{ mStride * mVerticesCount };
 	mVertexBuffer = CreateBufferResource(
@@ -76,6 +76,8 @@ void Mesh::ReleaseUploadBuffers()
 
 void Mesh::Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount)
 {
+	commandList->SetGraphicsRoot32BitConstants(0, sizeof(Meterial) / sizeof(float), &m_meterial, 16);
+
 	commandList->IASetVertexBuffers(mSlot, 1, &mVertexBufferView);
 	commandList->IASetPrimitiveTopology(mPrimitiveToplogy);
 	if (mIndexBuffer) {
@@ -94,189 +96,13 @@ void Mesh::Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3
 
 /////////////////////////////////////////////////////
 
-TriangleMesh::TriangleMesh(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList)
-	: Mesh{ device , commandList }
-{
-	constexpr UINT VC{ 3 };
-	mVerticesCount = VC;
-	mStride = sizeof(LightAttributeVertex);
-	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	
-	LightAttributeVertex vertices[VC]
-	{
-		  { XMFLOAT3A{  0.0f, +0.5f, 0.0f }, XMFLOAT4A{ Colors::Red }}
-		, { XMFLOAT3A{ +0.5f, -0.5f, 0.0f }, XMFLOAT4A{ Colors::Green }}
-		, { XMFLOAT3A{ -0.5f, -0.5f, 0.0f }, XMFLOAT4A{ Colors::Blue }}
-	};
-	
-	UINT bufferSize{ mStride * VC };
-	mVertexBuffer = CreateBufferResource(
-		  device
-		, commandList
-		, vertices
-		, bufferSize
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, mVertexUploadBuffer.GetAddressOf()
-	);
-	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
-	mVertexBufferView.StrideInBytes = mStride;
-	mVertexBufferView.SizeInBytes = bufferSize;
-}
-
-TriangleMesh::~TriangleMesh()
-{
-
-}
 
 ////////////////////////////////////////
 
-CubeMeshDiffused::CubeMeshDiffused(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, float width, float height, float depth)
-	: Mesh{ device, commandList }
-{
-	// 개노가다 우씨,, 오브젝트 리더 만들자.
-	mVerticesCount = 8;
-	mStride = sizeof(LightAttributeVertex);
-	float x = width  * 0.5f;
-	float y = height * 0.5f;
-	float z = depth	 * 0.5f;
-	LightAttributeVertex vertices[]{
-		 {-x, +y ,-z, Colors::Gray}
-		,{+x, +y ,-z, Colors::DarkRed}
-		,{+x, +y ,+z, Colors::DarkRed}
-		,{-x, +y ,+z, Colors::Blue}
-		,{-x, -y ,-z, Colors::ForestGreen}
-		,{+x, -y ,-z, Colors::ForestGreen}
-		,{+x, -y ,+z, Colors::GreenYellow}
-		,{-x, -y ,+z, Colors::GreenYellow}
-	};
-	UINT bufferSize{ mStride * mVerticesCount };
-	mVertexBuffer = CreateBufferResource(
-		  device
-		, commandList
-		, vertices
-		, bufferSize
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, mVertexUploadBuffer.GetAddressOf());
-	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
-	mVertexBufferView.StrideInBytes = mStride;
-	mVertexBufferView.SizeInBytes = bufferSize;
-
-	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
-	
-	mIndicesCount = 36;
-	UINT indices[]{
-		 3,1,0
-		,2,1,3
-		,0,5,4
-		,1,5,0
-		,3,4,7
-		,0,4,3
-		,1,6,5
-		,2,6,1
-		,2,7,6
-		,3,7,2
-		,6,4,5
-		,7,4,6
-	};
-	bufferSize = sizeof(UINT) * mIndicesCount;
-	mIndexBuffer = CreateBufferResource(
-		  device
-		, commandList
-		, indices
-		, bufferSize
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_INDEX_BUFFER
-		, mIndexUploadBuffer.GetAddressOf());
-	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
-	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	mIndexBufferView.SizeInBytes = bufferSize;
-}
-
-CubeMeshDiffused::~CubeMeshDiffused()
-{
-
-}
 
 /////////////////////////////////////
 
-PlayerMeshDiffused::PlayerMeshDiffused(
-	  ID3D12Device* device
-	, ID3D12GraphicsCommandList* commandList
-	, float width, float height, float depth
-	, XMVECTORF32 color)
-	: Mesh{ device,commandList }
-{
-	mVerticesCount = 8;
-	mStride = sizeof(LightAttributeVertex);
-	float x = width * 0.5f;
-	float y = height * 0.5f;
-	float z = depth * 0.5f;
-	LightAttributeVertex vertices[]{
-		 {-x, +y ,-z, Colors::Aquamarine}
-		,{+x, +y ,-z, Colors::Aquamarine + color}
-		,{+x, +y ,+z, Colors::Aquamarine}
-		,{-x, +y ,+z, Colors::Aquamarine + color}
-		,{-x, -y ,-z, Colors::Aquamarine}
-		,{+x, -y ,-z, Colors::Aquamarine}
-		,{+x, -y ,+z, Colors::Aquamarine + color}
-		,{-x, -y ,+z, Colors::Aquamarine + color}
-	};
-	UINT bufferSize{ mStride * mVerticesCount };
-	mVertexBuffer = CreateBufferResource(
-		device
-		, commandList
-		, vertices
-		, bufferSize
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, mVertexUploadBuffer.GetAddressOf());
-	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
-	mVertexBufferView.StrideInBytes = mStride;
-	mVertexBufferView.SizeInBytes = bufferSize;
-	
-	mOOBB = { {0.0f,0.0f,0.0f},{x,y,z},{0.0f,0.0f,0.0f,1.0f} };
 
-	mIndicesCount = 36;
-	UINT indices[]{
-		 3,1,0
-		,2,1,3
-		,0,5,4
-		,1,5,0
-		,3,4,7
-		,0,4,3
-		,1,6,5
-		,2,6,1
-		,2,7,6
-		,3,7,2
-		,6,4,5
-		,7,4,6
-	};
-	bufferSize = sizeof(UINT) * mIndicesCount;
-	mIndexBuffer = CreateBufferResource(
-		device
-		, commandList
-		, indices
-		, bufferSize
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_INDEX_BUFFER
-		, mIndexUploadBuffer.GetAddressOf());
-	mIndexBufferView.BufferLocation = mIndexBuffer->GetGPUVirtualAddress();
-	mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	mIndexBufferView.SizeInBytes = bufferSize;
-}
-
-PlayerMeshDiffused::~PlayerMeshDiffused()
-{
-
-}
 
 /////////////////////////////////////////////
 
@@ -374,16 +200,17 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	mPrimitiveToplogy = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	// vertex 
 	mVerticesCount = width * length;
-	mStride = sizeof(LightAttributeVertex);
-	unique_ptr<LightAttributeVertex[]> vertices = make_unique<LightAttributeVertex[]>(mVerticesCount);
+	mStride = sizeof(Vertex);
+	unique_ptr<Vertex[]> vertices = make_unique<Vertex[]>(mVerticesCount);
+	HeightMapImage const* const HMImage{ reinterpret_cast<HeightMapImage*>(context) };
 	float height{ 0.0f }, minH{ +FLT_MAX }, maxH{ -FLT_MAX };
 	for (int i = 0, z = Zstart; z < (Zstart + length); z++) {
 		for (int x = Xstart; x < (Xstart + width); x++, i++) {
 			XMVECTOR pos{ scale.x * x,OnGetHeight(x,z,context),scale.z * z };
-			XMVECTORF32 col;
-			col.v = { OnGetColor(x,z,context).v + color.v };
-			vertices[i] = LightAttributeVertex{ pos, col };
-	
+			//XMVECTORF32 col;
+			//col.v = { OnGetColor(x,z,context).v + color.v };
+			vertices[i] = Vertex{ pos };
+			XMStoreFloat3A(&vertices[i].mNormal, HMImage->GetNormal(x, z));
 			minH = min(minH, height);
 			maxH = max(maxH, height);
 		}
@@ -481,11 +308,11 @@ SquareMesh::SquareMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandL
 {
 	float x = 1.0f;
 	float y = 1.0f;
-	LightAttributeVertex vertices[]{
-		 {-x, +y ,1.0f, Colors::Gray}
-		,{+x, +y ,1.0f, Colors::Black}
-		,{+x, -y ,1.0f, Colors::Black}
-		,{-x, -y ,1.0f, Colors::Black}
+	Vertex vertices[]{
+		 {-x, +y ,1.0f}
+		,{+x, +y ,1.0f}
+		,{+x, -y ,1.0f}
+		,{-x, -y ,1.0f}
 	};
 	mStride = sizeof(decltype(vertices[0]));
 	mVerticesCount = _countof(vertices);

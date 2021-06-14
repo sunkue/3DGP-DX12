@@ -115,7 +115,7 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 		, "Assets/Image/Terrain/heightMap.raw"sv
 		, 257, 257, 257, 257, scale, color);
 #endif
-
+	
 	assert(mShaders.empty());
 	mShaders.push_back(new InstancingShader);
 	assert(mShaders.size() == 1);
@@ -126,8 +126,9 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[1]->BuildObjects(device, commandList, nullptr);
 
-	m_lightObjs.emplace_back(new LightObj(LightFactory::MakePointLight({ 0.0f,2000.0f,0.0f }, 5000.0f)));
-	m_lightObjs[0]->SetLightColor(Colors::Chocolate);
+	m_lightObjs.emplace_back(new LightObj(
+		LightFactory::MakePointLight({ 2000.0f,500.0f,0.0f }, 5000.0f)));
+	m_lightObjs[0]->SetLightColor(Colors::White);
 
 	m_light = make_shared<Light>(device, commandList);
 	for (auto& lightObj : m_lightObjs)m_light->AddLight(lightObj->GetLightInfo());

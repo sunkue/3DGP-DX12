@@ -57,7 +57,7 @@ struct LightFactory
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, XMFLOAT3{ 1.0f,0.000007f,0.00000002f }
 			, range
 			, XMFLOAT3{}
 			, 0.0f
@@ -78,7 +78,7 @@ struct LightFactory
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, XMFLOAT3{ 0.5f,0.000007f,0.00000002f }
 			, range
 			, dir
 			, falloff
@@ -97,7 +97,7 @@ struct LightFactory
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
 			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, XMFLOAT3{ 1.0f,0.000007f,0.00000002f }
 			, 0.0f
 			, dir
 			, 0.0f

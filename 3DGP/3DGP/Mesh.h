@@ -9,47 +9,25 @@ public:
 	explicit Vertex(XMVECTOR pos) { XMStoreFloat3A(&mPosition, pos); }
 
 
-	XMFLOAT3A mPosition;
-	XMFLOAT3A mNormal{ 0.0f,0.0f,0.0f };
-	XMFLOAT2A mTexture{ 0.0f,0.0f };
+	XMFLOAT3A mPosition{};
+	XMFLOAT3A mNormal{};
+	XMFLOAT2A mTexture{};
 };
 
-class LightAttributeVertex : public Vertex
+struct Meterial
 {
-public:
-	LightAttributeVertex() : mDiffuse{ 0.0f,0.0f,0.0f,0.0f } {}
-	LightAttributeVertex(float x, float y, float z, XMFLOAT4A diffuse)
-		: Vertex{ x,y,z }
-		, mDiffuse{ diffuse } {}
-	LightAttributeVertex(float x, float y, float z, XMVECTORF32 diffuse)
-		: Vertex{ x,y,z }
-		, mDiffuse{ diffuse } {}
-	LightAttributeVertex(float x, float y, float z, FXMVECTOR diffuse)
-		: Vertex{ x,y,z }
-	{
-		XMStoreFloat4A(&mDiffuse, diffuse);
-	}
-	LightAttributeVertex(float x, float y, float z, float r, float g, float b, float a)
-		: Vertex{ x,y,z }
-		, mDiffuse{ r,g,b,a } {}
-	LightAttributeVertex(XMFLOAT3A pos, XMFLOAT4A diffuse)
-		: Vertex{ pos }
-		, mDiffuse{ diffuse } {}
-	LightAttributeVertex(XMVECTOR pos, XMVECTORF32 diffuse)
-		: Vertex{ pos }
-		, mDiffuse{ diffuse } {}
-
-
-	XMFLOAT4A mDiffuse{ Colors::Gray };
+	XMFLOAT4A m_ambient{ 0.45f,0.4f,0.2f,0.0f };
+	XMFLOAT4A m_diffuse{ 0.45f,0.4f,0.2f,0.0f };
+	XMFLOAT4A m_specular{ 0.45f,0.4f,0.2f,0.0f };
+	XMFLOAT4A m_emessive{ 0.0f,0.0f,0.0f,0.0f };
+	float m_specualrPower{ 600.0f };
 };
-
-
 
 class Mesh
 {
 public:
 	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, vector<LightAttributeVertex>& v);
+	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, vector<Vertex>& v);
 	virtual ~Mesh();
 
 public:
@@ -84,29 +62,18 @@ protected:
 	UINT mStride;
 	UINT mOffset;
 	BoundingOrientedBox mOOBB;
-};
 
-class TriangleMesh : public Mesh
-{
 public:
-	explicit TriangleMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	virtual ~TriangleMesh();
-};
-
-class CubeMeshDiffused : public Mesh
-{
-public:
-	CubeMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-		, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
-	virtual ~CubeMeshDiffused();
-};
-
-class PlayerMeshDiffused : public Mesh
-{
-public:
-	PlayerMeshDiffused(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-		, float width = 4.0f, float height = 4.0f, float depth = 4.0f, XMVECTORF32 color = Colors::BlueViolet);
-	virtual ~PlayerMeshDiffused();
+	void SetMeterial(XMFLOAT4A a, XMFLOAT4A d, float sp = 600.0f, XMFLOAT4A s = { 0.0f,0.0f,0.0f,0.0f }) {
+		m_meterial.m_ambient = a;
+		m_meterial.m_diffuse = d;
+		m_meterial.m_specular = s;
+		m_meterial.m_specualrPower = sp;
+	}
+	void SetEmessive(XMFLOAT4A e) { m_meterial.m_emessive = e; }
+	Meterial GetMeterial() { return m_meterial; }
+protected:
+	Meterial m_meterial;
 };
 
 class HeightMapImage

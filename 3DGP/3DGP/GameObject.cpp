@@ -202,7 +202,6 @@ void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 	XMFLOAT4X4A world;
 	XMStoreFloat4x4A(&world, XMMatrixTranspose(GetWM()));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
-	commandList->SetGraphicsRoot32BitConstants(0, sizeof(Meterial)/sizeof(float), &m_meterial, 16);
 }
 
 void GameObject::ReleaseShaderVariables()

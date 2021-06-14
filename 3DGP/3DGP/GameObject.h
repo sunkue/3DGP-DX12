@@ -5,14 +5,6 @@
 class Shader;
 class Camera;
 
-struct Meterial
-{
-	XMFLOAT4A m_ambient{ 0.3f,0.4f,0.4f,0.0f };
-	XMFLOAT4A m_diffuse{ 0.7f,0.3f,0.3f,0.0f };
-	XMFLOAT4A m_specular{ 1.0f,1.0f,1.0f,0.0f };
-	XMFLOAT4A m_emessive{ 0.0f,0.0f,0.0f,0.0f };
-	float m_specualrPower{ 0.0f };
-};
 
 class GameObject
 {
@@ -69,17 +61,7 @@ public:
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void UpdateBoundingBox();
 
-public:
-	void SetMeterial(XMFLOAT4A a, XMFLOAT4A d, float sp = 0.0f, XMFLOAT4A s = { 1.0f,1.0f,1.0f,0.0f }) {
-		m_meterial.m_ambient = a;
-		m_meterial.m_diffuse = d;
-		m_meterial.m_specular = s;
-		m_meterial.m_specualrPower = sp;
-	}
-	void SetEmessive(XMFLOAT4A e) { m_meterial.m_emessive = e; }
-	Meterial GetMeterial() { return m_meterial; }
-protected:
-	Meterial m_meterial;
+
 
 public:
 	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }

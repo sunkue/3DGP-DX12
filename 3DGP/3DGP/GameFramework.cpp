@@ -378,24 +378,32 @@ void GameFramework::BuildMeshes()
 {
 	auto const d{ mDevice.Get() };
 	auto const c{ mCommandList.Get() };
-	vector<LightAttributeVertex> v;
+	vector<Vertex> v;
 	string file;
 	string const dir{ "Assets/Model/" };
 	string const ext{ ".bin" };
 	string const ext2{ ".obj" };
 
-	//file = "cube"; v = LoadObj<DiffusedVertex>(dir + file + ext2);
-	//SaveMeshAsBinary(v, dir + file + ext);
-	file = "tree"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
+	/*file = "tree"; v = LoadObj<Vertex>(dir + file + ext2);
+	SaveMeshAsBinary(v, dir + file + ext);
+	file = "cube"; v = LoadObj<Vertex>(dir + file + ext2);
+	SaveMeshAsBinary(v, dir + file + ext);
+	file = "sphere"; v = LoadObj<Vertex>(dir + file + ext2);
+	SaveMeshAsBinary(v, dir + file + ext);
+	file = "girl"; v = LoadObj<Vertex>(dir + file + ext2);
+	SaveMeshAsBinary(v, dir + file + ext);*/
+
+
+	file = "tree"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{d,c,v});
 
-	file = "cube"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
+	file = "cube"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	file = "sphere"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
+	file = "sphere"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	file = "girl"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
+	file = "girl"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
 
@@ -415,6 +423,7 @@ void GameFramework::BuildObjects()
 	mScene->BuildObjects(mDevice.Get(), mCommandList.Get());
 
 	mPlayer = new TerrainPlayer(mDevice.Get(), mCommandList.Get(), mScene->GetGraphicsRootSignature(), mScene->GetTerrain(), 1);
+	mPlayer->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 	//mPlayer->SetMesh(0, m_Meshes["tree"]);
 	mCamera = mPlayer->GetCamera();
 

@@ -178,7 +178,7 @@ D3D12_INPUT_LAYOUT_DESC PlayerShader::CreateInputLayout()
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,mNormal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;
@@ -223,7 +223,7 @@ D3D12_INPUT_LAYOUT_DESC ObjectsShader::CreateInputLayout()
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,mNormal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;
@@ -263,9 +263,6 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 	int const yObjects{ 2 };
 	int const zObjects{ static_cast<int>(terrainLength / zPitch) };
 	mObjects.reserve(static_cast<size_t>(xObjects) * yObjects * zObjects);
-
-	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
-		,12.0f,12.0f,12.0f) };
 	
 	XMVECTOR rotateAxis;
 	XMVECTOR surfaceNormal;	
@@ -274,7 +271,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 		for (int z = 0; z < zObjects; z++) {
 			for (int y = 0; y < yObjects; y++, i++) {
 				Eobj = make_shared<EnemyObject>(1);
-				Eobj->SetMesh(0, cube);
+				Eobj->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
 				float const xPosition = x * xPitch;
 				float const zPosition = z * zPitch;
 				float const height{ terrain->GetHeight(xPosition,zPosition) };
@@ -348,8 +345,6 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 
 	mObjects.reserve(size);
 	Scene::SCENE->TeamSetMaxCount((int)size);
-	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList
-		,12.0f,12.0f,12.0f) };
 
 	XMVECTOR rotateAxis;
 	XMVECTOR surfaceNormal;
@@ -358,13 +353,13 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 		for (int z = 0; z < zObjects; z++) {
 			for (int y = 0; y < yObjects; y++, i++) {
 				Eobj = make_shared<EnemyObject>(1);
-				Eobj->SetMesh(0, cube);
+				Eobj->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
 				float const xPosition = x * xPitch;
 				float const zPosition = z * zPitch;
 				float const height{ terrain->GetHeight(xPosition,zPosition) };
 				constexpr float magicNum0{ 10.0f };
-				constexpr float magicNum1{ 6.0f };
-				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + magicNum1, zPosition);
+				const float scale{ uniform_real_distribution<float>{ 2.0f, 4.0f }(Rand.dre) };
+				Eobj->SetPosition(xPosition, height + (y * magicNum0 * yPitch) + scale, zPosition);
 
 				constexpr XMVECTOR yAxis{ 0.0f,1.0f,0.0f };
 				if (0 == y) {
@@ -376,6 +371,10 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 				}
 				Eobj->SetRotationAxis(yAxis);
 				Eobj->SetRotationSpeed(36.0f * (1 % 10) + 36.0f);
+
+				XMVECTORF32 s;
+				s.f[0] = scale;
+				Eobj->SetScale(XMVectorSplatX(s.v));
 				mObjects.push_back(Eobj);
 				Scene::SCENE->AddObject(Eobj.get());
 			}
@@ -418,7 +417,7 @@ D3D12_INPUT_LAYOUT_DESC InstancingShader::CreateInputLayout()
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,mNormal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;
@@ -520,7 +519,7 @@ D3D12_INPUT_LAYOUT_DESC TerrainShader::CreateInputLayout()
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,mNormal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;
@@ -558,7 +557,6 @@ UIShader::~UIShader()
 void UIShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context)
 {
 	SquareMesh* square{ new SquareMesh(device,commandList) };
-	CubeMeshDiffused* cube{ new CubeMeshDiffused(device,commandList,0.2f,0.2f,0.2f) };
 	shared_ptr<UIObject> UIobj{ nullptr };	
 	for (int i = 0; i < 4; i++) {
 		UIobj = make_shared<UIObject>();
@@ -646,7 +644,7 @@ D3D12_INPUT_LAYOUT_DESC UIShader::CreateInputLayout()
 		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
 	{
 	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, sizeof(Vertex), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	,{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,mNormal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 	InputLayoutDesc.pInputElementDescs = InputElemDescs;

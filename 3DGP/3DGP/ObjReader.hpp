@@ -12,9 +12,9 @@ using namespace DirectX;
 using namespace std::literals::string_view_literals;
 
 //¡ý¡ý¡ý ¼öµ¿ ÅÛÇÃ¸´ ¤»¤»
-using STRUCT = LightAttributeVertex;
+using STRUCT = Vertex;
 #define POS mPosition 
-#define NOR mDiffuse
+#define NOR mNormal
 #define TEX mTexture
 //¡ü¡ü¡ü
 template<typename VERTEX = STRUCT>
@@ -36,7 +36,7 @@ std::vector<VERTEX> LoadObj(std::string_view fileName, size_t reserve_hint = 10'
 		smatch matches;
 		if (regex_match(line, matches, vertexPattern)) {
 			if ("v" == matches[1]) { v_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4])); }
-			else if ("vn" == matches[1]) { vn_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4]),1.0f); }
+			else if ("vn" == matches[1]) { vn_list.emplace_back(stof(matches[2]), stof(matches[3]), stof(matches[4])); }
 			else if ("vt" == matches[1]) { vt_list.emplace_back(stof(matches[2]), stof(matches[3])); }
 		}
 		else if (regex_match(line, matches, fragmentPattern))
