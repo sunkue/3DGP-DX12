@@ -1,15 +1,17 @@
 #pragma once
 
+#include "ShaderHelper.hpp"
 class GameObject;
 
 enum class LIGHT_TYPE : __int32
 {
+	NO_LIGHT,
 	POINT,
 	SPOT,
 	DIRECTIONAL
 };
 
-struct Light
+struct LightInfo
 {
 	LIGHT_TYPE m_type;
 	XMFLOAT3 m_position;
@@ -23,8 +25,8 @@ struct Light
 	float m_theta;
 	float m_phi;
 
-	Light() = default;
-	Light(LIGHT_TYPE t, XMFLOAT3 pos
+	LightInfo() = default;
+	LightInfo(LIGHT_TYPE t, XMFLOAT3 pos
 		, XMFLOAT4 amb, XMFLOAT4 diff, XMFLOAT4 spec
 		, XMFLOAT3 atten, float range
 		, XMFLOAT3 dir, float falloff
@@ -44,87 +46,93 @@ struct Light
 	{}
 };
 
-struct LightFactory 
+struct LightFactory
 {
-	static shared_ptr<Light> MakePointLight(XMFLOAT3 pos, float range)
+	static shared_ptr<LightInfo> MakePointLight(XMFLOAT3 pos, float range)
 	{
-		shared_ptr<Light> ret;
-		ret = make_shared<Light>(
-				new Light{
-				 { LIGHT_TYPE::POINT }
-				, pos
-				, { 1.0f,1.0f,1.0f,1.0f }
-				, { 1.0f,1.0f,1.0f,1.0f }
-				, { 1.0f,1.0f,1.0f,1.0f }
-				, { 1.0f,10.0f,100.0f }
-				, { range }
-				, {}
-				, {}
-				, {}
-				, {}
-			});
+		shared_ptr<LightInfo> ret;
+		ret = make_shared<LightInfo>(
+			  LIGHT_TYPE::POINT
+			, pos
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, range
+			, XMFLOAT3{}
+			, 0.0f
+			, 0.0f
+			, 0.0f
+			);
 		return ret;
 	}
 
-	static shared_ptr<Light> MakeSpotLight(XMFLOAT3 pos, XMFLOAT3 dir
+	static shared_ptr<LightInfo> MakeSpotLight(XMFLOAT3 pos, XMFLOAT3 dir
 		, float range, float falloff, float theta, float phi
 	)
 	{
-		shared_ptr<Light> ret;
-		ret = make_shared<Light>(
-			new Light{
-			 { LIGHT_TYPE::SPOT }
+		shared_ptr<LightInfo> ret;
+		ret = make_shared<LightInfo>(
+			  LIGHT_TYPE::SPOT
 			, pos
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,10.0f,100.0f }
-			, { range }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, range
 			, dir
 			, falloff
 			, theta
 			, phi
-			});
+			);
 		return ret;
 	}
 
-	static shared_ptr<Light> MakeDirectinalLight(XMFLOAT3 dir)
+	static shared_ptr<LightInfo> MakeDirectinalLight(XMFLOAT3 dir)
 	{
-		shared_ptr<Light> ret;
-		ret = make_shared<Light>(
-			new Light{
-			 { LIGHT_TYPE::SPOT }
-			, {}
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,1.0f,1.0f,1.0f }
-			, { 1.0f,10.0f,100.0f }
-			, {}
+		shared_ptr<LightInfo> ret;
+		ret = make_shared<LightInfo>(
+			  LIGHT_TYPE::SPOT
+			, XMFLOAT3{ 0.0f,0.0f,0.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
+			, XMFLOAT3{ 1.0f,10.0f,100.0f }
+			, 0.0f
 			, dir
-			, {}
-			, {}
-			, {}
-			});
+			, 0.0f
+			, 0.0f
+			, 0.0f
+			);
 		return ret;
 	}
 };
 
+class Light : public IShaderHelper
+{
+	static const int MaxLights{ 10 };
+public:
+	Light(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual ~Light();
+
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseShaderVariables()override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
+
+	void AddLight(shared_ptr<LightInfo> lightInfo) { Lights.push_back(lightInfo); }
+
+protected:
+	ComPtr<ID3D12Resource>	mcbLights;
+	LightInfo* mcbMappedLights;
+	vector<shared_ptr<LightInfo>> Lights;
+};
 
 
 class LightObj : public GameObject
 {
 public:
-	LightObj(shared_ptr<Light> = nullptr, int meshes = 0);
+	LightObj(shared_ptr<LightInfo> = nullptr, int meshes = 0);
 	virtual ~LightObj() {};
-
-public:
-	virtual void Animate(const milliseconds timeElapsed)override;
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-
-protected:
-	virtual void PrepareRender()override;
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables()override;
 
 public:
 	void SetLightColor(XMFLOAT4 lightColor) { 
@@ -136,8 +144,13 @@ public:
 		XMFLOAT4 col; XMStoreFloat4(&col, lightColor);
 		SetLightColor(col);
 	};
+	void SetLightColor(XMVECTOR lightColor) {
+		XMFLOAT4 col; XMStoreFloat4(&col, lightColor);
+		SetLightColor(col);
+	};
+
+	shared_ptr<LightInfo> GetLightInfo()const { return m_light; }
 
 protected:
-	shared_ptr<Light> m_light;
+	shared_ptr<LightInfo> m_light;
 };
-

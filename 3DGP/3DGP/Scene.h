@@ -77,5 +77,7 @@ protected:
 	HeightMapTerrain* mTerrain;
 
 	vector<UIObject*> m_UIs;
-	vector<shared_ptr<LightObj>> m_lights;
+	vector<shared_ptr<LightObj>> m_lightObjs;
+
+	shared_ptr<Light> m_light;
 };

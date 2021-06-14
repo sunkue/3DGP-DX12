@@ -29,6 +29,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	CD3DX12_ROOT_PARAMETER RootParameters[6];
 	/* 앞쪽이 접근속도가 빠름 */
 	//64개가 한계임. SRV는 두칸차지.
+	sizeof(Meterial);
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[0]
 		, 36
@@ -38,7 +39,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 	
 	CD3DX12_ROOT_PARAMETER::InitAsConstants(
 		  RootParameters[1]
-		, 18
+		, 19
 		, 1						//b1 Camera
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
@@ -60,12 +61,13 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 		, 2						//t2 UI
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
-
+	
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		RootParameters[5]
 		, 3						//t3 light
 		, 0
 		, D3D12_SHADER_VISIBILITY_ALL);
+	
 
 	D3D12_ROOT_SIGNATURE_FLAGS RSFlags{
 		  D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
@@ -124,8 +126,11 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[1]->BuildObjects(device, commandList, nullptr);
 
-	m_lights.emplace_back(new LightObj{ LightFactory::MakePointLight({0.0f,2000.0f,0.0f},5000.0f) });
-	m_lights[0]->SetLightColor(Colors::Chocolate);
+	m_lightObjs.emplace_back(new LightObj(LightFactory::MakePointLight({ 0.0f,2000.0f,0.0f }, 5000.0f)));
+	m_lightObjs[0]->SetLightColor(Colors::Chocolate);
+
+	m_light = make_shared<Light>(device, commandList);
+	for (auto& lightObj : m_lightObjs)m_light->AddLight(lightObj->GetLightInfo());
 };
 
 void Scene::ReleaseObjects()
@@ -177,7 +182,7 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
 
-	for (auto& light : m_lights)light->Animate(timeElapsed);
+	for (auto& light : m_lightObjs)light->Animate(timeElapsed);
 
 	CheckCollision(timeElapsed);
 
@@ -202,10 +207,10 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
-	for (auto& light : m_lights)light->UpdateShaderVariables(commandList);
-
+	if(m_light)m_light->UpdateShaderVariables(commandList);
+	
 	for (auto& shader : mShaders)shader->Render(commandList, camera);
-	for (auto& light : m_lights)light->Render(commandList, camera);
+	//for (auto& light : m_lightObjs)light->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);

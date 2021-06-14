@@ -398,8 +398,7 @@ void GameFramework::BuildMeshes()
 	file = "girl"; v = LoadMeshFromBinary<LightAttributeVertex>(dir + file + ext);
 	m_Meshes.emplace(file, new Mesh{ d,c,v });
 
-	//file = "car"; v = LoadObj<DiffusedVertex>(dir + file + ext2);
-	//SaveMeshAsBinary(v, dir + file + ext);
+
 
 	//file = "onj";
 	//m_Meshes.emplace(file, new Mesh{d,c,v});
@@ -487,7 +486,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 		//GetCursorPos(&mOldCusorPos);
 		auto ray{ MouseRay() };
 		auto result{ RayCollapsePos(ray.first, ray.second, FLT_MAX) };
-		if (true == result.first) mEffect->NewWallEffect(result.second, 1.5f);
+		if (true == result.first) mEffect->NewWallEffect(result.second, 0.25f);
 		//SetCapture(hWnd);
 		//GetCursorPos(&mOldCusorPos);
 	}break;

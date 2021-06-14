@@ -1,6 +1,6 @@
 
 //////////////////////////////////////
-struct Meterial
+struct METERIAL
 {
 	float4 ambient;
 	float4 diffuse;
@@ -9,23 +9,23 @@ struct Meterial
 	float specularPower;
 	float3 _padd;
 };
-
+//////////////////////////////////////////
 cbuffer cbObjInfo : register(b0)
 {
 	matrix worldMat : packoffset(c0);
-	Meterial meterial : packoffset(c4);
+	METERIAL material : packoffset(c4);
 }
 
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix viewProj : packoffset(c0);
-	float2 viewport : packoffset(c4.x);
+	float3 cameraPos : packoffset(c4);
 }
 
 struct INSTANCED_GAMEOBJECT_INFO
 {
 	matrix mTransform;
-	Meterial meterial;
+	METERIAL meterial;
 };
 StructuredBuffer<INSTANCED_GAMEOBJECT_INFO> gameObjectInfos : register(t0);
 
@@ -43,6 +43,22 @@ struct UI_INFO
 	float4 mColor;
 };
 StructuredBuffer<UI_INFO> UIInfos : register(t2);
+
+struct LIGHT
+{
+	int type;
+	float3 position;
+	float4 ambient;
+	float4 diffuse;
+	float4 specualr;
+	float3 attenuation;
+	float range;
+	float3 direction;
+	float falloff;
+	float theta;
+	float phi;
+};
+StructuredBuffer<LIGHT> lightInfos : register(t3);
 //////////////////////////////////////////
 
 struct VS_INPUT
@@ -137,20 +153,143 @@ float4 Effect1Obj(float3 originPos)
 	else
 		return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
+/////////////////////////////////////////
+float4 ComputeDirectionalLight(
+	  METERIAL material
+	, LIGHT directionalLight
+	, float3 normal
+	, float3 toCamera
+)
+{
+	float4 ambient = material.ambient * directionalLight.ambient;
+	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	float3 toLight = -directionalLight.direction;
+	float diffuseFactor = dot(toLight, normal);
+	if (0.0f < diffuseFactor)
+	{
+		float3 reflection = reflect(-toLight, normal);
+		float specFactor = pow(max(dot(reflection, toCamera), 0.0f), material.specularPower);
+		
+		diffuse = material.diffuse * (directionalLight.diffuse * diffuseFactor);
+		specular = material.specular * (directionalLight.specualr * specFactor);
+	}
+	
+	return ambient + diffuse + specular + material.emmesive;
+}
+
+float4 ComputePointLight(
+	  METERIAL material
+	, LIGHT pointLight
+	, float3 position
+	, float3 normal
+	, float3 toCamera
+)
+{
+	float3 toLight = pointLight.position - position;
+	float distance = length(toLight);
+	if (pointLight.range < distance)
+		return float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	float4 ambient = material.ambient * pointLight.ambient;
+	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	toLight /= distance;
+	float diffuseFactor = dot(toLight, normal);
+	if (0.0f < diffuseFactor)
+	{
+		float3 reflection = reflect(-toLight, normal);
+		float4 specFactor = pow(max(dot(reflection, toCamera), 0.0f), material.specularPower);
+
+		diffuse = material.diffuse * (pointLight.diffuse * diffuseFactor);
+		specular = material.specular * (pointLight.specualr * specFactor);
+	}
+	float attenFactor = 1.0f / dot(pointLight.attenuation, float3(1.0f, distance, distance * distance));
+	ambient *= attenFactor;
+	diffuse *= attenFactor;
+	specular *= attenFactor;
+	return ambient + diffuse + specular + material.emmesive;
+}
+
+float4 ComputeSpotLight(
+	  METERIAL material
+	, LIGHT spotLight
+	, float3 position
+	, float3 normal
+	, float3 toCamera
+)
+{
+	float3 toLight = spotLight.position - position;
+	float distance = length(toLight);
+	if (spotLight.range < distance)
+		return float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	float4 ambient = material.ambient * spotLight.ambient;
+	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	toLight /= distance;
+	float diffuseFactor = dot(toLight, normal);
+	if (0.0f < diffuseFactor)
+	{
+		float3 reflection = reflect(-toLight, normal);
+		float specFactor = pow(max(dot(reflection, toCamera), 0.0f), material.specularPower);
+		
+		diffuse = material.diffuse * (spotLight.diffuse * diffuseFactor);
+		specular = material.specular * (spotLight.specualr * specFactor);
+	}
+	float spotFactor = pow(max(dot(-toLight, spotLight.direction), 0.0f), spotLight.falloff);
+	ambient *= spotFactor;
+	float attenFactor = 1.0f / dot(spotLight.attenuation, float3(1.0f, distance, distance * distance));
+	diffuse *= attenFactor;
+	specular *= attenFactor;
+	
+	return ambient + diffuse + specular + material.emmesive;
+}
+
+#define POINT_LIGHT			1
+#define SPOT_LIGHT			2
+#define DIRECTIONAL_LIGHT	3
+float4 ComputeLight(LIGHT L, float3 pos, float3 nor, float3 toCamera)
+{
+	float4 ret = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	switch (L.type)
+	{
+		case POINT_LIGHT:
+			ret = ComputePointLight(material, L, pos, nor, toCamera);
+			break;
+		case SPOT_LIGHT:
+			ret = ComputeSpotLight(material, L, pos, nor, toCamera);
+			break;
+		case DIRECTIONAL_LIGHT:
+			ret = ComputeDirectionalLight(material, L, nor, toCamera);
+			break;
+		default:
+			break;
+	}
+	return ret;
+}
 
 /////////////////////////////////////////
 
 //x : 1918
 //y : 1061
 // x : 0right1	y : 0down1
-
+#define MaxLights 10
 float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 {
 	float4 output = input.color;
 
+	
+	for (int i = 0; i < MaxLights; i++)
+	{
+		//output += ComputeLight(lightInfos[i], input.originPosition,,);
+	}
+	
 	output -= Effect0Wall(input.originPosition);
 	output += Effect1Obj(input.originPosition);
-	
 	
 	return output;
 }
