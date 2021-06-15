@@ -138,7 +138,7 @@ HeightMapImage::~HeightMapImage()
 #define WITH_APPROXIMATE_OPPOSITE_CORNER
 float const HeightMapImage::GetHeight(const float fx,const float fz)const
 {
-	if (OutOfRange(fx, fz))return 0.0f;
+	if (OutOfRange(fx, fz))return -50.0f;
 
 	size_t const x = static_cast<size_t>(fx);
 	size_t const z = static_cast<size_t>(fz);

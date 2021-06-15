@@ -230,6 +230,7 @@ void Player::FinishEvolving()
 			SetScale({ 1.0f,1.0f,1.0f });
 		}
 		else {
+			if (mMesh[0] == GameFramework::GetApp()->m_Meshes["girl"])return;
 			if (nullptr == m_brother) {
 				m_brother = new EnemyObject;
 				m_brother->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
@@ -385,7 +386,7 @@ TerrainPlayer::TerrainPlayer(
 	float const xCenter{ terrain->GetWidth() * 0.5f };
 	float const zCenter{ terrain->GetLength() * 0.5f };
 	float const height{ terrain->GetHeight(xCenter,zCenter) };
-	SetPosition({ xCenter,height + 1500.0f,zCenter });	
+	SetPosition({ xCenter, 2000.0f,zCenter });
 
 	SetPlayerUpdateContext(context);
 	SetCameraUpdateContext(context);
@@ -452,12 +453,18 @@ void TerrainPlayer::PlayerUpdateCallback(milliseconds timeElapsed)
 	HeightMapTerrain const* const terrain{ reinterpret_cast<HeightMapTerrain*>(mPlayerUpdateContext) };
 	float magicNum{ 2.0f*XMVectorGetY(GetScale()) };
 	float const terrainHeight{ terrain->GetHeight(XMVectorGetX(pos),XMVectorGetZ(pos)) + magicNum };
-	float const playeHeight{ XMVectorGetY(pos) };
+	float const playerHeight{ XMVectorGetY(pos) };
 
-	if ((playeHeight < terrainHeight)) {
+	if ((playerHeight < terrainHeight)) {
 		m_flight = false;
 		pos = XMVectorSetY(pos, terrainHeight);
 		SetPosition(pos);
+		if (playerHeight < 5.0f) {
+			float const xCenter{ terrain->GetWidth() * 0.5f };
+			float const zCenter{ terrain->GetLength() * 0.5f };
+			float const height{ terrain->GetHeight(xCenter,zCenter) };
+			SetPosition({ xCenter,height + 1500.0f,zCenter });
+		}
 	}
 	else {
 		m_flight = m_flying ? false : true;

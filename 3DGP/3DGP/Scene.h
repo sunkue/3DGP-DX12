@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "Light.h"
+#include "GameFramework.h"
 
 class GameObject;
 class Camera;
@@ -42,6 +43,10 @@ public:
 	HeightMapTerrain* GetTerrain()const { return mTerrain; }
 	void SetFactorMode(FACTOR_MODE fm) { m_light->SetFactorMode(fm); }
 	pair<bool, XMVECTOR> XM_CALLCONV RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist);
+	void Trees() { 
+		mObjects[0]->SetMesh(0, GameFramework::GetApp()->m_Meshes["tree"]); 
+		for (auto& a : mObjects)a->SetRotateSpeed(0.0f);
+	}
 public:
 	void TeamAddCount(EnemyObject::TEAM team, int count = 1) {
 		m_Team[static_cast<int>(team)].m_count += count;

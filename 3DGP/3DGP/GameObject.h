@@ -99,9 +99,13 @@ public:
 	 }
 
 	*/
+	GameObject* GetBrother()const { return m_brother; }
+	GameObject* GetChild()const { return m_child; }
+	void SetBrother(GameObject* br) { m_brother = br; }
+	void SetChild(GameObject* ch) { m_child = ch; }
 protected:
-	GameObject* m_brother;
-	GameObject* m_child;
+	GameObject* m_brother{ nullptr };
+	GameObject* m_child{ nullptr };
 };
 
 class EnemyObject : public GameObject

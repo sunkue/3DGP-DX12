@@ -128,10 +128,11 @@ public:
 
 	void AddLight(shared_ptr<LightInfo> lightInfo) { Lights.push_back(lightInfo); }
 	void SetFactorMode(FACTOR_MODE fm) { m_factorMode = fm; }
+
+	vector<shared_ptr<LightInfo>> Lights;
 protected:
 	ComPtr<ID3D12Resource>	mcbLights;
 	LightInfo* mcbMappedLights;
-	vector<shared_ptr<LightInfo>> Lights;
 	FACTOR_MODE m_factorMode;
 };
 
@@ -139,7 +140,7 @@ protected:
 class LightObj : public GameObject
 {
 public:
-	LightObj(shared_ptr<LightInfo> = nullptr, int meshes = 0);
+	LightObj(ID3D12Device* device, ID3D12RootSignature* rootSignature, shared_ptr<LightInfo> = nullptr, int meshes = 0);
 	virtual ~LightObj() {};
 
 public:
@@ -161,4 +162,26 @@ public:
 
 protected:
 	shared_ptr<LightInfo> m_light;
+};
+
+class Sun : public LightObj
+{
+public:
+	Sun(ID3D12Device* device, ID3D12RootSignature* rootSignature, shared_ptr<LightInfo> = nullptr, int meshes = 0, void* context = nullptr);
+	virtual ~Sun() {};
+
+
+	virtual void Animate(milliseconds timeElapsed)override;	
+
+	void SunUpdateCallback(milliseconds timeElapsed);
+	void SetSunUpdateContext(void* context) { mSunUpdateContext = context; }
+
+	void Revolve(milliseconds timeElapsed);
+
+	void Catch();
+protected:
+	void* mSunUpdateContext;
+
+	bool m_IsRevolving;
+	bool m_IsHandling{ false };
 };

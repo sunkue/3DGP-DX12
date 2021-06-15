@@ -84,6 +84,8 @@ public:
 	void SetPrevOffZ(float offZ) { mPrevOffsetZ = offZ; }
 	float GetPrevOffZ()const { return mPrevOffsetZ; }
 	Mesh* GetPrevMesh() { return mPrevMesh; }
+	void SetPrevMesh(Mesh* pr) { mPrevMesh = pr; }
+	void SetMaxScale(float s) { m_maxScale = s; }
 
 protected:
 	Mesh* mPrevMesh{ nullptr };
@@ -130,7 +132,6 @@ public:
 	virtual ~TerrainPlayer();
 
 	virtual Camera* ChangeCamera(CAMERA_MODE newCameraMode, milliseconds timeElapsed);
-	
 	virtual void PlayerUpdateCallback(milliseconds timeElapsed);
 	virtual void CameraUpdateCallback(milliseconds timeElapsed);
 };

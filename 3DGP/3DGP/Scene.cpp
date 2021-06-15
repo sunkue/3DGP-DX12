@@ -127,9 +127,15 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
 	mShaders[1]->BuildObjects(device, commandList, nullptr);
 
-	m_lightObjs.emplace_back(new LightObj(
-		LightFactory::MakePointLight({ 2000.0f,500.0f,0.0f }, 5000.0f)));
+	float const xCenter{ mTerrain->GetWidth() * 0.5f };
+	float const zCenter{ mTerrain->GetLength() * 0.5f };
+	float const height{ mTerrain->GetHeight(xCenter,zCenter) };
+
+	m_lightObjs.emplace_back(new Sun(device, mGraphicsRootSignature.Get(),
+		LightFactory::MakePointLight({ xCenter,2000.0f,zCenter }, 30000.0f), 1, mTerrain));
+	m_lightObjs[0]->SetMesh(0, GameFramework::GetApp()->m_Meshes["sphere"]);
 	m_lightObjs[0]->SetLightColor(Colors::White);
+	//m_lightObjs[0]->SetEmessiveColor(Colors::White);
 
 	m_light = make_shared<Light>(device, commandList);
 	for (auto& lightObj : m_lightObjs)m_light->AddLight(lightObj->GetLightInfo());
@@ -185,6 +191,7 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
 
 	for (auto& light : m_lightObjs)light->Animate(timeElapsed);
+	XMStoreFloat3(&(m_light->Lights[0]->m_position), m_lightObjs[0]->GetPosition());
 
 	CheckCollision(timeElapsed);
 
@@ -212,7 +219,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	if(m_light)m_light->UpdateShaderVariables(commandList);
 	
 	for (auto& shader : mShaders)shader->Render(commandList, camera);
-	//for (auto& light : m_lightObjs)light->Render(commandList, camera);
+	for (auto& light : m_lightObjs)light->Render(commandList, camera);
 
 	assert(mTerrain);
 	if (mTerrain)mTerrain->Render(commandList, camera);
@@ -223,9 +230,27 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {
+		bool br{ mPlayer->GetBrother() ? m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetBrother()->GetOOBB()) : false };
+		bool ch{ mPlayer->GetChild() ? m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetChild()->GetOOBB()) : false };
+		if (m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetOOBB()) | br | ch)
+		{
+			if (false == IsLButtonDown()) {
+				reinterpret_cast<Sun*>(m_lightObjs[0].get())->Catch();
+			}
+			mPlayer->SetBrother(nullptr);
+			mPlayer->SetChild(nullptr);
+			mPlayer->SetPrevMesh(GameFramework::GetApp()->m_Meshes["girl"]);
+			mPlayer->SetMesh(0, GameFramework::GetApp()->m_Meshes["girl"]);
+			mPlayer->SetScale({ 20.0f,20.0f,20.0f });
+			mPlayer->SetMaxScale(50.0f);
+		}
+
+
 		for (const auto& obj : mObjects) {
 			if (false == obj->IsAble())continue;
-			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB())) {
+			bool br{ mPlayer->GetBrother() ? obj->GetOOBB().Intersects(mPlayer->GetBrother()->GetOOBB()) : false };
+			bool ch{ mPlayer->GetChild() ? obj->GetOOBB().Intersects(mPlayer->GetChild()->GetOOBB()) : false };
+			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB()) | br | ch) {
 				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
 				if (obj->GetTeam() == EnemyObject::TEAM::ENDCOUNT) {

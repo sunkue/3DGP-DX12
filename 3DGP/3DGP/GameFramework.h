@@ -29,6 +29,7 @@ public:
 	UINT GetHeight()const { return mWndClientHeight; }
 	GameTimer* GetTimer() { return &mGameTimer; }
 	RECT GetRECT()const { return mWndRect; }
+	Player* GetPlayer()const { return mPlayer; }
 protected:
 	void OnCreate();
 	void OnDestroy();
