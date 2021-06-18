@@ -159,50 +159,6 @@ void Shader::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	PrepareRender(commandList);
 }
-///////////////////////////////////////////////////
-
-PlayerShader::PlayerShader()
-{
-
-}
-
-PlayerShader::~PlayerShader()
-{
-
-}
-
-D3D12_INPUT_LAYOUT_DESC PlayerShader::CreateInputLayout()
-{
-	constexpr UINT InputElemDescsCount = 2;
-	D3D12_INPUT_ELEMENT_DESC* InputElemDescs = 
-		new D3D12_INPUT_ELEMENT_DESC[InputElemDescsCount]
-	{
-	 { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	,{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex,nor), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
-	D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
-	InputLayoutDesc.pInputElementDescs = InputElemDescs;
-	InputLayoutDesc.NumElements = InputElemDescsCount;
-	return InputLayoutDesc;
-}
-
-D3D12_SHADER_BYTECODE PlayerShader::CreateVertexShader(ID3DBlob** shaderBlob)
-{
-	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "VSDiffused", "vs_5_1", shaderBlob);
-}
-
-D3D12_SHADER_BYTECODE PlayerShader::CreatePixelShader(ID3DBlob** shaderBlob)
-{
-	return CompileShaderFromFile(const_cast<WCHAR*>
-		(L"Shaders.hlsl"), "PSDiffused", "ps_5_1", shaderBlob);
-}
-
-void PlayerShader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)
-{
-	mPipelineStates.emplace_back();
-	Shader::CreateShader(device, rootSignature);
-}
 
 ///////////////////////////////////////////////////
 
@@ -481,7 +437,7 @@ void InstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandL
 	for (int i = 0; i < mObjects.size(); ++i) {
 		XMFLOAT4A col{ tc::teamColor(reinterpret_cast<EnemyObject*>(mObjects[i].get())->GetTeam()) };
 		mcbMappedGameObjects[i].mMeterial = Meterial{ col, col, {1.0f,1.0f,1.0f,0.0f},{ 0.0f,0.0f,0.0f,0.0f },60.0f };
-		XMStoreFloat4x4A(&mcbMappedGameObjects[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
+		XMStoreFloat4x4A(&mcbMappedGameObjects[i].transform, XMMatrixTranspose(mObjects[i]->GetWM()));
 	}
 }
 
@@ -624,8 +580,8 @@ void UIShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootShaderResourceView(4, mcb_UIs->GetGPUVirtualAddress());
 	for (int i = 0; i < mObjects.size(); ++i) {
-		XMStoreFloat4x4A(&mcb_MappedUIs[i].mTransform, XMMatrixTranspose(mObjects[i]->GetWM()));
-		mcb_MappedUIs[i].mColor = tc::teamColor(static_cast<EnemyObject::TEAM>(i));
+		XMStoreFloat4x4A(&mcb_MappedUIs[i].transform, XMMatrixTranspose(mObjects[i]->GetWM()));
+		mcb_MappedUIs[i].color = tc::teamColor(static_cast<EnemyObject::TEAM>(i));
 	}
 }
 

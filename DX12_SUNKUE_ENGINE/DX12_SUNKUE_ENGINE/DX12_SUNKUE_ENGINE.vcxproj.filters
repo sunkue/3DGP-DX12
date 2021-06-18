@@ -99,6 +99,9 @@
     <ClInclude Include="Mesh.h">
       <Filter>DX\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="MyDXHelper.h">
+      <Filter>DX\stdafx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">

@@ -238,7 +238,7 @@ EnemyObject::EnemyObject(int meshes)
 	, mSpeed{ 0.0f }
 	, m_able{ true }
 {
-	XMStoreFloat3A(&mDir, XMVectorZero());
+	vec(mDir, XMVectorZero());
 }
 
 
@@ -250,8 +250,8 @@ EnemyObject::~EnemyObject()
 void EnemyObject::Animate(milliseconds timeElapsed)
 {
 	const float timeE{ timeElapsed.count() / 1000.0f };
-	RotateByAxis(XMLoadFloat3A(&mRotationAxis), mRotationSpeed * timeE);
-	Move(XMLoadFloat3A(&mDir) * mSpeed * timeE);
+	RotateByAxis(vec(mRotationAxis), mRotationSpeed * timeE);
+	Move(vec(mDir) * mSpeed * timeE);
 	
 	UpdateBoundingBox();
 

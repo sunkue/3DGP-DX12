@@ -43,20 +43,6 @@ protected:
 	vector<ComPtr<ID3D12PipelineState>> mPipelineStates;
 };
 
-class PlayerShader : public Shader
-{
-public:
-	PlayerShader();
-	virtual ~PlayerShader();
-
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
-protected:
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
-
-};
-
 class ObjectsShader : public Shader
 {
 public:

@@ -48,14 +48,16 @@ using Microsoft::WRL::ComPtr;
 #include <ranges>
 #include <map>
 #include <cassert>
+#include <type_traits>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
 #include "Interface.h"
+#include "MyDXHelper.h"
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::string_view_literals;
-
+using namespace SUNKUE;
 constexpr UINT RFR = 144;
 
 #undef min
@@ -77,8 +79,4 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b) {
 		&& IsZero(XMVectorGetY(val))
 		&& IsZero(XMVectorGetZ(val));
 }
-
-extern constexpr XMFLOAT3A xAxis{ 1.0f,0.0f,0.0f };
-extern constexpr XMFLOAT3A yAxis{ 0.0f,1.0f,0.0f };
-extern constexpr XMFLOAT3A zAxis{ 0.0f,0.0f,2.0f };
 
