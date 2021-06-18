@@ -49,6 +49,9 @@
     <Filter Include="DX\ResourceHelper">
       <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DX\stdafx\Interface">
+      <UniqueIdentifier>{967a47b7-5757-4314-96b2-d66315e8a2d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -78,6 +81,24 @@
     <ClInclude Include="Camera.h">
       <Filter>DX\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>DX\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>DX\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>DX\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>DX\stdafx\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>DX\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>DX\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
@@ -94,6 +115,21 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>DX\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>DX\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>DX\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>DX\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>DX\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>DX\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

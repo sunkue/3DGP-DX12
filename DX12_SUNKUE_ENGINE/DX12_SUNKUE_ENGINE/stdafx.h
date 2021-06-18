@@ -51,7 +51,7 @@ using Microsoft::WRL::ComPtr;
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
-
+#include "Interface.h"
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::string_view_literals;

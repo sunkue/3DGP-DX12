@@ -8,7 +8,7 @@ enum class CAMERA_MODE
 	, tomography
 };
 
-struct VS_CAMERA_INFO
+struct SR_CAMERA_INFO
 {
 	XMFLOAT4X4 viewMat;
 	XMFLOAT4X4 projectionMat;
@@ -44,7 +44,7 @@ public:
 	void SetMode(CAMERA_MODE mode) { m_Mode = mode; }
 	CAMERA_MODE GetMode()const { return m_Mode; }
 
-	void XM_CALLCONV SetPosition(FXMVECTOR position) { XMStoreFloat3A(&m_Position, position); }
+	void XM_CALLCONV SetPosition(FXMVECTOR pos) { XMStoreFloat3A(&m_Position, pos); }
 	XMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3A(&m_Position); }
 
 	virtual void XM_CALLCONV SetLookAt(FXMVECTOR lookAt) { XMStoreFloat3A(&m_LookAt, lookAt); }
@@ -110,7 +110,7 @@ protected:
 	milliseconds m_TimeLag;
 
 	// 변환행렬
-	VS_CAMERA_INFO m_Info;
+	SR_CAMERA_INFO m_Info;
 
 	D3D12_VIEWPORT m_Viewport;
 	D3D12_RECT m_ScissorRect;

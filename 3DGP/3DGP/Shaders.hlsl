@@ -176,11 +176,10 @@ float cellSmooth(float x)
 {
 	const int slice = 3;
 	const float t = (1.0f / slice);
-	const float R = (1.0f / (slice - 1));
 	float ret = 0.0f;
 	for (int i = 0; i < slice; i++)
 	{
-		ret += smoothstep(t * i, t * (i + 1), x) * (R * i);
+		ret += smoothstep(t * i, t * (i + 1), x) * (t * (i + 1));
 	}
 	return ret;
 }

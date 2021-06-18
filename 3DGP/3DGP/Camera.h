@@ -4,7 +4,7 @@ class Player;
 
 enum class CAMERA_MODE
 {
-	  NO_CAMERA
+	NO_CAMERA
 	, FIRST_PERSON
 	, SPACESHIP
 	, THIRD_PERSON
@@ -28,14 +28,14 @@ protected:
 public:
 
 	virtual void CreateShaderVariables(
-		  ID3D12Device* device
+		ID3D12Device* device
 		, ID3D12GraphicsCommandList* commandlist);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commadList);
 
 	void GenerateViewMatrix();
 	void XM_CALLCONV GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up);
-	/* 회전으로인한 누적 실수 연산 오류 제거를 위해 ULR 직교화 작업 */
+	/* ??????????? ???? ??? ???? ???? ????? ???? ULR ????? ??? */
 	void RegenerateViewMatrix();
 
 	void GenerateProjectionMatrix(float fov, float aspect, float n, float f);
@@ -47,7 +47,7 @@ public:
 
 
 public:
-	void SetPlayer(Player* player)	{ mPlayer = player; }
+	void SetPlayer(Player* player) { mPlayer = player; }
 	Player* GetPlayer()const { return mPlayer; }
 	void SetMode(CAMERA_MODE mode) { mMode = mode; }
 	CAMERA_MODE GetMode()const { return mMode; }
@@ -65,7 +65,7 @@ public:
 	float GetPitch()const { return mPitch; }
 	float GetYaw()const { return mYaw; }
 	float GetRoll()const { return mRoll; }
-	
+
 	void XM_CALLCONV SetOffset(FXMVECTOR offset) { XMStoreFloat3A(&mOffset, offset); }
 	XMVECTOR XM_CALLCONV GetOffset()const { return XMLoadFloat3A(&mOffset); }
 	float ClampOffset(float z)const { return clamp(z, m_minOffsetZ, m_maxOffsetZ); }
@@ -77,7 +77,7 @@ public:
 	XMMATRIX XM_CALLCONV GetProjectionMatrix()const { return XMLoadFloat4x4A(&mProjectionMat); }
 	D3D12_VIEWPORT GetViewPort()const { return mViewport; }
 	D3D12_RECT GetScissorRect()const { return mScissorRect; }
-	
+
 	virtual void XM_CALLCONV Move(FXMVECTOR shift) { XMStoreFloat3A(&mPosition, XMLoadFloat3A(&mPosition) + shift); }
 	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) {};
 	virtual void XM_CALLCONV Update(XMVECTOR lookAt, milliseconds timeElapsed) {};
@@ -90,7 +90,7 @@ public:
 
 protected:
 	void XM_CALLCONV ModulatePosWhileRotate(FXMMATRIX rotateMat);
-	
+
 public:
 	void GenerateFrustum();
 	bool IsInFrustum(BoundingOrientedBox const& OOBB)const {
@@ -100,12 +100,12 @@ public:
 protected:
 	XMFLOAT3A mPosition;
 
-	// 축
+	// ??
 	XMFLOAT3A mUpV;
 	XMFLOAT3A mLookV;
 	XMFLOAT3A mRightV;
 
-	// 누적회전각
+	// ?????????
 	float	mPitch;
 	float	mYaw;
 	float	mRoll;
@@ -118,14 +118,14 @@ protected:
 
 	CAMERA_MODE	mMode;
 
-	// 3인친용 소스
+	// 3????? ???
 	XMFLOAT3A mLookAt;
 	XMFLOAT3A mOffset;
 
-	// 지연시간
+	// ?????ð?
 	milliseconds mTimeLag;
 
-	// 변환행렬
+	// ??????
 	XMFLOAT4X4A mViewMat;
 	XMFLOAT4X4A mProjectionMat;
 	D3D12_VIEWPORT mViewport;
@@ -141,7 +141,7 @@ class SpaceShipCamera :public Camera
 {
 public:
 	SpaceShipCamera(Camera* camera);
-	virtual ~SpaceShipCamera(){}
+	virtual ~SpaceShipCamera() {}
 
 	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) override;
 
@@ -151,7 +151,7 @@ class FirstPersonCamera :public Camera
 {
 public:
 	FirstPersonCamera(Camera* camera);
-	virtual ~FirstPersonCamera(){}
+	virtual ~FirstPersonCamera() {}
 
 	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) override;
 };
@@ -160,7 +160,7 @@ class ThirdPersonCamera :public Camera
 {
 public:
 	ThirdPersonCamera(Camera* camera);
-	virtual ~ThirdPersonCamera(){}
+	virtual ~ThirdPersonCamera() {}
 	virtual void XM_CALLCONV Update(FXMVECTOR lookAt, milliseconds timeElapsed);
 	virtual void XM_CALLCONV SetLookAt(FXMVECTOR lookAt)override;
 };
