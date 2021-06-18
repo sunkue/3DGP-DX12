@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{961e3805-ae16-456e-8a88-35ca80cfb9d3}</ProjectGuid>
-    <RootNamespace>My3DGP1</RootNamespace>
+    <ProjectGuid>{54138a1b-d492-418d-ac9e-2a72f4e26107}</ProjectGuid>
+    <RootNamespace>DX12SUNKUEENGINE</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>연습</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -90,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,8 +104,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,13 +117,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>Default</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,12 +132,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,59 +141,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="3DGP00.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="GameFramework.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GameTimer.h" />
     <ClInclude Include="D3DX12Helper.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="DX12_SUNKUE_ENGINE.h" />
+    <ClInclude Include="GameTimer.h" />
     <ClInclude Include="ResourceHelper.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Effect.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3DGP00.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="GameFramework.cpp" />
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="DX12_SUNKUE_ENGINE.cpp" />
     <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="ResourceHelper.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="3DGP00.rc" />
+    <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="3DGP00.ico" />
+    <Image Include="DX12_SUNKUE_ENGINE.ico" />
     <Image Include="small.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Shaders.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

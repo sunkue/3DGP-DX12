@@ -1,5 +1,15 @@
 #pragma once
 
+#include <chrono>
+#include <array>
+
+using namespace std::chrono;
+using TimePoint = steady_clock::time_point;
+
+inline float MillisecToSec(milliseconds time) {
+	return time.count() / 1000.0f;
+}
+
 class GameTimer
 {
 public:
@@ -11,7 +21,8 @@ public:
 	void Stop()		{ mStopTime = mCurrentTime; mbStopped = true; };
 	void Reset();
 	void Tick(const milliseconds fLockFPS = 0ms);
-	size_t GetFrameRate(wchar_t* lpszString = nullptr, const size_t characters = 0);
+	size_t GetFrameRate(TCHAR* lpszString = nullptr, const size_t characters = 0);
+	float GetTimeElapsedSec()	const { return MillisecToSec(mTimeElapsed); }
 	milliseconds GetTimeElapsed()	const { return mTimeElapsed; }
 	milliseconds GetTimePaused()	const { return mTimePaused; }
 	milliseconds GetTimePlayed()	const { return mTimePlayed; }
@@ -31,7 +42,7 @@ private:
 	milliseconds	mTimePlayed;
 	milliseconds	mTimePaused;
 
-	array<milliseconds, 50>		mFrameTimes;
+	std::array<milliseconds, 50>		mFrameTimes;
 	size_t			mSampleCount;
 	size_t			mCurrentFrameRate;
 	size_t			mFramesPerSecond;

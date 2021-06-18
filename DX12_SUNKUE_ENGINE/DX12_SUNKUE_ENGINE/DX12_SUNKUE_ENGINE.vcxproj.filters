@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="DX">
+      <UniqueIdentifier>{a48020e6-de26-46d9-aa7f-4b7208ccb99e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Camera">
+      <UniqueIdentifier>{a16daccd-3da9-4dcc-afc7-693885ab183f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Framework">
+      <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Light">
+      <UniqueIdentifier>{31141c54-b54b-42a2-8c71-eff1dad7c383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Shader">
+      <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Timer">
+      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Mesh">
+      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Object">
+      <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Terrain">
+      <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Scene">
+      <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\stdafx">
+      <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\ResourceHelper">
+      <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12_SUNKUE_ENGINE.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>DX\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceHelper.h">
+      <Filter>DX\ResourceHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>DX\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DX12Helper.h">
+      <Filter>DX\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
+      <Filter>DX\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>DX\Camera</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>DX\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceHelper.cpp">
+      <Filter>DX\ResourceHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>DX\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>DX\Camera</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="DX12_SUNKUE_ENGINE.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
