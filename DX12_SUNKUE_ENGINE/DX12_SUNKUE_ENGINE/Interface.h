@@ -12,3 +12,12 @@ public:
 private:
 	size_t m_reference{ 0 };
 };
+
+class Collideable
+{
+public:
+	BoundingOrientedBox GetOOBB()const { return m_OOBB; }
+	void SetOOBB(const BoundingOrientedBox& OOBB) { m_OOBB = OOBB; }
+protected:
+	BoundingOrientedBox m_OOBB;
+};

@@ -17,7 +17,7 @@ public:
 	int GetLength()const { return m_length; }
 
 private:
-	template<typename N>requires arithmetic<N>
+	template<typename N>requires is_arithmetic<N>::value
 		bool const OutOfRange(N w, N l)const { return (w < 0) || (l < 0) || (m_width <= w) || (m_length <= l); }
 
 private:
@@ -27,7 +27,7 @@ private:
 	XMFLOAT3 m_scale;
 };
 
-class HeighMapGridMesh : public Mesh
+class HeighMapGridMesh : public VertexBufferData
 {
 public:
 	HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList

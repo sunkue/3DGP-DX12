@@ -84,7 +84,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	, XMVECTORF32 color
 	, void* context
 )
-	: Mesh{ device,commandList }
+	: VertexBufferData{ device,commandList }
 	, m_scale{ scale }
 	, m_width{ width }
 	, m_length{ length }

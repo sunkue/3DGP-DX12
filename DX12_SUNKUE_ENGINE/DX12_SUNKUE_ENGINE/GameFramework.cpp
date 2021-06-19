@@ -308,21 +308,21 @@ void GameFramework::BuildMeshes()
 
 
 	file = "tree"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
-	m_Meshes.emplace(file, new Mesh{d,c,v});
+	m_Meshes.emplace(file, new VertexBufferData{d,c,v});
 	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 	m_Meshes[file]->SetOOBB({ {0.0f,0.0f,0.0f}, {2.0f,25.0f,2.0f}, {0.0f,0.0f,0.0f,1.0f} });
 
 	file = "cube"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
-	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes.emplace(file, new VertexBufferData{ d,c,v });
 	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 	m_Meshes[file]->SetOOBB({ {0.0f,0.0f,0.0f}, {1.0f,1.0f,1.0f}, {0.0f,0.0f,0.0f,1.0f} });
 
 	file = "sphere"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
-	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes.emplace(file, new VertexBufferData{ d,c,v });
 	m_Meshes[file]->SetMeterial({ 0.9f,0.5f,0.5f,0.0f }, { 0.9f,0.5f,0.5f,0.0f });
 
 	file = "girl"; v = LoadMeshFromBinary<Vertex>(dir + file + ext);
-	m_Meshes.emplace(file, new Mesh{ d,c,v });
+	m_Meshes.emplace(file, new VertexBufferData{ d,c,v });
 	m_Meshes[file]->SetMeterial({ 0.2f,0.5f,0.6f,0.0f }, { 0.5f,0.7f,0.8f,0.0f });
 
 
@@ -585,7 +585,7 @@ void GameFramework::PopulateCommandList()
 	mCommandList->ClearDepthStencilView(dsvCPUDescH, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	mCommandList->OMSetRenderTargets(1, &rtvCPUDescH, true, &dsvCPUDescH);
-
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	
 	if (mScene)mScene->Render(mCommandList.Get(), mCamera);
 #ifdef WITH_PLAYER_TOP

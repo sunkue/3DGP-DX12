@@ -4,7 +4,7 @@ class Camera;
 class Scene;
 class Effect;
 class GameTimer;
-class Mesh;
+class VertexBufferData;
 class GameObject;
 
 class GameFramework

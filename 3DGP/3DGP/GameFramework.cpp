@@ -635,7 +635,8 @@ void GameFramework::ProcessInput()
 	GetCursorPos(&cursorPos);
 	deltaX = static_cast<float>((cursorPos.x - mOldCusorPos.x) / 3.0f);
 	deltaY = static_cast<float>((cursorPos.y - mOldCusorPos.y) / 3.0f);
-	SetCursorPos(mOldCusorPos.x, mOldCusorPos.y);
+	mOldCusorPos = cursorPos;
+	//SetCursorPos(mOldCusorPos.x, mOldCusorPos.y);
 
 	if ((dir != 0) || (deltaX != 0.0f) || (deltaY != 0.0f)) {
 		if (deltaX || deltaY) {

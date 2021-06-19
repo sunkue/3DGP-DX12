@@ -1,7 +1,14 @@
 #pragma once
 
 #include<concepts>
+#include<type_traits>
 
 namespace SUNKUE {
-	template<class T>concept arithmetic = std::integral<T> or std::floating_point<T>;
+	using namespace std;
+	
+	template<class T>
+	struct TypeInfo {
+		using value_type = remove_pointer_t<T>;
+	};
+	
 }

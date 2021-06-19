@@ -216,6 +216,7 @@ void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
+
 	if(m_light)m_light->UpdateShaderVariables(commandList);
 	
 	for (auto& shader : mShaders)shader->Render(commandList, camera);

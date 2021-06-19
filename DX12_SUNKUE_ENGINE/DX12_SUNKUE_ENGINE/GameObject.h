@@ -4,9 +4,9 @@
 
 class Shader;
 class Camera;
+class HeightMapImage;
 
-
-class GameObject :public Reference
+class GameObject : public Collideable
 {
 public:
 	GameObject(int meshes = 1);
@@ -15,15 +15,12 @@ public:
 public:
 	void ReleaseUploadBuffers();
 	
-	void SetMesh(int index, VertexBufferData* mesh);
-	void SetShader(Shader* shader);
+	void SetMesh(int index, const shared_ptr<Mesh>& mesh) { m_meshes[index] = mesh; };
+	void SetShader(const shared_ptr<Shader>& shader) { m_shader = shader; };
 
-	virtual void Animate(const milliseconds timeElapsed);
+	virtual void Animate(const float timeElapsed);
 
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount);
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera
-		, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount = 1);
 
 protected:
 	virtual void PrepareRender();
@@ -32,7 +29,7 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 public:
-	vector<VertexBufferData*> const& GetMesh() { return mMesh; }
+	vector<shared_ptr<Mesh>> const& GetMesh() { return m_meshes; }
 	XMVECTOR XM_CALLCONV GetPosition()	const;
 	XMVECTOR XM_CALLCONV GetLook() const;
 	XMVECTOR XM_CALLCONV GetUp() const;
@@ -40,7 +37,7 @@ public:
 	XMVECTOR XM_CALLCONV GetScale() const { return Load(m_scale); }
 	void XM_CALLCONV SetScale(FXMVECTOR scale) { Store(m_scale, scale); }
 
-	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*Load(mWorldMat); }
+	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*Load(m_worldMatNoScale); }
 
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(FXMVECTOR pos);
@@ -54,23 +51,14 @@ public:
 	void RotateByPYR(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void UpdateBoundingBox();
 
-
-
 public:
-	BoundingOrientedBox const& GetOOBB()const { return m_OOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { m_OOBB = OOBB; }
+	virtual bool IsVisible(const Camera* = nullptr);
 
 protected:
-	BoundingOrientedBox m_OOBB;
-
-public:
-	virtual bool const IsVisible(Camera const* const camera = nullptr);
-
-protected:
-	XMFLOAT4X4A	mWorldMat;
-	vector<VertexBufferData*>	mMesh;
-	Shader*	mShader;
-	XMFLOAT3A m_scale;
+	XMFLOAT4X4	m_worldMatNoScale;
+	XMFLOAT3 m_scale;
+	vector<shared_ptr<Mesh>> m_meshes;
+	shared_ptr<Shader>	m_shader;
 
 public:
 	template<typename Pred, typename... Args>
@@ -85,13 +73,6 @@ public:
 			funct(*m_brother, std::forward<Args>(args)...);
 		}
 	}
-	/*
-	 void f(int a, int b) {
-        cout << x + a + b << "!\n";
-        ForFamily([](A& obj, int AAA, int BBB) { obj.f(AAA, BBB); }, a, b);
-	 }
-
-	*/
 	GameObject* GetBrother()const { return m_brother; }
 	GameObject* GetChild()const { return m_child; }
 	void SetBrother(GameObject* br) { m_brother = br; }
@@ -101,42 +82,11 @@ protected:
 	GameObject* m_child{ nullptr };
 };
 
-class EnemyObject : public GameObject
+class InstancingObject : public GameObject
 {
 public:
-	static constexpr float RESETZPOSITION{ 1500.0f };
-
-public:
-	EnemyObject(int meshes = 1);
-	virtual ~EnemyObject();
-
-	
-	enum class TEAM { RED, GREEN, BLUE, YELLOW, ENDCOUNT };
-	
-private:
-	XMFLOAT3A mRotationAxis;
-	float mRotationSpeed;
-	XMFLOAT3A mDir;
-	float mSpeed;
-	TEAM m_team{ EnemyObject::TEAM::ENDCOUNT };
-	bool m_able;
-public:
-	bool const IsAble()const { return m_able; }
-	void SetAbleState(bool able) { m_able = able; }
-	TEAM const GetTeam()const { return m_team; }
-	void SetTeam(TEAM t) { m_team = t; }
-
-	void SetRotationSpeed(float rotationSpeed) { mRotationSpeed = rotationSpeed; }
-	void XM_CALLCONV SetRotationAxis(FXMVECTOR rotationAxis) { XMStoreFloat3A(&mRotationAxis, rotationAxis); }
-
-	XMVECTOR XM_CALLCONV GetDir() { return XMLoadFloat3A(&mDir); }
-	void XM_CALLCONV SetDir(FXMVECTOR dir) { XMStoreFloat3A(&mDir, dir); }
-	void SetRotateSpeed(float speed) { mRotationSpeed = speed; };
-	virtual void Animate(milliseconds timeElapsed);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList*)final {}; // do not update constbuffer
 };
-
-EnemyObject::TEAM& operator++(EnemyObject::TEAM& t);
-EnemyObject::TEAM operator++(EnemyObject::TEAM& t, int);
 
 class HeightMapTerrain : public GameObject
 {

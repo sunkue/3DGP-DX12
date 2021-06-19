@@ -44,7 +44,7 @@ GameObject::~GameObject()
 
 /// ////////////////////////////////////////
 
-void GameObject::SetMesh(int index, VertexBufferData* mesh)
+void GameObject::SetMesh(int index, MeshUnit* mesh)
 {
 	SAFE_RELEASE(mMesh[index]);
 	mMesh[index] = mesh;
@@ -82,6 +82,7 @@ void GameObject::PrepareRender()
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
 {
+	sizeof(milliseconds);
 	PrepareRender();
 	for (auto& m : mMesh)m->Render(commandList, instanceCount);
 	ForFamily([=](auto& obj) {obj.Render(commandList, camera, instanceCount); });

@@ -13,15 +13,15 @@ inline float MillisecToSec(milliseconds time) {
 class GameTimer
 {
 public:
-	GameTimer();
-	virtual ~GameTimer();
+	GameTimer() = default;
+	virtual ~GameTimer() = default;
 
 public:
 	void Start()	{ mbStopped = false; };
 	void Stop()		{ mStopTime = mCurrentTime; mbStopped = true; };
 	void Reset();
 	void Tick(const milliseconds fLockFPS = 0ms);
-	size_t GetFrameRate(TCHAR* lpszString = nullptr, const size_t characters = 0);
+	size_t GetFrameRate(TCHAR* lpszString = nullptr, size_t characters = 0);
 	float GetTimeElapsedSec()	const { return MillisecToSec(mTimeElapsed); }
 	milliseconds GetTimeElapsed()	const { return mTimeElapsed; }
 	milliseconds GetTimePaused()	const { return mTimePaused; }
@@ -38,16 +38,16 @@ private:
 	TimePoint		mCurrentTime;
 	TimePoint		mStopTime;
 
-	milliseconds	mTimeElapsed;
-	milliseconds	mTimePlayed;
-	milliseconds	mTimePaused;
+	milliseconds	mTimeElapsed{ milliseconds::zero() };
+	milliseconds	mTimePlayed{ milliseconds::zero() };
+	milliseconds	mTimePaused{ milliseconds::zero() };
 
-	std::array<milliseconds, 50>		mFrameTimes;
-	size_t			mSampleCount;
-	size_t			mCurrentFrameRate;
-	size_t			mFramesPerSecond;
-	milliseconds	mFPSTimeElapsed;
+	std::array<milliseconds, 50>	mFrameTimes;
+	size_t			mSampleCount{ 0 };
+	size_t			mCurrentFrameRate{ 0 };
+	size_t			mFramesPerSecond{ 0 };
+	milliseconds	mFPSTimeElapsed{ milliseconds::zero() };
 
-	bool			mbStopped;
+	bool			mbStopped{ true };
 };
 

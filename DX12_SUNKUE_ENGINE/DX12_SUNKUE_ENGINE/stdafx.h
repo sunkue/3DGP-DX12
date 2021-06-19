@@ -83,13 +83,17 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b) {
 }
 
 /*
-IA	rootsignature::32bit * 64.	srv::2.	=> SV_VertexID // SV_InstanceID
-VS	input::32bit * 16.	output::32bit * 16.
+* default::32bit per.
+* PipelineStateObject => statestore. PSO
+* Rendering is based on shader, not on object.
+IA	rootsignature::64.	srv::2.	=> SV_VertexID // SV_InstanceID // SV_PrimitiveID
+VS	input::16.	output::16.		
 HS
 TS
 DS
 GS			(SO)->OUTPUT
-RS
-PS
+RS	Rasterize	=> SV_IsFrontFace 
+	<= SV_Position
+PS	input::(GS)?(32):(16). Can_Discard	=> SV_Depth // nostencil
 OM
 */

@@ -24,30 +24,24 @@ struct Mesh_Info
 	XMFLOAT3 extents;
 };
 
-class VertexBufferData
+class MeshUnit : public Collideable
 {
 public:
-	VertexBufferData(ID3D12Device*, ID3D12GraphicsCommandList*, Mesh_Info, vector<D3D12_VERTEX_BUFFER_VIEW>& out);
+	MeshUnit(ID3D12Device*, ID3D12GraphicsCommandList*, Mesh_Info, vector<D3D12_VERTEX_BUFFER_VIEW>& out);
 
 public:
 	UINT GetVerticesCount()const { return m_verticesCount; }
-	
-public:
-	BoundingOrientedBox GetOOBB()const { return m_OOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { m_OOBB = move(OOBB); }
-	void SetOOBB(BoundingOrientedBox& OOBB) { m_OOBB = OOBB; }
 
 protected:
 	ComPtr<ID3D12Resource>	m_vertexBuffer;
 	ComPtr<ID3D12Resource>	m_vertexUploadBuffer;
 	UINT m_verticesCount{ 0 };
-	BoundingOrientedBox m_OOBB;
 };
 
-class Mesh
+class Mesh : public Collideable
 {
 public:
-	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, vector<Mesh_Info>, BoundingOrientedBox);
+	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, const vector<Mesh_Info>&);
 
 	virtual void Render(ID3D12GraphicsCommandList*, UINT instanceCount = 1);
 
@@ -58,15 +52,9 @@ public:
 	void SetEmessive(XMFLOAT3 e) { m_meterial.emessive = e; }
 	Meterial GetMeterial() { return m_meterial; }
 
-public:
-	BoundingOrientedBox GetOOBB()const { return m_Big_OOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { m_Big_OOBB = move(OOBB); }
-	void SetOOBB(BoundingOrientedBox& OOBB) { m_Big_OOBB = OOBB; }
-
 protected:
-	vector<shared_ptr<VertexBufferData>> m_meshes;
+	vector<shared_ptr<MeshUnit>> m_meshes;
 	vector<D3D12_VERTEX_BUFFER_VIEW> m_vertexBufferView;
 	UINT m_slot{ 0 };
-	BoundingOrientedBox m_Big_OOBB;
 	Meterial m_meterial{};
 };

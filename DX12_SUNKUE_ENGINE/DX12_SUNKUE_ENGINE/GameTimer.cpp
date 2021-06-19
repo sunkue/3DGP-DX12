@@ -5,22 +5,9 @@
 //////////////// init //////////////////////////////////
 
 GameTimer::GameTimer()
-	:mSampleCount		{ 0 }
-	, mCurrentFrameRate	{ 0 }
-	, mFramesPerSecond	{ 0 }
-	, mFPSTimeElapsed	{ milliseconds::zero() }
-	, mbStopped			{ true }
-	, mTimeElapsed		{ milliseconds::zero() }
-	, mTimePaused		{ milliseconds::zero() }
-	, mTimePlayed		{ milliseconds::zero() }
 {
 	ResetTimePoints();
 	mFrameTimes.fill(milliseconds::zero());
-}
-
-GameTimer::~GameTimer()
-{
-
 }
 
 ///////////////// public ////////////////////////////////
