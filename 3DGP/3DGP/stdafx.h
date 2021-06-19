@@ -123,7 +123,7 @@ inline float ToSec(milliseconds time) {
 */
 
 template<typename XMFLOAT>
-XMVECTOR vec(const XMFLOAT& src)
+auto Load(const XMFLOAT& src)
 {
 	if constexpr (is_same<XMFLOAT, XMFLOAT2>::value)return XMLoadFloat2(&src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT2A>::value)return XMLoadFloat2A(&src);
@@ -131,11 +131,13 @@ XMVECTOR vec(const XMFLOAT& src)
 	else if constexpr (is_same<XMFLOAT, XMFLOAT3A>::value)return XMLoadFloat3A(&src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT4>::value)return XMLoadFloat4(&src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT4A>::value)return XMLoadFloat4A(&src);
+	else if constexpr (is_same<XMFLOAT, XMFLOAT4X4>::value)return XMLoadFloat4x4(&src);
+	else if constexpr (is_same<XMFLOAT, XMFLOAT4X4A>::value)return XMLoadFloat4x4A(&src);
 	else static_assert(false, "vec::Is not XMFLOAT");
 }
 
 template<typename XMFLOAT>
-void vec(XMFLOAT& to, XMVECTOR src)
+void Store(XMFLOAT& to, auto src)
 {
 	if constexpr (is_same<XMFLOAT, XMFLOAT2>::value)return XMStoreFloat2(&to, src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT2A>::value)return XMStoreFloat2A(&to, src);
@@ -143,21 +145,7 @@ void vec(XMFLOAT& to, XMVECTOR src)
 	else if constexpr (is_same<XMFLOAT, XMFLOAT3A>::value)return XMStoreFloat3A(&to, src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT4>::value)return XMStoreFloat4(&to, src);
 	else if constexpr (is_same<XMFLOAT, XMFLOAT4A>::value)return XMStoreFloat4A(&to, src);
+	else if constexpr (is_same<XMFLOAT, XMFLOAT4X4>::value)return XMStoreFloat4x4(&to, src);
+	else if constexpr (is_same<XMFLOAT, XMFLOAT4X4A>::value)return XMStoreFloat4x4A(&to, src);
 	else static_assert(false, "vec::Is not XMFLOAT");
-}
-
-template<typename XMFLOATX>
-XMMATRIX mat(const XMFLOATX& src)
-{
-	if constexpr (is_same<XMFLOATX, XMFLOAT4X4>::value)return XMLoadFloat4x4(&src);
-	else if constexpr (is_same<XMFLOATX, XMFLOAT4X4A>::value)return XMLoadFloat4x4A(&src);
-	else static_assert(false, "vec::Is not XMFLOATX");
-}
-
-template<typename XMFLOATX>
-void mat(XMFLOATX& to, XMMATRIX src)
-{
-	if constexpr (is_same<XMFLOATX, XMFLOAT4X4>::value)return XMStoreFloat4x4(&to, src);
-	else if constexpr (is_same<XMFLOATX, XMFLOAT4X4A>::value)return XMStoreFloat4x4A(&to, src);
-	else static_assert(false, "vec::Is not XMFLOATX");
 }

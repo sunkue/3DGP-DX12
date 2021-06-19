@@ -49,11 +49,13 @@ using Microsoft::WRL::ComPtr;
 #include <map>
 #include <cassert>
 #include <type_traits>
+#include <concepts>
 #include "d3dx12.h"
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
 #include "Interface.h"
 #include "MyDXHelper.h"
+#include "SUNKUE.h"
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::string_view_literals;
@@ -80,3 +82,14 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b) {
 		&& IsZero(XMVectorGetZ(val));
 }
 
+/*
+IA	rootsignature::32bit * 64.	srv::2.	=> SV_VertexID // SV_InstanceID
+VS	input::32bit * 16.	output::32bit * 16.
+HS
+TS
+DS
+GS			(SO)->OUTPUT
+RS
+PS
+OM
+*/

@@ -90,7 +90,7 @@ protected:
 
 protected:
 	ComPtr<ID3D12Resource>	mcbGameObjects;
-	SR_INSTANCE_INFO*			mcbMappedGameObjects;
+	SR_INSTANCE_INFO*		mcbMappedGameObjects;
 	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
 };
 

@@ -102,6 +102,12 @@
     <ClInclude Include="MyDXHelper.h">
       <Filter>DX\stdafx</Filter>
     </ClInclude>
+    <ClInclude Include="SUNKUE.h">
+      <Filter>DX\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMap.h">
+      <Filter>DX\Terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
@@ -133,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>DX\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMap.cpp">
+      <Filter>DX\Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,7 @@ public:
 public:
 	void ReleaseUploadBuffers();
 	
-	void SetMesh(int index, Mesh* mesh);
+	void SetMesh(int index, VertexBufferData* mesh);
 	void SetShader(Shader* shader);
 
 	virtual void Animate(const milliseconds timeElapsed);
@@ -32,15 +32,15 @@ protected:
 	virtual void ReleaseShaderVariables();
 
 public:
-	vector<Mesh*> const& GetMesh() { return mMesh; }
+	vector<VertexBufferData*> const& GetMesh() { return mMesh; }
 	XMVECTOR XM_CALLCONV GetPosition()	const;
 	XMVECTOR XM_CALLCONV GetLook() const;
 	XMVECTOR XM_CALLCONV GetUp() const;
 	XMVECTOR XM_CALLCONV GetRight() const;
-	XMVECTOR XM_CALLCONV GetScale() const { return XMLoadFloat3A(&mScale); }
-	void XM_CALLCONV SetScale(FXMVECTOR scale) { XMStoreFloat3A(&mScale, scale); }
+	XMVECTOR XM_CALLCONV GetScale() const { return Load(m_scale); }
+	void XM_CALLCONV SetScale(FXMVECTOR scale) { Store(m_scale, scale); }
 
-	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*XMLoadFloat4x4A(&mWorldMat); }
+	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*Load(mWorldMat); }
 
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(FXMVECTOR pos);
@@ -57,20 +57,20 @@ public:
 
 
 public:
-	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { mOOBB = OOBB; }
+	BoundingOrientedBox const& GetOOBB()const { return m_OOBB; }
+	void SetOOBB(BoundingOrientedBox&& OOBB) { m_OOBB = OOBB; }
 
 protected:
-	BoundingOrientedBox mOOBB;
+	BoundingOrientedBox m_OOBB;
 
 public:
 	virtual bool const IsVisible(Camera const* const camera = nullptr);
 
 protected:
 	XMFLOAT4X4A	mWorldMat;
-	vector<Mesh*>	mMesh;
+	vector<VertexBufferData*>	mMesh;
 	Shader*	mShader;
-	XMFLOAT3A mScale;
+	XMFLOAT3A m_scale;
 
 public:
 	template<typename Pred, typename... Args>
@@ -148,23 +148,23 @@ public:
 	virtual ~HeightMapTerrain();
 
 public:
-	float GetHeight(float x, float z)const { return mHeightMapImage->GetHeight(x / mScale.x, z / mScale.z) * mScale.y; }
-	XMVECTOR XM_CALLCONV GetNormal(float x, float z)const { return mHeightMapImage->GetNormal(int(x / mScale.x), int(z / mScale.z)); }
+	float GetHeight(float x, float z)const { return mHeightMapImage->GetHeight(x / m_scale.x, z / m_scale.z) * m_scale.y; }
+	XMVECTOR XM_CALLCONV GetNormal(float x, float z)const { return mHeightMapImage->GetNormal(int(x / m_scale.x), int(z / m_scale.z)); }
 	
 	int GetHeightMapWidth()const { return mHeightMapImage->GetWidth(); }
 	int GetHeightMapLength()const { return mHeightMapImage->GetLength(); }
 	
-	XMFLOAT3A GetScale()const { return mScale; }
-	float GetWidth()const { return mWidth * mScale.x; }
-	float GetLength()const { return mLength * mScale.z; }
+	XMFLOAT3A GetScale()const { return m_scale; }
+	float GetWidth()const { return m_width * m_scale.x; }
+	float GetLength()const { return m_length * m_scale.z; }
 	
 	virtual bool const IsVisible(Camera const* const camera = nullptr)final;
 
 private:
 	unique_ptr<HeightMapImage> mHeightMapImage;
-	int mWidth;
-	int mLength;
-	XMFLOAT3A mScale;
+	int m_width;
+	int m_length;
+	XMFLOAT3A m_scale;
 
 };
 

@@ -47,7 +47,7 @@ public:
 	XMVECTOR XM_CALLCONV GetScale() const { return XMLoadFloat3A(&mScale); }
 	void XM_CALLCONV SetScale(FXMVECTOR scale) { XMStoreFloat3A(&mScale, scale); }
 
-	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*XMLoadFloat4x4A(&mWorldMat); }
+	XMMATRIX XM_CALLCONV GetWM()const { return XMMatrixScalingFromVector(GetScale())*Load(mWorldMat); }
 
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(FXMVECTOR position);

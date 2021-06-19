@@ -10,10 +10,10 @@ struct Vertex
 
 struct Meterial
 {
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 specular;
-	XMFLOAT4 emessive;
+	XMFLOAT3 ambient;
+	XMFLOAT3 diffuse;
+	XMFLOAT3 specular;
+	XMFLOAT3 emessive;
 	float specualrPower;
 };
 
@@ -24,94 +24,49 @@ struct Mesh_Info
 	XMFLOAT3 extents;
 };
 
-class Mesh : public Reference
+class VertexBufferData
 {
 public:
-	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	Mesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, Mesh_Info meshInfo);
-	virtual ~Mesh();
+	VertexBufferData(ID3D12Device*, ID3D12GraphicsCommandList*, Mesh_Info, vector<D3D12_VERTEX_BUFFER_VIEW>& out);
 
 public:
-	void ReleaseUploadBuffers();
-	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount = 1);
-	virtual void Render(ID3D12GraphicsCommandList* commandList, UINT instanceCount, D3D12_VERTEX_BUFFER_VIEW instancingBufferView);
+	UINT GetVerticesCount()const { return m_verticesCount; }
+	
+public:
+	BoundingOrientedBox GetOOBB()const { return m_OOBB; }
+	void SetOOBB(BoundingOrientedBox&& OOBB) { m_OOBB = move(OOBB); }
+	void SetOOBB(BoundingOrientedBox& OOBB) { m_OOBB = OOBB; }
+
+protected:
+	ComPtr<ID3D12Resource>	m_vertexBuffer;
+	ComPtr<ID3D12Resource>	m_vertexUploadBuffer;
+	UINT m_verticesCount{ 0 };
+	BoundingOrientedBox m_OOBB;
+};
+
+class Mesh
+{
+public:
+	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, vector<Mesh_Info>, BoundingOrientedBox);
+
+	virtual void Render(ID3D12GraphicsCommandList*, UINT instanceCount = 1);
 
 public:
-	BoundingOrientedBox const& GetOOBB()const { return mOOBB; }
-	void SetOOBB(BoundingOrientedBox&& OOBB) { mOOBB = move(OOBB); }
-
-public:
-	void SetMeterial(XMFLOAT4A a, XMFLOAT4A d, float sp = 600.0f, XMFLOAT4A s = { 0.0f,0.0f,0.0f,0.0f }) {
+	void SetMeterial(XMFLOAT3 a, XMFLOAT3 d, float sp = 600.0f, XMFLOAT3 s = { 0.0f,0.0f,0.0f }) {
 		m_meterial.ambient = a;	m_meterial.diffuse = d; m_meterial.specular = s; m_meterial.specualrPower = sp;
 	}
-	void SetEmessive(XMFLOAT4A e) { m_meterial.emessive = e; }
+	void SetEmessive(XMFLOAT3 e) { m_meterial.emessive = e; }
 	Meterial GetMeterial() { return m_meterial; }
 
-protected:
-	ComPtr<ID3D12Resource>	mVertexBuffer;
-	ComPtr<ID3D12Resource>	mVertexUploadBuffer;
-	ComPtr<ID3D12Resource>	mIndexBuffer;
-	ComPtr<ID3D12Resource>	mIndexUploadBuffer;
-	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW	 mIndexBufferView;
-	D3D12_PRIMITIVE_TOPOLOGY mPrimitiveToplogy;
-	UINT mVerticesCount;
-	UINT mIndicesCount;
-	UINT mStartIndex;
-	int  mBaseVertex;
-	UINT mSlot;
-	UINT mStride;
-	UINT mOffset;
-	BoundingOrientedBox mOOBB;
-	Meterial m_meterial;
-
-};
-
-class HeightMapImage
-{
 public:
-	HeightMapImage(string_view fileName, int width, int length, XMFLOAT3A scale);
-	~HeightMapImage();
-
-	float const GetHeight(float x, float z)const;
-	XMVECTOR const XM_CALLCONV GetNormal(int x, int z)const;
-	
-	XMFLOAT3A const GetScale()const { return mScale; }
-	const BYTE* const GetPixels()const { return mHeightMapPixels.get(); }
-	int const GetWidth()const { return mWidth; }
-	int const GetLength()const { return mLength; }
-
-private:
-	bool const OutOfRange(int w, int l)const { return (w < 0.0f) || (l < 0.0f) || (mWidth <= w) || (mLength <= l); }
-	bool const OutOfRange(float w, float l)const { return (w < 0.0f) || (l < 0.0f) || (mWidth <= w) || (mLength <= l); }
-
-private:
-	unique_ptr<BYTE[]> mHeightMapPixels;
-	int mWidth;
-	int mLength;
-	XMFLOAT3A mScale;
-
-};
-
-class HeighMapGridMesh : public Mesh
-{
-public:
-	HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList
-		, int Xstart, int Zstart, int width, int length
-		, XMFLOAT3A scale = { 1.0f,1.0f,1.0f }
-		, XMVECTORF32 color = Colors::Yellow
-		, void* context = nullptr);
-	virtual ~HeighMapGridMesh();
-
-	XMFLOAT3A const GetScale()const { return mScale; }
-	int const GetWidth()const { return mWidth; }
-	int const GetLength()const { return mLength; }
-
-	virtual float const OnGetHeight(int x, int z, void* context)const;
+	BoundingOrientedBox GetOOBB()const { return m_Big_OOBB; }
+	void SetOOBB(BoundingOrientedBox&& OOBB) { m_Big_OOBB = move(OOBB); }
+	void SetOOBB(BoundingOrientedBox& OOBB) { m_Big_OOBB = OOBB; }
 
 protected:
-	int mWidth;
-	int mLength;
-	XMFLOAT3A mScale;
-
+	vector<shared_ptr<VertexBufferData>> m_meshes;
+	vector<D3D12_VERTEX_BUFFER_VIEW> m_vertexBufferView;
+	UINT m_slot{ 0 };
+	BoundingOrientedBox m_Big_OOBB;
+	Meterial m_meterial{};
 };

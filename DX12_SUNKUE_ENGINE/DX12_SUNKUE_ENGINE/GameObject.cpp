@@ -20,7 +20,7 @@ EnemyObject::TEAM operator++(EnemyObject::TEAM& t, int) {
 
 GameObject::GameObject(int meshes)
 	: mShader{ nullptr }
-	, mScale{ 1.0f,1.0f,1.0f }
+	, m_scale{ 1.0f,1.0f,1.0f }
 	, mReferences{ 0 }
 	, m_brother{ nullptr }
 	, m_child{ nullptr }
@@ -44,7 +44,7 @@ GameObject::~GameObject()
 
 /// ////////////////////////////////////////
 
-void GameObject::SetMesh(int index, Mesh* mesh)
+void GameObject::SetMesh(int index, VertexBufferData* mesh)
 {
 	SAFE_RELEASE(mMesh[index]);
 	mMesh[index] = mesh;
@@ -213,8 +213,8 @@ void GameObject::UpdateBoundingBox()
 {
 	assert(mMesh.empty() == false);
 	assert(mMesh[0]);
-	mMesh[0]->GetOOBB().Transform(mOOBB, GetWM());
-	XMStoreFloat4(&mOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&mOOBB.Orientation)));
+	mMesh[0]->GetOOBB().Transform(m_OOBB, GetWM());
+	XMStoreFloat4(&m_OOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_OOBB.Orientation)));
 }
 
 bool const GameObject::IsVisible(Camera const* const camera)
@@ -276,9 +276,9 @@ HeightMapTerrain::HeightMapTerrain(
 	, XMVECTORF32 color
 )
 	: GameObject{ 0 }
-	, mWidth{ width }
-	, mLength{ length }
-	, mScale{ scale }
+	, m_width{ width }
+	, m_length{ length }
+	, m_scale{ scale }
 	, mHeightMapImage{ make_unique<HeightMapImage>(fileName,width,length,scale) }
 {
 	int const xQuadsPerBlock{ blockWidth - 1 };
