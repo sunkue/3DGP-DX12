@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="리소스 파일">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -28,12 +20,6 @@
     <Filter Include="DX\Shader">
       <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Timer">
-      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\Mesh">
-      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\Object">
       <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
     </Filter>
@@ -43,40 +29,46 @@
     <Filter Include="DX\Scene">
       <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\stdafx">
-      <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\ResourceHelper">
       <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\stdafx\Interface">
+    <Filter Include="DX\CLEAR">
+      <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\CLEAR\Timer">
+      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\CLEAR\Mesh">
+      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc">
+      <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc\Interface">
       <UniqueIdentifier>{967a47b7-5757-4314-96b2-d66315e8a2d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc\Helper">
+      <UniqueIdentifier>{24630d36-f7d1-460d-ad70-b6cb05e3f110}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc\stdafx">
+      <UniqueIdentifier>{bb67dc92-fff6-4940-b261-dec902587c05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc\MyHelper">
+      <UniqueIdentifier>{eb687275-0466-48c6-9965-01a9862e6885}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\etc\etc">
+      <UniqueIdentifier>{0871c2c2-742f-41b8-b32e-85b2948883f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\Effect">
+      <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12_SUNKUE_ENGINE.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>DX\stdafx</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceHelper.h">
       <Filter>DX\ResourceHelper</Filter>
     </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>DX\stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DX12Helper.h">
-      <Filter>DX\stdafx</Filter>
-    </ClInclude>
     <ClInclude Include="GameTimer.h">
-      <Filter>DX\Timer</Filter>
+      <Filter>DX\CLEAR\Timer</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>DX\Camera</Filter>
@@ -91,36 +83,57 @@
       <Filter>DX\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Interface.h">
-      <Filter>DX\stdafx\Interface</Filter>
+      <Filter>DX\etc\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
       <Filter>DX\Object</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>DX\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="MyDXHelper.h">
-      <Filter>DX\stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="SUNKUE.h">
-      <Filter>DX\stdafx</Filter>
+      <Filter>DX\CLEAR\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="HeightMap.h">
       <Filter>DX\Terrain</Filter>
     </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>DX\etc\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DX12Helper.h">
+      <Filter>DX\etc\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>DX\etc\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="MyDXHelper.h">
+      <Filter>DX\etc\MyHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="SUNKUE.h">
+      <Filter>DX\etc\MyHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>DX\etc\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>DX\etc\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12_SUNKUE_ENGINE.h">
+      <Filter>DX\etc\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>DX\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>DX\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>DX\Terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>DX\stdafx</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceHelper.cpp">
       <Filter>DX\ResourceHelper</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
-      <Filter>DX\Timer</Filter>
+      <Filter>DX\CLEAR\Timer</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>DX\Camera</Filter>
@@ -138,9 +151,24 @@
       <Filter>DX\Object</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>DX\Mesh</Filter>
+      <Filter>DX\CLEAR\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="HeightMap.cpp">
+      <Filter>DX\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>DX\etc\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
+      <Filter>DX\etc\etc</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>DX\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>DX\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
       <Filter>DX\Terrain</Filter>
     </ClCompile>
   </ItemGroup>

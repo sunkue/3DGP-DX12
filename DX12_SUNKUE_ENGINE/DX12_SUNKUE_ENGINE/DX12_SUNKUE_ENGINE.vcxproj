@@ -145,11 +145,13 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="D3DX12Helper.h" />
     <ClInclude Include="DX12_SUNKUE_ENGINE.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="HeightMap.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MyDXHelper.h" />
     <ClInclude Include="ResourceHelper.h" />
@@ -159,14 +161,17 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SUNKUE.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Terrain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DX12_SUNKUE_ENGINE.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="HeightMap.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ResourceHelper.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -174,6 +179,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc" />

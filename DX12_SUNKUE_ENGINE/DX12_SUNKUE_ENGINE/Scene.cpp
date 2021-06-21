@@ -133,7 +133,7 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 
 	m_lightObjs.emplace_back(new Sun(device, mGraphicsRootSignature.Get(),
 		LightFactory::MakePointLight({ xCenter,2000.0f,zCenter }, 30000.0f), 1, mTerrain));
-	m_lightObjs[0]->SetMesh(0, GameFramework::GetApp()->m_Meshes["sphere"]);
+	m_lightObjs[0]->SetMesh(0, GameFramework::GetApp()->m_meshes["sphere"]);
 	m_lightObjs[0]->SetLightColor(Colors::White);
 	//m_lightObjs[0]->SetEmessiveColor(Colors::White);
 
@@ -231,17 +231,17 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 	const float timeE{ timeElapsed.count() / 1000.0f };
 	// obj player
 	if (!mPlayer->Collable()) {
-		bool br{ mPlayer->GetBrother() ? m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetBrother()->GetOOBB()) : false };
-		bool ch{ mPlayer->GetChild() ? m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetChild()->GetOOBB()) : false };
-		if (m_lightObjs[0]->GetOOBB().Intersects(mPlayer->GetOOBB()) | br | ch)
+		bool br{ mPlayer->GetBrother() ? m_lightObjs[0]->GetOOBB_origin().Intersects(mPlayer->GetBrother()->GetOOBB_origin()) : false };
+		bool ch{ mPlayer->GetChild() ? m_lightObjs[0]->GetOOBB_origin().Intersects(mPlayer->GetChild()->GetOOBB_origin()) : false };
+		if (m_lightObjs[0]->GetOOBB_origin().Intersects(mPlayer->GetOOBB_origin()) | br | ch)
 		{
 			if (false == IsLButtonDown()) {
 				reinterpret_cast<Sun*>(m_lightObjs[0].get())->Catch();
 			}
 			mPlayer->SetBrother(nullptr);
 			mPlayer->SetChild(nullptr);
-			mPlayer->SetPrevMesh(GameFramework::GetApp()->m_Meshes["girl"]);
-			mPlayer->SetMesh(0, GameFramework::GetApp()->m_Meshes["girl"]);
+			mPlayer->SetPrevMesh(GameFramework::GetApp()->m_meshes["girl"]);
+			mPlayer->SetMesh(0, GameFramework::GetApp()->m_meshes["girl"]);
 			mPlayer->SetScale({ 20.0f,20.0f,20.0f });
 			mPlayer->SetMaxScale(50.0f);
 		}
@@ -249,9 +249,9 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 
 		for (const auto& obj : mObjects) {
 			if (false == obj->IsAble())continue;
-			bool br{ mPlayer->GetBrother() ? obj->GetOOBB().Intersects(mPlayer->GetBrother()->GetOOBB()) : false };
-			bool ch{ mPlayer->GetChild() ? obj->GetOOBB().Intersects(mPlayer->GetChild()->GetOOBB()) : false };
-			if (obj->GetOOBB().Intersects(mPlayer->GetOOBB()) | br | ch) {
+			bool br{ mPlayer->GetBrother() ? obj->GetOOBB_origin().Intersects(mPlayer->GetBrother()->GetOOBB_origin()) : false };
+			bool ch{ mPlayer->GetChild() ? obj->GetOOBB_origin().Intersects(mPlayer->GetChild()->GetOOBB_origin()) : false };
+			if (obj->GetOOBB_origin().Intersects(mPlayer->GetOOBB_origin()) | br | ch) {
 				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
 				if (obj->GetTeam() == EnemyObject::TEAM::ENDCOUNT) {
@@ -277,11 +277,11 @@ pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTO
 	vector<GameObject*> temp;
 	for (const auto& obj : mObjects) {
 		if (false == obj->IsAble())continue;
-		if (obj->GetOOBB().Intersects(origin, direction, dist)) {
+		if (obj->GetOOBB_origin().Intersects(origin, direction, dist)) {
 			temp.push_back(obj);
 		}
 	}
-	if (mPlayer->GetOOBB().Intersects(origin, direction, dist)) {
+	if (mPlayer->GetOOBB_origin().Intersects(origin, direction, dist)) {
 		//temp.push_back(mPlayer);
 	}
 

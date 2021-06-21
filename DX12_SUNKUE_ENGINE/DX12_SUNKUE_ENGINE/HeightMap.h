@@ -27,7 +27,7 @@ private:
 	XMFLOAT3 m_scale;
 };
 
-class HeighMapGridMesh : public VertexBufferData
+class HeighMapGridMesh : public MeshUnit
 {
 public:
 	HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandList* commandList

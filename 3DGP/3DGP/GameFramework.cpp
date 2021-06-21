@@ -772,6 +772,9 @@ void GameFramework::FrameAdvance()
 		ProcessInput();
 		AnimateObjects();
 	}
+		mPlayer->GetLook(); 
+		mPlayer->GetUp(); 
+		mPlayer->GetRight();
 
 	PopulateCommandList();
 	ExecuteComandLists();

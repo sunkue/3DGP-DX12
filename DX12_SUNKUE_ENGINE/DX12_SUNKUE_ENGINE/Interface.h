@@ -16,7 +16,8 @@ private:
 class Collideable
 {
 public:
-	BoundingOrientedBox GetOOBB()const { return m_OOBB; }
+	BoundingOrientedBox GetOOBB_origin()const { return m_OOBB; }
+	BoundingOrientedBox GetOOBB_transformed(FXMMATRIX WM)const { BoundingOrientedBox ret; m_OOBB.Transform(ret, WM); return ret; }
 	void SetOOBB(const BoundingOrientedBox& OOBB) { m_OOBB = OOBB; }
 protected:
 	BoundingOrientedBox m_OOBB;

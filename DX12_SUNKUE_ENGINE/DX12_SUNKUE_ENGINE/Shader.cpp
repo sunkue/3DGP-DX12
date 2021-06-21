@@ -227,7 +227,7 @@ void ObjectsShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList
 		for (int z = 0; z < zObjects; z++) {
 			for (int y = 0; y < yObjects; y++, i++) {
 				Eobj = make_shared<EnemyObject>(1);
-				Eobj->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
+				Eobj->SetMesh(0, GameFramework::GetApp()->m_meshes["cube"]);
 				float const xPosition = x * xPitch;
 				float const zPosition = z * zPitch;
 				float const height{ terrain->GetHeight(xPosition,zPosition) };
@@ -309,7 +309,7 @@ void InstancingShader::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandL
 		for (int z = 0; z < zObjects; z++) {
 			for (int y = 0; y < yObjects; y++, i++) {
 				Eobj = make_shared<EnemyObject>(1);
-				Eobj->SetMesh(0, GameFramework::GetApp()->m_Meshes["cube"]);
+				Eobj->SetMesh(0, GameFramework::GetApp()->m_meshes["cube"]);
 				float const xPosition = x * xPitch;
 				float const zPosition = z * zPitch;
 				float const height{ terrain->GetHeight(xPosition,zPosition) };
@@ -412,22 +412,6 @@ void InstancingShader::ReleaseShaderVariables()
 	if (mcbGameObjects) {
 		mcbGameObjects->Unmap(0, nullptr);
 		mcbGameObjects.Reset();
-	}
-}
-
-
-namespace tc {
-	inline XMFLOAT4A teamColor(EnemyObject::TEAM t)
-	{
-		XMFLOAT4A retCol{ 0.2f,0.2f,0.2f,0.5f };
-		switch (t)
-		{
-		case EnemyObject::TEAM::RED:retCol.x = 1.0f; break;
-		case EnemyObject::TEAM::GREEN:retCol.y = 1.0f; break;
-		case EnemyObject::TEAM::BLUE:retCol.z = 1.0f; break;
-		case EnemyObject::TEAM::YELLOW:retCol.x = 1.0f; retCol.y = 1.0f; break;
-		}
-		return retCol;
 	}
 }
 
