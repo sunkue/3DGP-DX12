@@ -118,7 +118,7 @@ void Shader::CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignatu
 	ThrowIfFailed(device->CreateGraphicsPipelineState(
 		  &PSDesc
 		, IID_PPV_ARGS(mPipelineStates[0].GetAddressOf())));
-	
+
 	if (PSDesc.InputLayout.pInputElementDescs)
 		delete[]PSDesc.InputLayout.pInputElementDescs;
 }

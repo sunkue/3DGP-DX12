@@ -22,15 +22,11 @@ public:
 	virtual ~Camera();
 
 public:
-
-	virtual void CreateShaderVariables(
-		  ID3D12Device* device
-		, ID3D12GraphicsCommandList* commandlist);
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commadList);
 
 	void XM_CALLCONV GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up);
-	/* 회전으로인한 누적 실수 연산 오류 제거를 위해 ULR 직교화 작업 */
 	void RegenerateViewMatrix();
 	void GenerateProjectionMatrix(float fov, float aspect, float n, float f);
 	void SetNF(float n, float f) { m_n = n; m_f = f; }
@@ -60,8 +56,8 @@ public:
 	
 	void XM_CALLCONV SetOffset(FXMVECTOR offset) { XMStoreFloat3A(&m_Offset, offset); }
 	XMVECTOR XM_CALLCONV GetOffset()const { return XMLoadFloat3A(&m_Offset); }
-	void SetTimeLag(milliseconds timeLag) { m_TimeLag = timeLag; }
-	milliseconds GetTimeLag()const { return m_TimeLag; }
+	void SetTimeLag(float timeLag) { m_TimeLag = timeLag; }
+	float GetTimeLag()const { return m_TimeLag; }
 
 	XMMATRIX XM_CALLCONV GetViewMatrix()const { return XMLoadFloat4x4(&m_Info.viewMat); }
 	XMMATRIX XM_CALLCONV GetProjectionMatrix()const { return XMLoadFloat4x4(&m_Info.projectionMat); }
@@ -70,7 +66,7 @@ public:
 	
 	virtual void XM_CALLCONV Move(FXMVECTOR shift) { XMStoreFloat3A(&m_Position, XMLoadFloat3A(&m_Position) + shift); }
 	virtual void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f) {};
-	virtual void XM_CALLCONV Update(XMVECTOR lookAt, milliseconds timeElapsed) {};
+	virtual void XM_CALLCONV Update(XMVECTOR lookAt, float timeElapsed) {};
 
 	void XM_CALLCONV RotateByMat(FXMMATRIX rotateMat) {
 		XMStoreFloat3A(&m_RightV, XMVector3TransformNormal(XMLoadFloat3A(&m_RightV), rotateMat));
@@ -80,23 +76,18 @@ public:
 	
 public:
 	void GenerateFrustum();
-	bool IsInFrustum(BoundingOrientedBox const& OOBB)const {
-		return m_frustum.Intersects(OOBB);
-	}
+	bool IsInFrustum(const BoundingOrientedBox& OOBB)const { return m_frustum.Intersects(OOBB); }
 
 protected:
 	XMFLOAT3A m_Position;
 
-	// 축
 	XMFLOAT3A m_UpV;
 	XMFLOAT3A m_LookV;
 	XMFLOAT3A m_RightV;
 
-	// 누적회전각
 	float	m_Pitch;
 	float	m_Yaw;
 	float	m_Roll;
-
 
 	float m_n;
 	float m_f;
@@ -106,10 +97,8 @@ protected:
 	XMFLOAT3A m_LookAt;
 	XMFLOAT3A m_Offset;
 
-	// 지연시간
-	milliseconds m_TimeLag;
+	float m_TimeLag;
 
-	// 변환행렬
 	SR_CAMERA_INFO m_Info;
 
 	D3D12_VIEWPORT m_Viewport;

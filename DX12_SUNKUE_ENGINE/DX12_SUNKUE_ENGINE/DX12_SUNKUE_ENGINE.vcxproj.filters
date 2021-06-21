@@ -20,17 +20,11 @@
     <Filter Include="DX\Shader">
       <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Object">
-      <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\Terrain">
       <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\Scene">
       <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\ResourceHelper">
-      <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\CLEAR">
       <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
@@ -62,10 +56,16 @@
     <Filter Include="DX\Effect">
       <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DX\CLEAR\Object">
+      <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\CLEAR\ResourceHelper">
+      <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceHelper.h">
-      <Filter>DX\ResourceHelper</Filter>
+      <Filter>DX\CLEAR\ResourceHelper</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
       <Filter>DX\CLEAR\Timer</Filter>
@@ -86,7 +86,7 @@
       <Filter>DX\etc\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>DX\Object</Filter>
+      <Filter>DX\CLEAR\Object</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>DX\CLEAR\Mesh</Filter>
@@ -130,7 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceHelper.cpp">
-      <Filter>DX\ResourceHelper</Filter>
+      <Filter>DX\CLEAR\ResourceHelper</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
       <Filter>DX\CLEAR\Timer</Filter>
@@ -148,7 +148,7 @@
       <Filter>DX\Shader</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>DX\Object</Filter>
+      <Filter>DX\CLEAR\Object</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>DX\CLEAR\Mesh</Filter>

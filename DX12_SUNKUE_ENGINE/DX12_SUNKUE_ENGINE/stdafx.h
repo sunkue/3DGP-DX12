@@ -82,18 +82,3 @@ inline bool const IsEqual(const XMVECTOR a, const XMVECTOR b) {
 		&& IsZero(XMVectorGetZ(val));
 }
 
-/*
-* default::32bit per.
-* PipelineStateObject => statestore. PSO
-* Rendering is based on shader, not on object.
-IA	rootsignature::64.	srv::2.	=> SV_VertexID // SV_InstanceID // SV_PrimitiveID
-VS	input::16.	output::16.		
-HS
-TS
-DS
-GS			(SO)->OUTPUT
-RS	Rasterize	=> SV_IsFrontFace 
-	<= SV_Position
-PS	input::(GS)?(32):(16). Can_Discard	=> SV_Depth // nostencil
-OM
-*/
