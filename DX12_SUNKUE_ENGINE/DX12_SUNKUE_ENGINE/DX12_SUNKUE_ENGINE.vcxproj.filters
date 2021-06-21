@@ -26,15 +26,6 @@
     <Filter Include="DX\Scene">
       <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\CLEAR">
-      <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\CLEAR\Timer">
-      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\CLEAR\Mesh">
-      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\etc">
       <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
     </Filter>
@@ -56,19 +47,28 @@
     <Filter Include="DX\Effect">
       <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\CLEAR\Object">
+    <Filter Include="DX\완성된 부분">
+      <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Timer">
+      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Mesh">
+      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Object">
       <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\CLEAR\ResourceHelper">
+    <Filter Include="DX\완성된 부분\ResourceHelper">
       <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceHelper.h">
-      <Filter>DX\CLEAR\ResourceHelper</Filter>
+      <Filter>DX\완성된 부분\ResourceHelper</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
-      <Filter>DX\CLEAR\Timer</Filter>
+      <Filter>DX\완성된 부분\Timer</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>DX\Camera</Filter>
@@ -86,10 +86,10 @@
       <Filter>DX\etc\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>DX\CLEAR\Object</Filter>
+      <Filter>DX\완성된 부분\Object</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>DX\CLEAR\Mesh</Filter>
+      <Filter>DX\완성된 부분\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="HeightMap.h">
       <Filter>DX\Terrain</Filter>
@@ -130,10 +130,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceHelper.cpp">
-      <Filter>DX\CLEAR\ResourceHelper</Filter>
+      <Filter>DX\완성된 부분\ResourceHelper</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
-      <Filter>DX\CLEAR\Timer</Filter>
+      <Filter>DX\완성된 부분\Timer</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>DX\Camera</Filter>
@@ -148,10 +148,10 @@
       <Filter>DX\Shader</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>DX\CLEAR\Object</Filter>
+      <Filter>DX\완성된 부분\Object</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>DX\CLEAR\Mesh</Filter>
+      <Filter>DX\완성된 부분\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="HeightMap.cpp">
       <Filter>DX\Terrain</Filter>

@@ -3,6 +3,12 @@
 #include<concepts>
 #include<type_traits>
 
+#ifdef UNICODE
+using tstring = wstring;
+#else
+using tstring = string;
+#endif // UNICODE
+
 namespace SUNKUE {
 	using namespace std;
 	

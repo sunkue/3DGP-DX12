@@ -17,15 +17,15 @@ public:
 	virtual ~GameTimer() = default;
 
 public:
-	void Start()	{ mbStopped = false; };
-	void Stop()		{ mStopTime = mCurrentTime; mbStopped = true; };
+	void Start() { mbStopped = false; };
+	void Stop() { mStopTime = mCurrentTime; mbStopped = true; };
 	void Reset();
-	void Tick(const milliseconds fLockFPS = 0ms);
-	size_t GetFrameRate(TCHAR* lpszString = nullptr, size_t characters = 0);
-	float GetTimeElapsedSec()	const { return MillisecToSec(mTimeElapsed); }
-	milliseconds GetTimeElapsed()	const { return mTimeElapsed; }
-	milliseconds GetTimePaused()	const { return mTimePaused; }
-	milliseconds GetTimePlayed()	const { return mTimePlayed; }
+	void Tick(const milliseconds LockFPS = 0ms);
+	size_t GetFrameRate() const { return mCurrentFrameRate; }
+	float GetTimeElapsedSec() const { return MillisecToSec(mTimeElapsed); }
+	milliseconds GetTimeElapsed() const { return mTimeElapsed; }
+	milliseconds GetTimePaused() const { return mTimePaused; }
+	milliseconds GetTimePlayed() const { return mTimePlayed; }
 
 private:
 	void CaculateFrameStates(const milliseconds timeElapsed);

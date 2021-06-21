@@ -2,16 +2,11 @@
 #include "GameTimer.h"
 
 
-//////////////// init //////////////////////////////////
-
 GameTimer::GameTimer()
 {
 	ResetTimePoints();
 	mFrameTimes.fill(milliseconds::zero());
 }
-
-///////////////// public ////////////////////////////////
-
 
 void GameTimer::Tick(const milliseconds lockFPS)
 {
@@ -32,27 +27,12 @@ void GameTimer::Tick(const milliseconds lockFPS)
 	mTimePaused = mbStopped ? (mTimePaused + timeElapsed) : (milliseconds::zero());
 }
 
-size_t GameTimer::GetFrameRate(TCHAR* lpszString, const size_t characters)
-{
-	if (lpszString)
-	{
-		_itow_s(static_cast<int>(mCurrentFrameRate), lpszString, characters, 10);
-		wcscat_s(lpszString, characters, _T(" FPS)"));
-	}
-
-	return mCurrentFrameRate;
-}
-
 void GameTimer::Reset()
 {
 	ResetTimePoints();
 	ResetDurations();
-
 	mbStopped = false;
 }
-
-
-///////////////// private ////////////////////////////////
 
 void GameTimer::CaculateFrameStates(const milliseconds timeElapsed)
 {

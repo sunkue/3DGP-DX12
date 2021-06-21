@@ -28,10 +28,12 @@ void GameObject::PrepareRender()
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
 {	
-	if (false == IsVisible(camera))return;
-	PrepareRender();
-	for (auto& m : m_meshes)m->Render(commandList, instanceCount);
-	ForFamily([=](auto& obj) {obj->Render(commandList, camera, instanceCount); });
+	if (IsVisible(camera))
+	{
+		PrepareRender();
+		for (auto& m : m_meshes)m->Render(commandList, instanceCount);
+		ForFamily([=](auto& obj) {obj->Render(commandList, camera, instanceCount); });
+	}
 }
 
 void GameObject::RotateByAxis(FXMVECTOR axis, float angle)
@@ -97,7 +99,7 @@ void GameObject::ReleaseShaderVariables()
 bool GameObject::IsVisible(const Camera* camera)
 {
 	if (nullptr == camera)return false;
-	return camera->IsInFrustum(GetOOBB_transformed(Load(m_worldMatNoScale)));
+	else return camera->IsInFrustum(GetOOBB_transformed(Load(m_worldMatNoScale)));
 }
 
 //////////////////////////////
