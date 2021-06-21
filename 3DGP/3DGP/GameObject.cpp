@@ -147,23 +147,20 @@ XMVECTOR GameObject::GetPosition()	const
 XMVECTOR GameObject::GetLook() const
 {
 	XMVECTOR look{ XMVectorSet(mWorldMat._31,mWorldMat._32,mWorldMat._33,0.0f) };
-	cout << "look:"<< XMVectorGetX(XMVector3Length(look))<<"\n";
-
+	
 	return XMVector3Normalize(look);
 }
 
 XMVECTOR GameObject::GetUp() const
 {
 	XMVECTOR up{ XMVectorSet(mWorldMat._21,mWorldMat._22,mWorldMat._23,0.0f) };
-	cout << "up:" << XMVectorGetX(XMVector3Length(up))<<"\n";
-
+	
 	return XMVector3Normalize(up);
 }
 
 XMVECTOR GameObject::GetRight() const
 {
-	XMVECTOR right{ XMVectorSet(mWorldMat._21,mWorldMat._22,mWorldMat._23,0.0f) };
-	cout << "right:" << XMVectorGetX(XMVector3Length(right))<<"\n";
+	XMVECTOR right{ XMVectorSet(mWorldMat._11,mWorldMat._12,mWorldMat._13,0.0f) };
 	return XMVector3Normalize(right);
 }
 
