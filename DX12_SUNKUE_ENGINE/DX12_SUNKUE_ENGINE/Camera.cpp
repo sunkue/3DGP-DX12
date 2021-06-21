@@ -1,45 +1,14 @@
 #include "stdafx.h"
-
 #include "Camera.h"
-
+//#include "Player.h"
 ////////////////////////////
 Camera::Camera()
-	: m_Viewport{ 0,0,0,0.0f,0.0f }
-	, m_ScissorRect{ 0,0,0,0 }
-	, m_Position{ 0.0f,0.0f,0.0f }
-	, m_RightV{ 1.0f,0.0f,0.0f }
-	, m_UpV{ 0.0f,1.0f,0.0f }
-	, m_LookV{ 0.0f,0.0f,1.0f }
-	, m_Pitch{ 0.0f }
-	, m_Yaw{ 0.0f }
-	, m_Roll{ 0.0f }
-	, m_Offset{ 0.0f,0.0f,0.0f }
-	, m_TimeLag{ milliseconds::zero() }
-	, m_LookAt{ 0.0f,0.0f,0.0f }
-	, m_Mode{ CAMERA_MODE::observer }
 {
-	XMStoreFloat4x4(&m_Info.viewMat, XMMatrixIdentity());
-	XMStoreFloat4x4(&m_Info.projectionMat, XMMatrixIdentity());
+	Store(m_Info.viewMat, XMMatrixIdentity());
+	Store(m_Info.projectionMat, XMMatrixIdentity());
+	SetViewport(0.0f, 0.0f, 0.0f, 0.0f);
+	SetScissorRect(0, 0, 0, 0);
 }
-
-Camera::Camera(Camera* camera)
-{
-	if (camera)
-	{
-		*this = *camera;
-	}
-	else
-	{
-		*this = Camera();
-	}
-}
-
-Camera::~Camera()
-{
-
-}
-
-////////////////////////////
 
 void Camera::SetViewport(
 	  float xTopLeft
@@ -82,48 +51,38 @@ void Camera::GenerateViewMatrix(FXMVECTOR pos, FXMVECTOR lookAt, FXMVECTOR up)
 {
 	SetPosition(pos);
 	SetLookAt(lookAt);
-	XMStoreFloat3A(&m_UpV, XMVector3Normalize(up));
+	Store(m_UpV, XMVector3Normalize(up));
+	Store(m_Info.viewMat,XMMatrixLookAtLH(pos, lookAt, up));
 }
 
+/* after rotate */
 void Camera::RegenerateViewMatrix()
 {
-	XMVECTOR look{ XMVector3Normalize(GetLookVector()) };
-	XMVECTOR up{ XMVector3Normalize(GetUpVector()) };
+	XMVECTOR up{ Load(m_UpV) };
+	XMVECTOR look{ XMVector3Normalize(Load(m_LookV)) };
 	XMVECTOR right{ XMVector3Normalize(XMVector3Cross(up, look)) };
 	up = XMVector3Normalize(XMVector3Cross(look, right));
-	XMStoreFloat3A(&m_LookV, look);
-	XMStoreFloat3A(&m_RightV, right);
-	XMStoreFloat3A(&m_UpV, up);
-	XMVECTOR pos{ XMLoadFloat3A(&m_Position) };
-	m_Info.viewMat =
-	{
-		m_RightV.x, m_UpV.x, m_LookV.x, m_Info.viewMat._14,
-		m_RightV.y, m_UpV.y, m_LookV.y, m_Info.viewMat._24,
-		m_RightV.z, m_UpV.z, m_LookV.z, m_Info.viewMat._34,
-		
-		-XMVectorGetX(XMVector3Dot(pos, right)),
-		-XMVectorGetX(XMVector3Dot(pos, up)),
-		-XMVectorGetX(XMVector3Dot(pos, look)),
-		m_Info.viewMat._44
-	};
+	Store(m_LookV, look);
+	Store(m_RightV, right);
+	Store(m_UpV, up);
+	XMVECTOR pos{ Load(m_Position) };
+	Store(m_Info.viewMat, XMMatrixLookAtLH(pos, pos + look, up));
 	GenerateFrustum();
 }
 
 void Camera::GenerateProjectionMatrix(float fov, float aspect, float n, float f)
 {
-	XMStoreFloat4x4(&m_Info.projectionMat, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
-	m_n = n;
-	m_f = f;
+	Store(m_Info.projectionMat, XMMatrixPerspectiveFovLH(fov, aspect, n, f));
+	m_n = n; m_f = f;
 }
 
 void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	XMMATRIX VP = XMMatrixTranspose(GetViewMatrix() * GetProjectionMatrix());
-	XMFLOAT4X4A viewProj;
-	XMStoreFloat4x4A(&viewProj, VP);
+	XMFLOAT4X4 viewProj; Store(viewProj, VP);
 	commandList->SetGraphicsRoot32BitConstants(1, 16, &viewProj, 0);
 	commandList->SetGraphicsRoot32BitConstants(1, 3, &m_Position, 16);
-	float v[2]{ m_Viewport.Width,m_Viewport.Height };
+	//float v[2]{ m_Viewport.Width,m_Viewport.Height };
 	//commandList->SetGraphicsRoot32BitConstants(1, 2, &v, 16);
 }
 
@@ -132,9 +91,54 @@ void Camera::ReleaseShaderVariables()
 
 }
 
+void Camera::SetLookAt(FXMVECTOR lookAt)
+{
+	Store(m_LookAt, lookAt);
+	Store(m_Info.viewMat, XMMatrixLookAtLH(GetPosition(), lookAt, GetUpVector()));
+	m_RightV= { m_Info.viewMat._11,m_Info.viewMat._21,m_Info.viewMat._31 };
+	m_UpV	= { m_Info.viewMat._12,m_Info.viewMat._22,m_Info.viewMat._32 };
+	m_LookV = { m_Info.viewMat._13,m_Info.viewMat._23,m_Info.viewMat._33 };
+	GenerateFrustum();
+}
+void Camera::SetPosition(FXMVECTOR pos) {
+	Store(m_Position, pos); 
+	Store(m_Info.viewMat, XMMatrixLookAtLH(pos, GetLookAt(), GetUpVector()));
+}
+
+void Camera::RotateByMat(FXMMATRIX rotateMat) {
+	Store(m_RightV, XMVector3TransformNormal(Load(m_RightV),rotateMat));
+	Store(m_UpV,	XMVector3TransformNormal(Load(m_UpV),	rotateMat));
+	Store(m_LookV,	XMVector3TransformNormal(Load(m_LookV), rotateMat));
+}
+
 void Camera::GenerateFrustum()
 {
 	m_frustum.CreateFromMatrix(m_frustum, GetProjectionMatrix());
 	XMMATRIX inversView{ XMMatrixInverse(nullptr, GetViewMatrix()) };
 	m_frustum.Transform(m_frustum, inversView);
 }
+
+/// ////////////////////////////////////////
+void ThirdPersonCamera::Update(float timeElapsed)
+{
+//	assert(m_Player);
+//	XMVECTOR right{ m_Player->GetRightVector() };
+//	XMVECTOR up{ m_Player->GetUpVector() };
+//	XMVECTOR look{ m_Player->GetLookVector() };
+//	XMMATRIX rotate{ right,up,look,g_XMIdentityR3 };
+//	XMVECTOR offset{ XMVector3TransformCoord(Load(m_Offset), rotate) };
+//	XMVECTOR pos{ XMVectorAdd(m_Player->GetPosition(),offset) };
+//	XMVECTOR dir{ XMVectorSubtract(pos,this->GetPosition()) };
+//	float length{ XMVectorGetX(XMVector3Length(dir)) };
+//	dir = XMVector3Normalize(dir);
+//
+//	float timeLagScale = (0 != m_TimeLag) ? (timeElapsed / m_TimeLag) : (1);
+//	float distance{ length * timeLagScale };
+//	if (length < 0.01f || 1 < timeLagScale)distance = length;
+//	if (0 < distance) {
+//		SetPosition(XMVectorAdd(GetPosition(), dir * distance));
+//		SetLookAt(look);
+//	}
+}
+
+/// ////////////////////////////////////////

@@ -54,8 +54,8 @@ using Microsoft::WRL::ComPtr;
 #include "D3DX12Helper.h"
 #include "ResourceHelper.h"
 #include "Interface.h"
-#include "MyDXHelper.h"
-#include "SUNKUE.h"
+#include "MyDXHelper.hpp"
+#include "SUNKUE.hpp"
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::string_view_literals;

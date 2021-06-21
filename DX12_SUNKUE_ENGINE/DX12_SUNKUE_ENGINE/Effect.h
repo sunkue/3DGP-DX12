@@ -1,13 +1,12 @@
 #pragma once
-#include "ShaderHelper.hpp"
+
 
 struct PS_VB_EFFECT
 {
+	XMFLOAT3 mPosition{ 0.0f,0.0f,0.0f };
 	float mTime{ 0.0f };
 	float mLifeTime{ 0.0f };
-	XMFLOAT3 mPosition{ 0.0f,0.0f,0.0f };
 };
-// 0 wall	 1 Obj
 
 class Effect : public IShaderHelper
 {

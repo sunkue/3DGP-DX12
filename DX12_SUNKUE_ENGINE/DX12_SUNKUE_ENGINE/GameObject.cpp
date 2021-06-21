@@ -13,12 +13,12 @@ GameObject::GameObject(int meshes)
 
 void GameObject::ReleaseUploadBuffers()
 {
-	ForFamily([](auto& obj) {obj->ReleaseUploadBuffers(); });
+	ForFamily([](auto& obj) {obj.ReleaseUploadBuffers(); });
 }
 
 void GameObject::Animate(const float timeElapsed)
 {
-	ForFamily([=](auto& obj) {obj->Animate(timeElapsed); });
+	ForFamily([=](auto& obj) {obj.Animate(timeElapsed); });
 }
 
 void GameObject::PrepareRender()
@@ -32,7 +32,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, 
 	{
 		PrepareRender();
 		for (auto& m : m_meshes)m->Render(commandList, instanceCount);
-		ForFamily([=](auto& obj) {obj->Render(commandList, camera, instanceCount); });
+		ForFamily([=](auto& obj) {obj.Render(commandList, camera, instanceCount); });
 	}
 }
 

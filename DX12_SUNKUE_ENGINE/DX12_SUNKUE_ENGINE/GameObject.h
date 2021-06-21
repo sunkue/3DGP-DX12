@@ -5,7 +5,7 @@ class Camera;
 class HeightMapImage;
 class Mesh;
 
-class GameObject : public Collideable
+class GameObject : public Collideable , public IShaderHelper
 {
 public:
 	GameObject(int meshes = 1);
@@ -23,9 +23,9 @@ public:
 
 protected:
 	virtual void PrepareRender();
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
-	virtual void ReleaseShaderVariables();
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
+	virtual void ReleaseShaderVariables()override;
 
 public:
 	const vector<shared_ptr<Mesh>>& GetMesh()const { return m_meshes; }

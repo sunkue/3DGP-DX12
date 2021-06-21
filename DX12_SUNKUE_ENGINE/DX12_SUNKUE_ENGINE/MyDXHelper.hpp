@@ -2,14 +2,16 @@
 
 #include <DirectxMath.h>
 #include <concepts>
+#include <cmath>
+#include <numeric>
 
 namespace SUNKUE {
 	using namespace std;
 	using namespace DirectX;
 
-	inline XMVECTOR xAxis() { return XMVECTOR{ 1.0f,0.0f,0.0f,0.0f }; }
-	inline XMVECTOR yAxis() { return XMVECTOR{ 0.0f,1.0f,0.0f,0.0f }; }
-	inline XMVECTOR zAxis() { return XMVECTOR{ 0.0f,0.0f,1.0f,0.0f }; }
+	static constexpr XMVECTORF32 xAxis{ 1.0f,0.0f,0.0f,0.0f };
+	static constexpr XMVECTORF32 yAxis{ 0.0f,1.0f,0.0f,0.0f };
+	static constexpr XMVECTORF32 zAxis{ 0.0f,0.0f,1.0f,0.0f };
 
 	template<class T>concept DXFLOATV = is_same<T, XMFLOAT2>::value or is_same<T, XMFLOAT3>::value or is_same<T, XMFLOAT4>::value;
 	template<class T>concept DXFLOATA = is_same<T, XMFLOAT2A>::value or is_same<T, XMFLOAT3A>::value or is_same<T, XMFLOAT4A>::value;
@@ -49,4 +51,25 @@ namespace SUNKUE {
 		else static_assert(false, "Add yourthing");
 	}
 
+
+	template<size_t N>requires (1 < N) and (N < 5)
+	XMVECTOR XM_CALLCONV CaculateBezierCurves(const vector<array<XMFLOAT3, N>>& BezierCurves, float t)
+	{
+		assert(false == BezierCurves.empty());
+		if (BezierCurves.size() < t)return Load(*(prev(end(*prev(end(BezierCurves), 1)), 1)));
+		if (t < 0)return Load(BezierCurves.at(0).at(0));
+		int tInt = static_cast<int>(t);
+		float tPercent = t - tInt;
+
+		vector<XMFLOAT3> ret{ ALLOF(BezierCurves.at(tInt)) };
+		while (1 != ret.size()) {
+			vector<XMFLOAT3> temp;
+			adjacent_difference(ALLOF(ret), back_inserter(temp),
+				[tPercent](XMFLOAT3 a, XMFLOAT3 b)->XMFLOAT3 {
+					return { lerp(a.x, b.x, tPercent),lerp(a.y, b.y, tPercent),lerp(a.z, b.z, tPercent) };
+				});
+			ret = { next(begin(temp),1),end(temp) };
+		}
+		return Load(ret[0]);
+	}
 }

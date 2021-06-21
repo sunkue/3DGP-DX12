@@ -153,13 +153,13 @@
     <ClInclude Include="Interface.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="MyDXHelper.h" />
+    <ClInclude Include="MyDXHelper.hpp" />
     <ClInclude Include="ResourceHelper.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SUNKUE.h" />
+    <ClInclude Include="SUNKUE.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
   </ItemGroup>
