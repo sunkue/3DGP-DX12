@@ -1,138 +1,97 @@
 #pragma once
 
-#include "Mesh.h"
+#include "GameObject.h"
 
-struct SR_INSTANCE_INFO
+class GameObject;
+class Camera;
+
+class ShaderCompiler abstract
 {
-	XMFLOAT4X4 transform;
-	Meterial meterial;
-};
-
-struct SR_UI_INFO
-{
-	XMFLOAT4X4 transform;
-	XMFLOAT4 color;
-};
-
-class Shader : public Reference
-{
-public:
-	explicit Shader() = default;
-	virtual ~Shader() = default;
-
-public:
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* commandList, XMFLOAT4X4A* world);
-
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
-
 protected:
-	virtual D3D12_SHADER_BYTECODE	CreatePixelShader(ID3DBlob** ShaderBlob);
-	virtual D3D12_SHADER_BYTECODE	CreateVertexShader(ID3DBlob** ShaderBlob);
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* fileName, LPCSTR shaderName, LPCSTR shaderProfile, ID3DBlob** shaderBlob);
-	virtual D3D12_INPUT_LAYOUT_DESC	CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC	CreateInputLayout() abstract = 0;
+	virtual D3D12_SHADER_BYTECODE	CreatePixelShader(ID3DBlob** ShaderBlob) abstract = 0;
+	virtual D3D12_SHADER_BYTECODE	CreateVertexShader(ID3DBlob** ShaderBlob) abstract = 0;
 	virtual D3D12_RASTERIZER_DESC	CreateRasterizerState();
 	virtual D3D12_BLEND_DESC		CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
-	virtual void PrepareRender(ID3D12GraphicsCommandList* commandList);
-
-protected:
-	vector<ComPtr<ID3D12PipelineState>> mPipelineStates;
 };
 
-class ObjectsShader : public Shader
+
+class Shader abstract : public ShaderCompiler, public IShaderResourceHelper
 {
 public:
-	explicit ObjectsShader();
-	virtual ~ObjectsShader();
+	virtual ~Shader() = default;
 
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context);
-	virtual void AnimateObjects(milliseconds timeElapsed);
-	virtual void ReleaseObjects();
-	virtual void ReleaseUploadBuffers();
-
+public:
+	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) abstract = 0;
 	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature);
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) override;
 
 protected:
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+	void SetPSO(ID3D12GraphicsCommandList* commandList, size_t PSO_index = 0);
+
+protected:
+	vector<ComPtr<ID3D12PipelineState>> m_PipelineStates;
+};
+
+
+class ObjectsShader abstract : public Shader
+{
+public:
+	virtual ~ObjectsShader() = default;
+
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context) abstract = 0;
+	virtual void AnimateObjects(float timeElapsed);
+	void ReleaseObjects() { m_Objects.clear(); }
+	
+	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera, size_t PSO_index = 0) { SetPSO(commandList, PSO_index); OnRender(commandList, camera); }
+	virtual void OnRender(ID3D12GraphicsCommandList* commandList, Camera* camera);
 	
 protected:
-	vector<shared_ptr<GameObject>> mObjects;
+	vector<shared_ptr<GameObject>> m_Objects;
 };
 
-class InstancingShader : public ObjectsShader
+
+template<class SR> class SRVShader abstract : public ObjectsShader
 {
 public:
-	InstancingShader();
-	virtual ~InstancingShader();
-
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context = nullptr)override;
-	virtual void ReleaseObjects()override;
-	virtual void AnimateObjects(milliseconds timeElapsed)override;
-
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) override;
-
-protected:
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
-
-protected:
-	ComPtr<ID3D12Resource>	mcbGameObjects;
-	SR_INSTANCE_INFO*		mcbMappedGameObjects;
-	D3D12_VERTEX_BUFFER_VIEW mInstancingBufferView;
-};
-
-class TerrainShader : public Shader
-{
-public:
-	TerrainShader();
-	virtual ~TerrainShader();
-
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
-
-protected:
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
+	void SetRootParamIndex(UINT index) { m_RootParamIndex = index; }
 	
-};
-
-class UIShader : public InstancingShader
-{
-public:
-	UIShader();
-	virtual ~UIShader();
-
-	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, void* context = nullptr)override;
-	virtual void ReleaseObjects()override;
-	virtual void AnimateObjects(milliseconds timeElapsed)override;
-
-	virtual void CreateShader(ID3D12Device* device, ID3D12RootSignature* rootSignature)override;
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-
-	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) override;
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) final
+	{
+		const UINT buffeSize{ static_cast<UINT>(sizeof(SR) * m_Objects.size()) };
+		m_RSRC = CreateBufferResource(device, commandList, nullptr, buffeSize
+			, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+		m_RSRC->Map(0, nullptr, (void**)&m_Mapped_RSRC);
+	}
+	
+	virtual void ReleaseShaderVariables()final
+	{
+		if (m_RSRC) {
+			m_RSRC->Unmap(0, nullptr);
+			m_RSRC.Reset();
+		}
+	}
+	
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList) final
+	{
+		SetSRV(commandList);
+		OnUpdateShaderVariables();
+	}
+	
+	void SetSRV(ID3D12GraphicsCommandList* commandList) 
+	{ 
+		commandList->SetGraphicsRootShaderResourceView(m_RootParamIndex, m_RSRC->GetGPUVirtualAddress());
+	}
+protected:
+	virtual void OnUpdateShaderVariables() abstract = 0;
 
 protected:
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** shaderBlob) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** shaderBlob) override;
-
-protected:
-	ComPtr<ID3D12Resource>	mcb_UIs;
-	SR_UI_INFO* mcb_MappedUIs;
-	D3D12_VERTEX_BUFFER_VIEW m_UIBufferView;
+	ComPtr<ID3D12Resource> m_RSRC;
+	SR* m_Mapped_RSRC;
+	D3D12_VERTEX_BUFFER_VIEW m_BufferView;
+	UINT m_RootParamIndex;
 };
+
+
+

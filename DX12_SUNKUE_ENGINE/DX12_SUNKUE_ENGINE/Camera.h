@@ -12,7 +12,7 @@ struct SR_CAMERA_INFO
 	XMFLOAT4X4 projectionMat;
 };
 
-class Camera : public IShaderHelper
+class Camera : public IShaderResourceHelper
 {
 public:
 	Camera();

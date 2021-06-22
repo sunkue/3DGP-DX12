@@ -115,7 +115,7 @@ struct LightFactory
 	}
 };
 
-class Light : public IShaderHelper
+class Light : public IShaderResourceHelper
 {
 	static const int MaxLights{ 10 };
 public:

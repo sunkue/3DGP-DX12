@@ -8,7 +8,7 @@ struct PS_VB_EFFECT
 	float mLifeTime{ 0.0f };
 };
 
-class Effect : public IShaderHelper
+class Effect : public IShaderResourceHelper
 {
 public:
 	Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int n);

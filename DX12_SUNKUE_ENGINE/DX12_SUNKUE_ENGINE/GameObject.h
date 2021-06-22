@@ -5,27 +5,27 @@ class Camera;
 class HeightMapImage;
 class Mesh;
 
-class GameObject : public Collideable , public IShaderHelper
+class GameObject : public Collideable , public IShaderResourceHelper
 {
 public:
-	GameObject(int meshes = 1);
+	explicit GameObject(int meshes = 1);
 	virtual ~GameObject() = default;
 
-public:
-	void ReleaseUploadBuffers();
-	
-	void SetMesh(int index, const Mesh* mesh) { m_meshes.at(index).reset(mesh); };
-	void SetShader(const Shader* shader) { m_shader.reset(shader); };
+public:	
+	void SetMesh(int index, const shared_ptr<Mesh> mesh) { m_meshes.at(index) = mesh; };
+	void SetShader(const shared_ptr<Shader> shader) { m_shader = shader; };
 
-	virtual void Animate(const float timeElapsed);
+	void Animate(float timeElapsed);
+	virtual void OnAnimate(float timeElapsed) {};
 
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount = 1);
 
 protected:
-	virtual void PrepareRender();
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
+	virtual void PrepareRender(ID3D12GraphicsCommandList* commandList);
+
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override {};
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables()override;
+	virtual void ReleaseShaderVariables()override {};
 
 public:
 	const vector<shared_ptr<Mesh>>& GetMesh()const { return m_meshes; }
@@ -74,8 +74,8 @@ public:
 	}
 	GameObject* GetBrother()const { return m_brother.get(); }
 	GameObject* GetChild()const { return m_child.get(); }
-	void SetBrother(const GameObject* br) { m_brother.reset(br); }
-	void SetChild(const GameObject* ch) { m_child.reset(ch); }
+	void SetBrother(const shared_ptr<GameObject> br) { m_brother = br; }
+	void SetChild(const shared_ptr<GameObject> ch) { m_child = ch; }
 protected:
 	shared_ptr<GameObject> m_brother;
 	shared_ptr<GameObject> m_child;
@@ -84,5 +84,7 @@ protected:
 class InstancingObject : public GameObject
 {
 public:
+	explicit InstancingObject(int meshes = 1) : GameObject(meshes) {};
+	virtual ~InstancingObject() = default;
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList*)final {}; // do not update constbuffer
 };

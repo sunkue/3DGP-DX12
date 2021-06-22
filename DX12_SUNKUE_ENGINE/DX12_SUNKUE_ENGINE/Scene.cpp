@@ -198,7 +198,7 @@ void Scene::AnimateObjects(milliseconds timeElapsed)
 	if (mPlayer->IsEvolving()) {
 		XMVECTOR playerPos{ mPlayer->GetPosition() };
 		float const MaxDist{ 100.0f*sqrtf(mPlayer->GetScale().m128_f32[0]) };
-		for (auto& obj : mObjects) {
+		for (auto& obj : m_Objects) {
 			XMVECTOR const dir{ playerPos- obj->GetPosition() };
 			float distance{ XMVectorGetX(XMVector3Length(dir)) };
 			if (distance < MaxDist) {
@@ -247,7 +247,7 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 		}
 
 
-		for (const auto& obj : mObjects) {
+		for (const auto& obj : m_Objects) {
 			if (false == obj->IsAble())continue;
 			bool br{ mPlayer->GetBrother() ? obj->GetOOBB_origin().Intersects(mPlayer->GetBrother()->GetOOBB_origin()) : false };
 			bool ch{ mPlayer->GetChild() ? obj->GetOOBB_origin().Intersects(mPlayer->GetChild()->GetOOBB_origin()) : false };
@@ -275,7 +275,7 @@ pair<bool,XMVECTOR> Scene::RayCollapsePos(const FXMVECTOR origin, const FXMVECTO
 {
 	// obj player
 	vector<GameObject*> temp;
-	for (const auto& obj : mObjects) {
+	for (const auto& obj : m_Objects) {
 		if (false == obj->IsAble())continue;
 		if (obj->GetOOBB_origin().Intersects(origin, direction, dist)) {
 			temp.push_back(obj);

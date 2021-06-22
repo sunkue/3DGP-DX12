@@ -27,7 +27,7 @@ struct Mesh_Info
 class MeshUnit : public Collideable
 {
 public:
-	MeshUnit(ID3D12Device*, ID3D12GraphicsCommandList*, Mesh_Info, vector<D3D12_VERTEX_BUFFER_VIEW>& out);
+	MeshUnit(ID3D12Device*, ID3D12GraphicsCommandList*, Mesh_Info&, vector<D3D12_VERTEX_BUFFER_VIEW>& out);
 
 public:
 	UINT GetVerticesCount()const { return m_verticesCount; }
@@ -41,7 +41,7 @@ protected:
 class Mesh : public Collideable
 {
 public:
-	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, const vector<Mesh_Info>&);
+	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, vector<Mesh_Info>&);
 
 	virtual void Render(ID3D12GraphicsCommandList*, UINT instanceCount = 1);
 

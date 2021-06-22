@@ -39,7 +39,7 @@ protected:
 	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
 	
 	vector<shared_ptr<Shader>>	mShaders;
-	vector<shared_ptr<GameObject>> mObjects;
+	vector<shared_ptr<GameObject>> m_Objects;
 	vector<shared_ptr<Terrain>> m_Terrains;
 
 	shared_ptr<Effect> mEffect;

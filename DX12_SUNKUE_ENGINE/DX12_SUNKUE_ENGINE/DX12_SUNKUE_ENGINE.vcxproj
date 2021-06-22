@@ -150,6 +150,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="HeightMap.h" />
+    <ClInclude Include="InstancingShader.h" />
     <ClInclude Include="Interface.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mesh.h" />
@@ -162,6 +163,8 @@
     <ClInclude Include="SUNKUE.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainShader.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -171,6 +174,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="HeightMap.cpp" />
+    <ClCompile Include="InstancingShader.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ResourceHelper.cpp" />
@@ -180,6 +184,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainShader.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc" />

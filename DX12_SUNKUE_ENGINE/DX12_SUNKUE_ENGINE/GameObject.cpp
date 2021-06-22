@@ -11,26 +11,23 @@ GameObject::GameObject(int meshes)
 	m_meshes.resize(meshes);
 }
 
-void GameObject::ReleaseUploadBuffers()
-{
-	ForFamily([](auto& obj) {obj.ReleaseUploadBuffers(); });
-}
 
 void GameObject::Animate(const float timeElapsed)
 {
+	OnAnimate(timeElapsed);
 	ForFamily([=](auto& obj) {obj.Animate(timeElapsed); });
 }
 
-void GameObject::PrepareRender()
+void GameObject::PrepareRender(ID3D12GraphicsCommandList* commandList)
 {
-
+	UpdateShaderVariables(commandList);
 }
 
 void GameObject::Render(ID3D12GraphicsCommandList* commandList, Camera* camera, UINT instanceCount)
 {	
 	if (IsVisible(camera))
 	{
-		PrepareRender();
+		PrepareRender(commandList);
 		for (auto& m : m_meshes)m->Render(commandList, instanceCount);
 		ForFamily([=](auto& obj) {obj.Render(commandList, camera, instanceCount); });
 	}
@@ -79,21 +76,10 @@ void GameObject::Move(FXMVECTOR vel)
 	SetPosition(pos);
 }
 
-void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
-{
-
-}
-
 void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	XMFLOAT4X4 world;
-	Store(world, XMMatrixTranspose(GetWM()));
+	XMFLOAT4X4 world; Store(world, XMMatrixTranspose(GetWM()));
 	commandList->SetGraphicsRoot32BitConstants(0, 16, &world, 0);
-}
-
-void GameObject::ReleaseShaderVariables()
-{
-
 }
 
 bool GameObject::IsVisible(const Camera* camera)
