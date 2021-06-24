@@ -89,7 +89,6 @@ protected:
 protected:
 	ComPtr<ID3D12Resource> m_RSRC;
 	SR* m_Mapped_RSRC;
-	D3D12_VERTEX_BUFFER_VIEW m_BufferView;
 	UINT m_RootParamIndex;
 };
 

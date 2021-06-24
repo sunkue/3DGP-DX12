@@ -2,57 +2,33 @@
 #include "Effect.h"
 #include "GameFramework.h"
 
-bool alive(PS_VB_EFFECT* a) { return a->mTime < a->mLifeTime; }
-bool dead(PS_VB_EFFECT* a) { return !alive(a); }
-
-Effect::Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int n)
+Effect::Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, size_t n)
 	: size{ n }
-	, mcbMappedEffects{ new PS_VB_EFFECT[n] }
+	, m_Mapped_RSRC{ new SR_EFFECT[n] }
 {
-
 	CreateShaderVariables(device, commandList);
-}
-
-Effect::~Effect()
-{
-
 }
 
 void Effect::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	const UINT buffeSize{ static_cast<UINT>(sizeof(PS_VB_EFFECT) * size) };
-	mcbEffects = CreateBufferResource(device, commandList, nullptr, buffeSize
+	const UINT buffeSize{ static_cast<UINT>(sizeof(SR_EFFECT) * size) };
+	m_RSRC = CreateBufferResource(device, commandList, nullptr, buffeSize
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
-	mcbEffects->Map(0, nullptr, (void**)&mcbMappedEffects);
+	m_RSRC->Map(0, nullptr, (void**)&m_Mapped_RSRC);
 }
 
 void Effect::ReleaseShaderVariables()
 {
-	if (mcbEffects) {
-		mcbEffects->Unmap(0, nullptr);
-		mcbEffects.Reset();
+	if (m_RSRC) {
+		m_RSRC->Unmap(0, nullptr);
+		m_RSRC.Reset();
 	}
 }
 
 void Effect::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	const float timeE{ GameFramework::GetApp()->GetTimer()->GetTimeElapsed().count() / 1000.0f };
-	commandList->SetGraphicsRootShaderResourceView(3, mcbEffects->GetGPUVirtualAddress());
-	for (int i = 0; i < size; ++i) {
-		mcbMappedEffects[i].mTime += timeE;
-	}
-}
-
-void Effect::NewWallEffect(FXMVECTOR pos, float lifeTime)
-{
-	mcbMappedEffects[0].mLifeTime = mcbMappedEffects[0].mTime + lifeTime;
-	XMStoreFloat3(&mcbMappedEffects[0].mPosition, pos);
-}
-
-void Effect::NewObjEffect(FXMVECTOR pos, float lifeTime)
-{
-	mcbMappedEffects[1].mLifeTime = mcbMappedEffects[1].mTime + lifeTime;
-	XMStoreFloat3(&mcbMappedEffects[1].mPosition, pos);
+	commandList->SetGraphicsRootShaderResourceView(m_RootParamIndex, m_RSRC->GetGPUVirtualAddress());
+	OnUpdateShaderVariables(commandList);
 }
 
 

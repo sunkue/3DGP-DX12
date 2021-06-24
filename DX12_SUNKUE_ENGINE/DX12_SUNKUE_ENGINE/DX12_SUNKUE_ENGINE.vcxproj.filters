@@ -11,9 +11,6 @@
     <Filter Include="DX\Framework">
       <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Light">
-      <UniqueIdentifier>{31141c54-b54b-42a2-8c71-eff1dad7c383}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\Terrain">
       <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
     </Filter>
@@ -37,9 +34,6 @@
     </Filter>
     <Filter Include="DX\etc\etc">
       <UniqueIdentifier>{0871c2c2-742f-41b8-b32e-85b2948883f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\Effect">
-      <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\완성된 부분">
       <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
@@ -73,6 +67,12 @@
     </Filter>
     <Filter Include="DX\완성된 부분\Shader\BasicShader">
       <UniqueIdentifier>{325d7dd8-aee4-4f78-a8a1-465e8e50cb1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Light">
+      <UniqueIdentifier>{31141c54-b54b-42a2-8c71-eff1dad7c383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Effect">
+      <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -128,10 +128,10 @@
       <Filter>DX\etc\etc</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
-      <Filter>DX\Light</Filter>
+      <Filter>DX\완성된 부분\Light</Filter>
     </ClInclude>
     <ClInclude Include="Effect.h">
-      <Filter>DX\Effect</Filter>
+      <Filter>DX\완성된 부분\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>DX\Terrain</Filter>
@@ -181,10 +181,10 @@
       <Filter>DX\etc\etc</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>DX\Light</Filter>
+      <Filter>DX\완성된 부분\Light</Filter>
     </ClCompile>
     <ClCompile Include="Effect.cpp">
-      <Filter>DX\Effect</Filter>
+      <Filter>DX\완성된 부분\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>DX\Terrain</Filter>

@@ -345,9 +345,9 @@ void GameFramework::BuildObjects()
 	//mPlayer->SetMesh(0, m_Meshes["tree"]);
 	mCamera = mPlayer->GetCamera();
 
-	mEffect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
-	mPlayer->SetEffect(mEffect);
-	mScene->SetEffect(mEffect);
+	m_Effect = new Effect(mDevice.Get(), mCommandList.Get(), 2);
+	mPlayer->SetEffect(m_Effect);
+	mScene->SetEffect(m_Effect);
 	
 	mCommandList->Close();
 	ExecuteComandLists();
@@ -366,8 +366,8 @@ void GameFramework::ReleaseObjects()
 	if (mCamera)mCamera->ReleaseShaderVariables();
 	delete mCamera;
 
-	if (mEffect)mEffect->ReleaseShaderVariables();
-	delete mEffect;
+	if (m_Effect)m_Effect->ReleaseShaderVariables();
+	delete m_Effect;
 }
 
 void GameFramework::ChanegeFullScreenMode()
@@ -413,7 +413,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM w
 		//GetCursorPos(&mOldCusorPos);
 		auto ray{ MouseRay() };
 		auto result{ RayCollapsePos(ray.first, ray.second, FLT_MAX) };
-		if (true == result.first) mEffect->NewWallEffect(result.second, 0.25f);
+		if (true == result.first) m_Effect->NewWallEffect(result.second, 0.25f);
 		//SetCapture(hWnd);
 		//GetCursorPos(&mOldCusorPos);
 	}break;
@@ -602,7 +602,7 @@ void GameFramework::PopulateCommandList()
 
 void GameFramework::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
-	if (mEffect)mEffect->UpdateShaderVariables(commandList);
+	if (m_Effect)m_Effect->UpdateShaderVariables(commandList);
 }
 
 void GameFramework::WaitForGpuComplete()

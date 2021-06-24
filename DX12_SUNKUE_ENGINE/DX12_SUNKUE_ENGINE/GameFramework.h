@@ -107,7 +107,7 @@ protected:
 	shared_ptr<GameTimer>		mGameTimer;
 	shared_ptr<Scene>			mScene;
 	shared_ptr<Camera>			mCamera;
-	shared_ptr<Effect>			mEffect;
+	shared_ptr<Effect>			m_Effect;
 	POINT						mOldCusorPos;
 	array<TCHAR, 50>			mStrFrameRate;
 };

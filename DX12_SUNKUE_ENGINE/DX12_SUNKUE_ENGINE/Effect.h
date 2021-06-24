@@ -1,28 +1,27 @@
 #pragma once
 
 
-struct PS_VB_EFFECT
+struct SR_EFFECT
 {
-	XMFLOAT3 mPosition{ 0.0f,0.0f,0.0f };
-	float mTime{ 0.0f };
-	float mLifeTime{ 0.0f };
+	XMFLOAT3 m_Position{ 0,0,0 };
+	float m_EmitTime{ 0 };
+	float m_LifeTime{ 0 };
 };
 
-class Effect : public IShaderResourceHelper
+class Effect abstract : public IShaderResourceHelper
 {
 public:
-	Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int n);
-	virtual ~Effect();
+	Effect(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, size_t n);
+	virtual ~Effect() = default;
 
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
-	virtual void ReleaseShaderVariables()override;
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
-
-	void NewWallEffect(FXMVECTOR pos, float lifeTime);
-	void NewObjEffect(FXMVECTOR pos, float lifeTime);
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) final;
+	virtual void ReleaseShaderVariables() final;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList) final;
+	virtual void OnUpdateShaderVariables(ID3D12GraphicsCommandList* commandList) abstract = 0;
 
 protected:
-	ComPtr<ID3D12Resource>	mcbEffects;
-	PS_VB_EFFECT* mcbMappedEffects;
-	int size;
+	ComPtr<ID3D12Resource> m_RSRC;
+	SR_EFFECT* m_Mapped_RSRC;
+	UINT m_RootParamIndex;
+	size_t size;
 };

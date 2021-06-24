@@ -10,6 +10,10 @@ inline float MillisecToSec(milliseconds time) {
 	return time.count() / 1000.0f;
 }
 
+inline float NanosecToSec(nanoseconds time) {
+	return time.count() / 1000'000.0f;
+}
+
 class GameTimer
 {
 public:
@@ -23,6 +27,7 @@ public:
 	void Tick(const milliseconds LockFPS = 0ms);
 	size_t GetFrameRate() const { return m_CurrentFrameRate; }
 	float GetTimeElapsedSec() const { return MillisecToSec(m_TimeElapsed); }
+	float GetEphocSec()const { return NanosecToSec(m_CurrentTime - m_BaseTime); }
 	milliseconds GetTimeElapsed() const { return m_TimeElapsed; }
 	milliseconds GetTimePaused() const { return m_TimePaused; }
 	milliseconds GetTimePlayed() const { return m_TimePlayed; }

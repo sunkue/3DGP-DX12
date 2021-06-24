@@ -3,18 +3,15 @@
 class GameObject;
 class Camera;
 class Effect;
-class Light;
+class LightShader;
 class Shader;
 class Terrain;
 
-class Scene
+class Scene abstract
 {
 public:
-	static Scene* SCENE;
-
-public:
-	Scene();
-	~Scene();
+	Scene() = default;
+	virtual ~Scene() = default;
 
 	void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 	void ReleaseObjects();
@@ -22,26 +19,24 @@ public:
 public:
 	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
 	void ReleaseUploadBuffers();
-	void AnimateObjects(const milliseconds timeElapsed);
-	ID3D12RootSignature* GetGraphicsRootSignature() { return mGraphicsRootSignature.Get(); }
+	void AnimateObjects(float timeElapsed);
+	ID3D12RootSignature* GetGraphicsRootSignature(size_t index = 0) { return m_RootSignatures.at(index).Get(); }
 	
 protected:
-	bool OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	bool OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	virtual void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam) abstract = 0;
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam) abstract = 0;
+	virtual void ProcessInput() abstract = 0;
 
-	bool ProcessInput();
-	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* device);
-
-	void CheckCollision(const milliseconds timeElapsed);
-
+	virtual ID3D12RootSignature* CreateGraphicsRootSignatures(ID3D12Device* device) abstract = 0;
+	virtual void CheckCollision(float timeElapsed) abstract = 0;
 
 protected:
-	ComPtr<ID3D12RootSignature>		mGraphicsRootSignature;
+	vector<ComPtr<ID3D12RootSignature>>	m_RootSignatures;
 	
-	vector<shared_ptr<Shader>>	mShaders;
 	vector<shared_ptr<GameObject>> m_Objects;
+	vector<shared_ptr<Shader>> m_Shaders;
 	vector<shared_ptr<Terrain>> m_Terrains;
 
-	shared_ptr<Effect> mEffect;
-	shared_ptr<Light> m_Light;
+	shared_ptr<Effect> m_Effect;
+	shared_ptr<LightShader> m_Light;
 };

@@ -15,10 +15,21 @@ using tstring = std::string;
 namespace SUNKUE {
 	using namespace std;
 
+	template<class T>
+	struct TypeInfo
+	{
+		using value_type = decltype(_GetValueType<T>());
+	};
 
 	template<class T>
-	struct TypeInfo {
-		using value_type = remove_pointer_t<T>;
-	};
+	auto consteval _GetValueType()
+	{
+		if constexpr (is_pointer<T>()) return _GetValueType<remove_pointer_t<T>>();
+		else return T();
+	}
+
+	
+
+
 
 }

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ShaderHelper.hpp"
-class GameObject;
+#include "GameObject.h"
 
 enum class LIGHT_TYPE : __int32
 {
@@ -10,31 +9,25 @@ enum class LIGHT_TYPE : __int32
 	SPOT,
 	DIRECTIONAL
 };
-
-enum class FACTOR_MODE : __int32
+static constexpr XMFLOAT3 default_attenuation{ 1.0f,0.000007f,0.00000002f };
+static constexpr XMFLOAT3 default_color{ 1.0f,1.0f,1.0f };
+struct SR_LIGHT_INFO
 {
-	DEFAULT,
-	CATOON,
-	SMOOTH
-};
+	LIGHT_TYPE m_type{ LIGHT_TYPE::NO_LIGHT };
+	XMFLOAT3 m_position{ 0,0,0 };
+	XMFLOAT3 m_ambient{ default_color };
+	float m_range{ 0 };
+	XMFLOAT3 m_diffuse{ default_color };
+	float m_falloff{ 0 };
+	XMFLOAT3 m_specular{ default_color };
+	float m_theta{ 0 };
+	XMFLOAT3 m_attenuation{ default_attenuation };
+	float m_phi{ 0 };
+	XMFLOAT3 m_direction{ 0,0,0 };
 
-struct LightInfo
-{
-	LIGHT_TYPE m_type;
-	XMFLOAT3 m_position;
-	XMFLOAT4 m_ambient;
-	XMFLOAT4 m_diffuse;
-	XMFLOAT4 m_specular;
-	XMFLOAT3 m_attenuation;
-	float m_range;
-	XMFLOAT3 m_direction;
-	float m_falloff;
-	float m_theta;
-	float m_phi;
-
-	LightInfo() = default;
-	LightInfo(LIGHT_TYPE t, XMFLOAT3 pos
-		, XMFLOAT4 amb, XMFLOAT4 diff, XMFLOAT4 spec
+	SR_LIGHT_INFO() = default;
+	SR_LIGHT_INFO(LIGHT_TYPE t, XMFLOAT3 pos
+		, XMFLOAT3 amb, XMFLOAT3 diff, XMFLOAT3 spec
 		, XMFLOAT3 atten, float range
 		, XMFLOAT3 dir, float falloff
 		, float theta, float phi
@@ -55,16 +48,16 @@ struct LightInfo
 
 struct LightFactory
 {
-	static shared_ptr<LightInfo> MakePointLight(XMFLOAT3 pos, float range)
+	static shared_ptr<SR_LIGHT_INFO> MakePointLight(XMFLOAT3 pos, float range)
 	{
-		shared_ptr<LightInfo> ret;
-		ret = make_shared<LightInfo>(
+		shared_ptr<SR_LIGHT_INFO> ret;
+		ret = make_shared<SR_LIGHT_INFO>(
 			  LIGHT_TYPE::POINT
 			, pos
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 1.0f,0.000007f,0.00000002f }
+			, default_color
+			, default_color
+			, default_color
+			, default_attenuation
 			, range
 			, XMFLOAT3{}
 			, 0.0f
@@ -74,18 +67,18 @@ struct LightFactory
 		return ret;
 	}
 
-	static shared_ptr<LightInfo> MakeSpotLight(XMFLOAT3 pos, XMFLOAT3 dir
+	static shared_ptr<SR_LIGHT_INFO> MakeSpotLight(XMFLOAT3 pos, XMFLOAT3 dir
 		, float range, float falloff, float theta, float phi
 	)
 	{
-		shared_ptr<LightInfo> ret;
-		ret = make_shared<LightInfo>(
+		shared_ptr<SR_LIGHT_INFO> ret;
+		ret = make_shared<SR_LIGHT_INFO>(
 			  LIGHT_TYPE::SPOT
 			, pos
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 0.5f,0.000007f,0.00000002f }
+			, default_color
+			, default_color
+			, default_color
+			, default_attenuation
 			, range
 			, dir
 			, falloff
@@ -95,16 +88,16 @@ struct LightFactory
 		return ret;
 	}
 
-	static shared_ptr<LightInfo> MakeDirectinalLight(XMFLOAT3 dir)
+	static shared_ptr<SR_LIGHT_INFO> MakeDirectinalLight(XMFLOAT3 dir)
 	{
-		shared_ptr<LightInfo> ret;
-		ret = make_shared<LightInfo>(
+		shared_ptr<SR_LIGHT_INFO> ret;
+		ret = make_shared<SR_LIGHT_INFO>(
 			  LIGHT_TYPE::SPOT
 			, XMFLOAT3{ 0.0f,0.0f,0.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT4{ 1.0f,1.0f,1.0f,1.0f }
-			, XMFLOAT3{ 1.0f,0.000007f,0.00000002f }
+			, default_color
+			, default_color
+			, default_color
+			, default_attenuation
 			, 0.0f
 			, dir
 			, 0.0f
@@ -115,73 +108,52 @@ struct LightFactory
 	}
 };
 
-class Light : public IShaderResourceHelper
+class LightShader : public IShaderResourceHelper
 {
 	static const int MaxLights{ 10 };
 public:
-	Light(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
-	virtual ~Light();
+	LightShader(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual ~LightShader() = default;
 
 	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)override;
 	virtual void ReleaseShaderVariables()override;
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)override;
 
-	void AddLight(shared_ptr<LightInfo> lightInfo) { Lights.push_back(lightInfo); }
-	void SetFactorMode(FACTOR_MODE fm) { m_factorMode = fm; }
+	void AddLight(shared_ptr<SR_LIGHT_INFO> lightInfo) { m_Lights.push_back(lightInfo); }
+	shared_ptr<SR_LIGHT_INFO> GetLight(size_t index) { return m_Lights.at(index); }
+	void XM_CALLCONV SortByDist(XMVECTOR point);
 
-	vector<shared_ptr<LightInfo>> Lights;
 protected:
-	ComPtr<ID3D12Resource>	mcbLights;
-	LightInfo* mcbMappedLights;
-	FACTOR_MODE m_factorMode;
+	vector<shared_ptr<SR_LIGHT_INFO>> m_Lights;
+	ComPtr<ID3D12Resource> m_RSRC;
+	SR_LIGHT_INFO* m_Mapped_RSRC;
+	UINT m_RootParamIndex;
 };
 
 
 class LightObj : public GameObject
 {
 public:
-	LightObj(ID3D12Device* device, ID3D12RootSignature* rootSignature, shared_ptr<LightInfo> = nullptr, int meshes = 0);
+	LightObj(ID3D12Device* device, ID3D12RootSignature* rootSignature, shared_ptr<SR_LIGHT_INFO> = nullptr, int meshes = 0);
 	virtual ~LightObj() {};
 
 public:
-	void SetLightColor(XMFLOAT4 lightColor) { 
+	void SetLightColor(XMFLOAT3 lightColor) { 
 		m_light->m_ambient = lightColor;
 		m_light->m_diffuse = lightColor;
 		m_light->m_specular = lightColor;
 	};
 	void SetLightColor(XMVECTORF32 lightColor) {
-		XMFLOAT4 col; XMStoreFloat4(&col, lightColor);
+		XMFLOAT3 col; Store(col, lightColor);
 		SetLightColor(col);
 	};
 	void SetLightColor(XMVECTOR lightColor) {
-		XMFLOAT4 col; XMStoreFloat4(&col, lightColor);
+		XMFLOAT3 col; Store(col, lightColor);
 		SetLightColor(col);
 	};
 
-	shared_ptr<LightInfo> GetLightInfo()const { return m_light; }
+	shared_ptr<SR_LIGHT_INFO> GetLightInfo()const { return m_light; }
 
 protected:
-	shared_ptr<LightInfo> m_light;
-};
-
-class Sun : public LightObj
-{
-public:
-	Sun(ID3D12Device* device, ID3D12RootSignature* rootSignature, shared_ptr<LightInfo> = nullptr, int meshes = 0, void* context = nullptr);
-	virtual ~Sun() {};
-
-
-	virtual void Animate(milliseconds timeElapsed)override;	
-
-	void SunUpdateCallback(milliseconds timeElapsed);
-	void SetSunUpdateContext(void* context) { mSunUpdateContext = context; }
-
-	void Revolve(milliseconds timeElapsed);
-
-	void Catch();
-protected:
-	void* mSunUpdateContext;
-
-	bool m_IsRevolving;
-	bool m_IsHandling{ false };
+	shared_ptr<SR_LIGHT_INFO> m_light;
 };

@@ -1,28 +1,9 @@
 #include "stdafx.h"
 #include "Scene.h"
-#include "Shader.h"
-#include "GameFramework.h"
-#include "Player.h"
-#include "Light.h"
-#include "Effect.h"
 
-Scene* Scene::SCENE = nullptr;
 
-Scene::Scene()
-	: mGraphicsRootSignature{ nullptr }
-	, mEffect{ nullptr }
-	, mPlayer{ nullptr }
-	, mTerrain{ nullptr }
-{
-	SCENE = this;
-}
 
-Scene::~Scene()
-{
-
-}
-
-ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
+ID3D12RootSignature* Scene::CreateGraphicsRootSignatures(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
@@ -98,7 +79,7 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 
 void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	mGraphicsRootSignature = CreateGraphicsRootSignature(device);
+	m_RootSignatures = CreateGraphicsRootSignatures(device);
 
 	XMFLOAT3A scale{ 8.0f,2.0f,8.0f };
 	XMVECTORF32 color{ 0.0f,0.2f,0.0f,0.0f };
@@ -111,40 +92,40 @@ void Scene::BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* comman
 #else
 	mTerrain = new HeightMapTerrain(
 		device, commandList
-		, mGraphicsRootSignature.Get()
+		, m_RootSignatures.Get()
 		, "Assets/Image/Terrain/heightMap.raw"sv
 		, 257, 257, 257, 257, scale, color);
 #endif
 	mTerrain->GetMesh()[0]->SetMeterial({ 0.45f,0.4f,0.2f,1.0f }, { 0.45f,0.4f,0.2f,1.0f }, 600.0f, { 0.45f,0.4f,0.2f,1.0f });
 
-	assert(mShaders.empty());
-	mShaders.push_back(new InstancingShader);
-	assert(mShaders.size() == 1);
-	mShaders[0]->CreateShader(device, mGraphicsRootSignature.Get());
-	mShaders[0]->BuildObjects(device, commandList, mTerrain);
+	assert(m_Shaders.empty());
+	m_Shaders.push_back(new InstancingShader);
+	assert(m_Shaders.size() == 1);
+	m_Shaders[0]->CreateShader(device, m_RootSignatures.Get());
+	m_Shaders[0]->BuildObjects(device, commandList, mTerrain);
 	
-	mShaders.push_back(new UIShader);
-	mShaders[1]->CreateShader(device, mGraphicsRootSignature.Get());
-	mShaders[1]->BuildObjects(device, commandList, nullptr);
+	m_Shaders.push_back(new UIShader);
+	m_Shaders[1]->CreateShader(device, m_RootSignatures.Get());
+	m_Shaders[1]->BuildObjects(device, commandList, nullptr);
 
 	float const xCenter{ mTerrain->GetWidth() * 0.5f };
 	float const zCenter{ mTerrain->GetLength() * 0.5f };
 	float const height{ mTerrain->GetHeight(xCenter,zCenter) };
 
-	m_lightObjs.emplace_back(new Sun(device, mGraphicsRootSignature.Get(),
+	m_lightObjs.emplace_back(new Sun(device, m_RootSignatures.Get(),
 		LightFactory::MakePointLight({ xCenter,2000.0f,zCenter }, 30000.0f), 1, mTerrain));
 	m_lightObjs[0]->SetMesh(0, GameFramework::GetApp()->m_meshes["sphere"]);
 	m_lightObjs[0]->SetLightColor(Colors::White);
 	//m_lightObjs[0]->SetEmessiveColor(Colors::White);
 
-	m_light = make_shared<Light>(device, commandList);
+	m_light = make_shared<LightShader>(device, commandList);
 	for (auto& lightObj : m_lightObjs)m_light->AddLight(lightObj->GetLightInfo());
 };
 
 void Scene::ReleaseObjects()
 {
-	mGraphicsRootSignature.Reset();
-	for (auto& shader : mShaders)
+	m_RootSignatures.Reset();
+	for (auto& shader : m_Shaders)
 	{
 		shader->ReleaseShaderVariables();
 		shader->ReleaseObjects();
@@ -154,7 +135,7 @@ void Scene::ReleaseObjects()
 
 void Scene::ReleaseUploadBuffers()
 {
-	for (auto& shader : mShaders)shader->ReleaseUploadBuffers();
+	for (auto& shader : m_Shaders)shader->ReleaseUploadBuffers();
 	if (mTerrain)mTerrain->ReleaseUploadBuffers();
 }
 
@@ -185,41 +166,18 @@ bool Scene::ProcessInput()
 	return false;
 };
 
-void Scene::AnimateObjects(milliseconds timeElapsed)
-{
-	const float timeE{ timeElapsed.count() / 1000.0f };
-	for (auto& shader : mShaders)shader->AnimateObjects(timeElapsed);
-
-	for (auto& light : m_lightObjs)light->Animate(timeElapsed);
-	XMStoreFloat3(&(m_light->Lights[0]->m_position), m_lightObjs[0]->GetPosition());
-
-	CheckCollision(timeElapsed);
-
-	if (mPlayer->IsEvolving()) {
-		XMVECTOR playerPos{ mPlayer->GetPosition() };
-		float const MaxDist{ 100.0f*sqrtf(mPlayer->GetScale().m128_f32[0]) };
-		for (auto& obj : m_Objects) {
-			XMVECTOR const dir{ playerPos- obj->GetPosition() };
-			float distance{ XMVectorGetX(XMVector3Length(dir)) };
-			if (distance < MaxDist) {
-				obj->Move(dir * (MaxDist / distance/2.0f) * timeE);
-			}
-		}
-	}
-
-};
 
 void Scene::Render(ID3D12GraphicsCommandList* commandList, Camera* camera)
 {
 	assert(camera);
 	camera->RSSetViewportScissorRect(commandList);
-	commandList->SetGraphicsRootSignature(mGraphicsRootSignature.Get());
+	commandList->SetGraphicsRootSignature(m_RootSignatures.Get());
 	camera->UpdateShaderVariables(commandList);
 	GameFramework::GetApp()->UpdateShaderVariables(commandList);
 
 	if(m_light)m_light->UpdateShaderVariables(commandList);
 	
-	for (auto& shader : mShaders)shader->Render(commandList, camera);
+	for (auto& shader : m_Shaders)shader->Render(commandList, camera);
 	for (auto& light : m_lightObjs)light->Render(commandList, camera);
 
 	assert(mTerrain);
@@ -252,7 +210,7 @@ void Scene::CheckCollision(const milliseconds timeElapsed)
 			bool br{ mPlayer->GetBrother() ? obj->GetOOBB_origin().Intersects(mPlayer->GetBrother()->GetOOBB_origin()) : false };
 			bool ch{ mPlayer->GetChild() ? obj->GetOOBB_origin().Intersects(mPlayer->GetChild()->GetOOBB_origin()) : false };
 			if (obj->GetOOBB_origin().Intersects(mPlayer->GetOOBB_origin()) | br | ch) {
-				mEffect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
+				m_Effect->NewObjEffect(mPlayer->GetPosition(), 0.5f);
 				mPlayer->Crash();
 				if (obj->GetTeam() == EnemyObject::TEAM::ENDCOUNT) {
 					obj->SetScale(XMVectorZero());
