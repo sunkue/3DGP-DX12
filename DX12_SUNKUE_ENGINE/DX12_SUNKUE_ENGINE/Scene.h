@@ -13,16 +13,17 @@ public:
 	Scene() = default;
 	virtual ~Scene() = default;
 
-	void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	virtual void BuildObjects(ID3D12Device* device, ID3D12GraphicsCommandList* commandList) = 0;
 	void ReleaseObjects();
 
 public:
 	void Render(ID3D12GraphicsCommandList* commandList, Camera* camera);
-	void ReleaseUploadBuffers();
 	void AnimateObjects(float timeElapsed);
 	ID3D12RootSignature* GetGraphicsRootSignature(size_t index = 0) { return m_RootSignatures.at(index).Get(); }
 	
 protected:
+	virtual void PrepareRender(ID3D12GraphicsCommandList* commandList, Camera* camera) abstract = 0;
+	
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam) abstract = 0;
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam) abstract = 0;
 	virtual void ProcessInput() abstract = 0;

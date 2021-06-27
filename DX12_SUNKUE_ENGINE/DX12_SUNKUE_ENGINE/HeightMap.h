@@ -47,5 +47,4 @@ protected:
 	int m_width;
 	int m_length;
 	XMFLOAT3 m_scale;
-
 };

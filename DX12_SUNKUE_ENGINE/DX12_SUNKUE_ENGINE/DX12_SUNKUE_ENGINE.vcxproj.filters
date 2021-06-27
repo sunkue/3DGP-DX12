@@ -8,14 +8,8 @@
     <Filter Include="DX">
       <UniqueIdentifier>{a48020e6-de26-46d9-aa7f-4b7208ccb99e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Framework">
-      <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\Terrain">
       <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\Scene">
-      <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\etc">
       <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
@@ -50,17 +44,11 @@
     <Filter Include="DX\완성된 부분\ResourceHelper">
       <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Player">
-      <UniqueIdentifier>{9cb3249c-7455-4218-b48c-cb02da37b2a9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\완성된 부분\Camera">
       <UniqueIdentifier>{a16daccd-3da9-4dcc-afc7-693885ab183f}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\완성된 부분\Shader">
       <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\UI">
-      <UniqueIdentifier>{8f546fc1-2777-48e9-8b02-607afcda436d}</UniqueIdentifier>
     </Filter>
     <Filter Include="DX\완성된 부분\Shader\InstancingShader">
       <UniqueIdentifier>{12cf152e-2dc8-4546-aa16-d32af97b33ed}</UniqueIdentifier>
@@ -74,6 +62,12 @@
     <Filter Include="DX\완성된 부분\Effect">
       <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DX\완성된 부분\Scene">
+      <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\완성된 부분\Framework">
+      <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceHelper.h">
@@ -86,10 +80,10 @@
       <Filter>DX\완성된 부분\Camera</Filter>
     </ClInclude>
     <ClInclude Include="GameFramework.h">
-      <Filter>DX\Framework</Filter>
+      <Filter>DX\완성된 부분\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>DX\Scene</Filter>
+      <Filter>DX\완성된 부분\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Interface.h">
       <Filter>DX\etc\Interface</Filter>
@@ -139,9 +133,6 @@
     <ClInclude Include="TerrainShader.h">
       <Filter>DX\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>DX\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>DX\완성된 부분\Shader\BasicShader</Filter>
     </ClInclude>
@@ -160,10 +151,10 @@
       <Filter>DX\완성된 부분\Camera</Filter>
     </ClCompile>
     <ClCompile Include="GameFramework.cpp">
-      <Filter>DX\Framework</Filter>
+      <Filter>DX\완성된 부분\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>DX\Scene</Filter>
+      <Filter>DX\완성된 부분\Scene</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>DX\완성된 부분\Object</Filter>
@@ -191,9 +182,6 @@
     </ClCompile>
     <ClCompile Include="TerrainShader.cpp">
       <Filter>DX\Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>DX\UI</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>DX\완성된 부분\Shader\BasicShader</Filter>

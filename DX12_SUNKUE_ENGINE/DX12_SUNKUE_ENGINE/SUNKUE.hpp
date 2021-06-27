@@ -10,6 +10,12 @@ using tstring = std::wstring;
 using tstring = std::string;
 #endif // UNICODE
 
+template<class T> tstring to_tstring(T arg)
+{
+	if constexpr (is_same<tstring, std::wstring>())return std::to_wstring(arg);
+	else return std::to_string(arg);
+}
+
 #define ALLOF(cont)(begin(cont)),(end(cont))
 
 namespace SUNKUE {

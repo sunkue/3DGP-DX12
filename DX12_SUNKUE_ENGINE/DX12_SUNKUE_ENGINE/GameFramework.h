@@ -1,5 +1,6 @@
 #pragma once
 
+
 class Camera;
 class Scene;
 class Effect;
@@ -18,27 +19,26 @@ private:
 
 public:
 	GameFramework() = default;
-	GameFramework(HINSTANCE hInstance, int showCmd);
 	virtual ~GameFramework();
-	bool Initialize();
-	int Run();
+
+	bool Initialize(HWND, HINSTANCE);
 	LRESULT CALLBACK MsgProc(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	float GetAspectRatio()const { return mAspectRatio; }
-	UINT GetWidth()const { return mWndClientWidth; }
-	UINT GetHeight()const { return mWndClientHeight; }
-	GameTimer* GetTimer() { return mGameTimer.get(); }
-	RECT GetRECT()const { return mWndRect; }
+	void SetHWND(HWND hwnd) { m_hWnd = hwnd; }
+	HWND GetHWND() { return m_hWnd; }
+	float GetAspectRatio()const { return m_AspectRatio; }
+	UINT GetWidth()const { return m_ClientWidth; }
+	UINT GetHeight()const { return m_ClientHeight; }
+	GameTimer* GetTimer() { return m_GameTimer.get(); }
+	RECT GetRECT()const { return m_WndRect; }
 
 protected:
-	void OnCreate();
-	void OnDestroy();
 	bool InitDirect3D();
-	bool InitMainWindow();
-	void OnProcessingMouseMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
-	void OnProcessingKeyboardMessage(HWND hWnd, UINT messageID, WPARAM wParam, LPARAM lParam);
+	virtual void OnProcessingMouseMessage(HWND, UINT messageID, WPARAM, LPARAM) abstract = 0;
+	virtual void OnProcessingKeyboardMessage(HWND, UINT messageID, WPARAM, LPARAM) abstract = 0;
+	virtual void ProcessInput() abstract = 0;
+	virtual void OnPopulateCommandList();
+
 	void FrameAdvance();
-	ATOM MyRegisterClass(HINSTANCE hInstance);
-	void ProcessInput();
 	void AnimateObjects();
 	void PopulateCommandList();
 	void ExecuteComandLists();
@@ -54,61 +54,68 @@ protected:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 	
-	void BuildMeshes();
-	void BuildObjects();
+	virtual void BuildMeshes() abstract = 0;
+	virtual void BuildObjects()abstract = 0;
 	void ReleaseObjects();
 
 public:
-	void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* commandList);
 	pair<XMVECTOR, XMVECTOR> XM_CALLCONV MouseRay();
-	pair<bool, XMVECTOR> XM_CALLCONV RayCollapsePos(FXMVECTOR origin, FXMVECTOR direction, float dist);
 protected:
 	void ChanegeFullScreenMode();
 
 protected:
-	HWND		mhWnd;
-	HINSTANCE	mhInstance;
-	int			mShowCmd;
-
-	RECT			mWndRect;
-	UINT			mWndClientWidth;
-	UINT			mWndClientHeight;
-	float			mAspectRatio;
+	HWND		m_hWnd;
+	HINSTANCE	m_hInstance;
+	RECT			m_WndRect;
+	UINT			m_ClientWidth;
+	UINT			m_ClientHeight;
+	float			m_AspectRatio;
 	
-	ComPtr<IDXGIFactory7>	mFactory;
-	ComPtr<IDXGISwapChain4>	mSwapChain;
-	ComPtr<ID3D12Device8>	mDevice;
+	ComPtr<IDXGIFactory7>	m_Factory;
+	ComPtr<IDXGISwapChain4>	m_SwapChain;
+	ComPtr<ID3D12Device8>	m_Device;
 
-	bool	mbMssa4xEnable;
-	UINT	mMsaa4xQualityLevels;
+	bool	m_IsMssa4xEnable;
+	UINT	m_Msaa4xQualityLevels;
 
-	static constexpr size_t FrameCount{ 2 };
-	UINT	mFrameIndex;
+	static constexpr size_t SwapChainCount{ 2 };
+	UINT	m_FrameIndex;
 
-	array<ComPtr<ID3D12Resource>, FrameCount>	mRenderTargetBuffers;
-	ComPtr<ID3D12DescriptorHeap>		mRtvDescriptorHeap;
-	UINT								mRtvDescriptorIncrementSize;
+	array<ComPtr<ID3D12Resource>, SwapChainCount>	m_RenderTargetBuffers;
+	ComPtr<ID3D12DescriptorHeap>		m_RtvDescriptorHeap;
+	UINT								m_RtvDescriptorIncrementSize;
 
-	ComPtr<ID3D12Resource>				mDepthStencilBuffer;
-	ComPtr<ID3D12DescriptorHeap>		mDsvDescriptorHeap;
-	UINT								mDsvDescriptorIncrementSize;
+	ComPtr<ID3D12Resource>				m_DepthStencilBuffer;
+	ComPtr<ID3D12DescriptorHeap>		m_DsvDescriptorHeap;
+	UINT								m_DsvDescriptorIncrementSize;
 
-	ComPtr<ID3D12CommandQueue>			mCommandQueue;
-	ComPtr<ID3D12CommandAllocator>		mCommandAllocator;
-	ComPtr<ID3D12GraphicsCommandList>	mCommandList;
+	ComPtr<ID3D12CommandQueue>			m_CommandQueue;
+	ComPtr<ID3D12CommandAllocator>		m_CommandAllocator;
+	ComPtr<ID3D12GraphicsCommandList>	m_CommandList;
 
-	ComPtr<ID3D12PipelineState>			mPipelineState;
+	ComPtr<ID3D12PipelineState>			m_PipelineState;
 
-	ComPtr<ID3D12Fence>					mFence;
-	array<UINT64, FrameCount>			mFenceValues;
-	HANDLE								mhFenceEvent;
+	ComPtr<ID3D12Fence>					m_Fence;
+	array<UINT64, SwapChainCount>		m_FenceValues;
+	HANDLE								m_hFenceEvent;
 
 protected:
-	shared_ptr<GameTimer>		mGameTimer;
-	shared_ptr<Scene>			mScene;
-	shared_ptr<Camera>			mCamera;
+	shared_ptr<GameTimer>		m_GameTimer;
+	shared_ptr<Scene>			m_Scene;
+	vector<shared_ptr<Scene>>	m_SceneList;
+	shared_ptr<Camera>			m_Camera;
 	shared_ptr<Effect>			m_Effect;
-	POINT						mOldCusorPos;
-	array<TCHAR, 50>			mStrFrameRate;
+	POINT						m_OldCusorPos;
+	tstring						m_title;
 };
 
+class MyApp : public GameFramework
+{
+protected:
+	virtual void OnProcessingMouseMessage(HWND, UINT messageID, WPARAM, LPARAM);
+	virtual void OnProcessingKeyboardMessage(HWND, UINT messageID, WPARAM, LPARAM);
+	virtual void ProcessInput();
+	virtual void BuildMeshes();
+	virtual void BuildObjects();
+};

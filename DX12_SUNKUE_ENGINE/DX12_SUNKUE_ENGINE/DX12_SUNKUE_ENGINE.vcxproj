@@ -164,7 +164,6 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainShader.h" />
-    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -185,7 +184,6 @@
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
-    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc" />

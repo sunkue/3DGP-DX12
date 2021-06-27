@@ -21,7 +21,7 @@ protected:
 class Shader abstract : public ShaderCompiler, public IShaderResourceHelper
 {
 public:
-	virtual ~Shader() = default;
+	virtual ~Shader() { ReleaseShaderVariables(); };
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* commandList, Camera* camera) abstract = 0;
