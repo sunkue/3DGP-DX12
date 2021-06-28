@@ -1,5 +1,7 @@
-
+#include "Header.hlsli"
+#include "Light.hlsli"
 //////////////////////////////////////
+
 struct METERIAL
 {
 	float4 ambient;
@@ -9,6 +11,7 @@ struct METERIAL
 	float specularPower;
 	float3 _padd;
 };
+
 //////////////////////////////////////////
 cbuffer cbObjInfo : register(b0)
 {
@@ -172,37 +175,7 @@ float4 Effect1Obj(float3 originPos)
 }
 /////////////////////////////////////////
 
-float cellSmooth(float x)
-{
-	const int slice = 3;
-	const float t = (1.0f / slice);
-	float ret = 0.0f;
-	for (int i = 0; i < slice; i++)
-	{
-		ret += smoothstep(t * i, t * (i + 1), x) * (t * (i + 1));
-	}
-	return ret;
-}
-float cellStatic(float x)
-{
-	const int slice = 3;
-	return ceil(x * slice) / slice;
-}
-float factorMode(int mode, float x)
-{
-	switch (mode)
-	{
-		case 1:
-			x = cellStatic(x);
-			break;
-		case 2:
-			x = cellSmooth(x);
-			break;
-		default:
-			break;
-	}
-	return x;
-}
+
 //////////////////////////////
 float4 ComputeDirectionalLight(
 	  METERIAL material

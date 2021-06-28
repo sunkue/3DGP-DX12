@@ -90,6 +90,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	, m_length{ length }
 {
 	m_verticesCount = width * length;
+	m_stride = sizeof(Vertex);
 	unique_ptr<Vertex[]> vertices = make_unique<Vertex[]>(m_verticesCount);
 	HeightMapImage const* const HMImage{ reinterpret_cast<HeightMapImage*>(context) };
 	for (int i = 0, z = Zstart; z < (Zstart + length); z++) {
