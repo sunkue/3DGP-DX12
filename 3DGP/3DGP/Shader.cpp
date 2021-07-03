@@ -609,7 +609,7 @@ void UIShader::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommand
 	const UINT buffeSize{ static_cast<UINT>(sizeof(VS_VB_UI) * mObjects.size()) };
 	mcb_UIs = CreateBufferResource(device, commandList, nullptr, buffeSize
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
-	mcb_UIs->Map(0, nullptr, (void**)&mcb_MappedUIs);
+	mcb_UIs->Map(0, nullptr, reinterpret_cast<void**>(&mcb_MappedUIs));
 }
 
 void UIShader::ReleaseShaderVariables()

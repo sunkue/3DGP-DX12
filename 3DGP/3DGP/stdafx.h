@@ -109,7 +109,7 @@ inline float ToSec(milliseconds time) {
 	return time.count() / 1000.0f;
 }
 
-#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 //#define WITH_TERRAIN_PARITION
 /*
 	목표 일주일 3챕터, 8주

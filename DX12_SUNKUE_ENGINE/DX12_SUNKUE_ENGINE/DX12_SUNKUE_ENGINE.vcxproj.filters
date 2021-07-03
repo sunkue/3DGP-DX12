@@ -68,6 +68,9 @@
     <Filter Include="DX\완성된 부분\Framework">
       <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DX\HLSL">
+      <UniqueIdentifier>{dbc570ce-1d63-49bd-93f8-9e14e6fb404b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceHelper.h">
@@ -202,5 +205,10 @@
     <Image Include="DX12_SUNKUE_ENGINE.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MATRIX.hlsli">
+      <Filter>DX\HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -81,12 +81,12 @@ bool GameFramework::Initialize()
 {
 	if (!InitMainWindow())return false;
 	if (!InitDirect3D())return false;
-#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
-	ChanegeFullScreenMode();
-#endif
 	READY = true;
 	ShowWindow(mhWnd, mShowCmd);
 	UpdateWindow(mhWnd);
+#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+	ChanegeFullScreenMode();
+#endif
 	return true;
 }
 
@@ -466,28 +466,29 @@ void GameFramework::ChanegeFullScreenMode()
 	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenNow, nullptr));
 
 	DXGI_MODE_DESC dxgiTargetParameters;
-	dxgiTargetParameters.Format		= DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiTargetParameters.Width		= mWndClientWidth;
-	dxgiTargetParameters.Height		= mWndClientHeight;
-	dxgiTargetParameters.RefreshRate.Numerator		= RFR;
-	dxgiTargetParameters.RefreshRate.Denominator	= 1;
-	dxgiTargetParameters.Scaling			= DXGI_MODE_SCALING_UNSPECIFIED;
-	dxgiTargetParameters.ScanlineOrdering	= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiTargetParameters.Width = mWndClientWidth;
+	dxgiTargetParameters.Height = mWndClientHeight;
+	dxgiTargetParameters.RefreshRate.Numerator = RFR;
+	dxgiTargetParameters.RefreshRate.Denominator = 1;
+	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	mSwapChain->ResizeTarget(&dxgiTargetParameters);
 
 	for (auto& RT : mRenderTargetBuffers) RT.Reset();
-	
+
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	mSwapChain->GetDesc(&dxgiSwapChainDesc);
 	mSwapChain->ResizeBuffers(
-		  FrameCount
+		FrameCount
 		, mWndClientWidth
 		, mWndClientHeight
 		, dxgiSwapChainDesc.BufferDesc.Format
 		, dxgiSwapChainDesc.Flags);
 	mFrameIndex = mSwapChain->GetCurrentBackBufferIndex();
-	
+
 	CreateRenderTargetViews();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -702,6 +703,7 @@ void GameFramework::WaitForGpuComplete()
 		ThrowIfFailed(mFence->SetEventOnCompletion(Fence, mhFenceEvent));
 		WaitForSingleObject(mhFenceEvent, INFINITE);
 	}
+	mFenceValues.at(mFrameIndex)++;
 }
 
 void GameFramework::MoveToNextFrame()

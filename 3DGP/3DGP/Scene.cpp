@@ -26,35 +26,15 @@ ID3D12RootSignature* Scene::CreateGraphicsRootSignature(ID3D12Device* device)
 {
 	ID3D12RootSignature* GraphicsRootSignature{ nullptr };
 	HRESULT hResult;
-	CD3DX12_ROOT_PARAMETER RootParameters[6];
+	CD3DX12_ROOT_PARAMETER RootParameters[6]{};
 	/* 앞쪽이 접근속도가 빠름 */
 	//64개가 한계임. SRV는 두칸차지.
 	sizeof(Meterial);
-	CD3DX12_ROOT_PARAMETER::InitAsConstants(
-		  RootParameters[0]
-		, 36
-		, 0						//b0 Player
-		, 0
-		, D3D12_SHADER_VISIBILITY_ALL);
-	
-	CD3DX12_ROOT_PARAMETER::InitAsConstants(
-		  RootParameters[1]
-		, 20
-		, 1						//b1 Camera
-		, 0
-		, D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
-		  RootParameters[2]
-		, 0						//t0 instance objescts
-		, 0
-		, D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
-		  RootParameters[3]
-		, 1						//t1 Effect
-		, 0
-		, D3D12_SHADER_VISIBILITY_ALL);
+	RootParameters[0].InitAsConstants(36, 0); //obj
+	RootParameters[1].InitAsConstants(20, 1); //camera
+	//RootParameters[1].InitAsConstantBufferView(1);
+	RootParameters[2].InitAsShaderResourceView(0); // instaning
+	RootParameters[3].InitAsShaderResourceView(1); // effect
 	
 	CD3DX12_ROOT_PARAMETER::InitAsShaderResourceView(
 		RootParameters[4]
