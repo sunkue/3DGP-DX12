@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DX">
+      <UniqueIdentifier>{819444aa-f6b6-4d0c-a82f-89ddcd2306ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine">
+      <UniqueIdentifier>{d711dfe0-703b-4166-823e-18e1daf1a32d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Timer">
+      <UniqueIdentifier>{c8083080-7826-4797-b011-f38e9c3b41ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Mesh">
+      <UniqueIdentifier>{a1076e59-a2af-4d16-88a7-082e3285c71b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Object">
+      <UniqueIdentifier>{103ce67b-7b3c-4d1d-9d7d-76d7786376da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\ResourceHelper">
+      <UniqueIdentifier>{b5c19afa-06e4-4a3e-b5e5-215ad841b54c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Camera">
+      <UniqueIdentifier>{479f9bf2-cc4b-4df2-9e92-dbf9238e8c95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader">
+      <UniqueIdentifier>{2d74d91f-20d4-413c-8ea6-3cdf72afe349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader\InstancingShader">
+      <UniqueIdentifier>{3e271b0e-33e4-4a86-ba04-56669d8cf78e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader\BasicShader">
+      <UniqueIdentifier>{c2872d41-89f9-4ffd-89ff-ec16714b4ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Light">
+      <UniqueIdentifier>{c2e3216c-c1ec-4a55-8dac-eafb0c49d9b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Effect">
+      <UniqueIdentifier>{51723104-3a04-41ac-b455-ee506c5d6058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Scene">
+      <UniqueIdentifier>{76dd10f2-0fe0-48b2-856a-e96f81ad1586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Framework">
+      <UniqueIdentifier>{fc38d147-a3fc-421e-bab6-42b13902562a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Terrain">
+      <UniqueIdentifier>{e5ae08d1-a8de-4460-a1fb-4eb4b040b855}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc">
+      <UniqueIdentifier>{411c0673-2717-4541-a3a8-5929e1161383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\Interface">
+      <UniqueIdentifier>{5a039c70-979e-49d3-822c-870163696c93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\Helper">
+      <UniqueIdentifier>{cfd1894b-f3df-4e6d-a80b-972f4e1f3cc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\stdafx">
+      <UniqueIdentifier>{a2354b9d-7c2d-452b-b626-2fe6976200a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\MyHelper">
+      <UniqueIdentifier>{9b084bbd-5dbd-42b6-b105-aed40c50162e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\etc">
+      <UniqueIdentifier>{f66929f0-b205-4072-a42d-486923cca8c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\HLSL">
+      <UniqueIdentifier>{56000606-ff3b-42a5-8edf-da3edb5bed46}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\GameTimer.h">
+      <Filter>DX\engine\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Mesh.h">
+      <Filter>DX\engine\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\GameObject.h">
+      <Filter>DX\engine\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\ResourceHelper.h">
+      <Filter>DX\engine\ResourceHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Camera.h">
+      <Filter>DX\engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\InstancingShader.h">
+      <Filter>DX\engine\Shader\InstancingShader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Shader.h">
+      <Filter>DX\engine\Shader\BasicShader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Light.h">
+      <Filter>DX\engine\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Effect.h">
+      <Filter>DX\engine\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Scene.h">
+      <Filter>DX\engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\GameFramework.h">
+      <Filter>DX\engine\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\HeightMap.h">
+      <Filter>DX\engine\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Terrain.h">
+      <Filter>DX\engine\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Interface.h">
+      <Filter>DX\engine\etc\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\d3dx12.h">
+      <Filter>DX\engine\etc\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\D3DX12Helper.h">
+      <Filter>DX\engine\etc\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\stdafx.h">
+      <Filter>DX\engine\etc\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\MyDXHelper.hpp">
+      <Filter>DX\engine\etc\MyHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\SUNKUE.hpp">
+      <Filter>DX\engine\etc\MyHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\DX12_SUNKUE_ENGINE.h">
+      <Filter>DX\engine\etc\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\Resource.h">
+      <Filter>DX\engine\etc\etc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DX12_SUNKUE_ENGINE\targetver.h">
+      <Filter>DX\engine\etc\etc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\GameTimer.cpp">
+      <Filter>DX\engine\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Mesh.cpp">
+      <Filter>DX\engine\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\GameObject.cpp">
+      <Filter>DX\engine\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\ResourceHelper.cpp">
+      <Filter>DX\engine\ResourceHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Camera.cpp">
+      <Filter>DX\engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\InstancingShader.cpp">
+      <Filter>DX\engine\Shader\InstancingShader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Shader.cpp">
+      <Filter>DX\engine\Shader\BasicShader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Light.cpp">
+      <Filter>DX\engine\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Effect.cpp">
+      <Filter>DX\engine\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Scene.cpp">
+      <Filter>DX\engine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\GameFramework.cpp">
+      <Filter>DX\engine\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\HeightMap.cpp">
+      <Filter>DX\engine\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\Terrain.cpp">
+      <Filter>DX\engine\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\stdafx.cpp">
+      <Filter>DX\engine\etc\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DX12_SUNKUE_ENGINE\DX12_SUNKUE_ENGINE.cpp">
+      <Filter>DX\engine\etc\etc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\DX12_SUNKUE_ENGINE\MATRIX.hlsli">
+      <Filter>DX\HLSL</Filter>
+    </None>
+  </ItemGroup>
+</Project>

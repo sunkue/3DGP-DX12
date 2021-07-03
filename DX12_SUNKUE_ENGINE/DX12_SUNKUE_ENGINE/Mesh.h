@@ -42,7 +42,8 @@ class Mesh : public Collideable
 {
 public:
 	Mesh(ID3D12Device*, ID3D12GraphicsCommandList*, vector<Mesh_Info>&);
-
+	virtual ~Mesh() = default;
+	
 	virtual void Render(ID3D12GraphicsCommandList*, UINT instanceCount = 1);
 
 public:

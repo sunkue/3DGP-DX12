@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DX12_SUNKUE_ENGINE", "DX12_SUNKUE_ENGINE\DX12_SUNKUE_ENGINE.vcxproj", "{54138A1B-D492-418D-AC9E-2A72F4E26107}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainTool", "TerrainTool\TerrainTool.vcxproj", "{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{54138A1B-D492-418D-AC9E-2A72F4E26107}.Release|x64.Build.0 = Release|x64
 		{54138A1B-D492-418D-AC9E-2A72F4E26107}.Release|x86.ActiveCfg = Release|Win32
 		{54138A1B-D492-418D-AC9E-2A72F4E26107}.Release|x86.Build.0 = Release|Win32
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Debug|x64.ActiveCfg = Debug|x64
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Debug|x64.Build.0 = Debug|x64
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Debug|x86.ActiveCfg = Debug|Win32
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Debug|x86.Build.0 = Debug|Win32
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Release|x64.ActiveCfg = Release|x64
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Release|x64.Build.0 = Release|x64
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Release|x86.ActiveCfg = Release|Win32
+		{BD89C4EC-5131-422D-86EC-C5C55EC92ED8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

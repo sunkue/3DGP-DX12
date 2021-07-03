@@ -3,7 +3,7 @@
 #include "GameObject.h"
 #include "HeightMap.h"
 
-class HeightMapTerrain : public GameObject
+class HeightMapTerrain
 {
 public:
 	HeightMapTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ID3D12RootSignature* rootSignature, string_view fileName
@@ -19,11 +19,11 @@ public:
 	int GetHeightMapWidth()const { return m_heightMapImage->GetWidth(); }
 	int GetHeightMapLength()const { return m_heightMapImage->GetLength(); }
 
-	XMFLOAT3 GetScale()const { return m_scale; }
+	auto GetScale()const { return m_scale; }
 	float GetWidth()const { return m_heightMapImage->GetWidth() * m_scale.x; }
 	float GetLength()const { return m_heightMapImage->GetLength() * m_scale.z; }
 
-	virtual bool IsVisible(const Camera* camera = nullptr)override;
+	virtual bool IsVisible(const Camera* camera = nullptr);
 
 private:
 	unique_ptr<HeightMapImage> m_heightMapImage;

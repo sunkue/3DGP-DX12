@@ -163,7 +163,6 @@
     <ClInclude Include="SUNKUE.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
-    <ClInclude Include="TerrainShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -183,7 +182,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="TerrainShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX12_SUNKUE_ENGINE.rc" />

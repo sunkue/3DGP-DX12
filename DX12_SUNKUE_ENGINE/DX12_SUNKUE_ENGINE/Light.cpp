@@ -36,7 +36,7 @@ void LightShader::UpdateShaderVariables(ID3D12GraphicsCommandList* commandList)
 {
 	commandList->SetGraphicsRootShaderResourceView(m_RootParamIndex, m_RSRC->GetGPUVirtualAddress());
 	for (int i = 0; i < MaxLights; ++i) {
-		if (i < m_Lights.size())m_Mapped_RSRC[i] = *m_Lights[i];
+		if (static_cast<size_t>(i) < m_Lights.size())m_Mapped_RSRC[i] = *m_Lights[i];
 		else m_Mapped_RSRC[i] = SR_LIGHT_INFO();
 	}
 }

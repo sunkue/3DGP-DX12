@@ -90,7 +90,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 	, m_length{ length }
 {
 	m_verticesCount = width * length;
-	m_stride = sizeof(Vertex);
+	UINT stride = sizeof(Vertex);
 	unique_ptr<Vertex[]> vertices = make_unique<Vertex[]>(m_verticesCount);
 	HeightMapImage const* const HMImage{ reinterpret_cast<HeightMapImage*>(context) };
 	for (int i = 0, z = Zstart; z < (Zstart + length); z++) {
@@ -101,7 +101,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 		}
 	}
 
-	UINT bufferSize{ m_stride * m_verticesCount };
+	UINT bufferSize{ stride * m_verticesCount };
 	m_vertexBuffer = CreateBufferResource(
 		device
 		, commandList, vertices.get()
@@ -110,7 +110,7 @@ HeighMapGridMesh::HeighMapGridMesh(ID3D12Device* device, ID3D12GraphicsCommandLi
 		, m_vertexUploadBuffer.GetAddressOf());
 	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
 	m_vertexBufferView.SizeInBytes = bufferSize;
-	m_vertexBufferView.StrideInBytes = m_stride;
+	m_vertexBufferView.StrideInBytes = stride;
 
 	/// index 
 	m_indicesCount = (width * 2) * (length - 1) + (length - 1 - 1);

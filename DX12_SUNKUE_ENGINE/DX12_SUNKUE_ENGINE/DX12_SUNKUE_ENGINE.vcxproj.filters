@@ -8,189 +8,183 @@
     <Filter Include="DX">
       <UniqueIdentifier>{a48020e6-de26-46d9-aa7f-4b7208ccb99e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DX\Terrain">
-      <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc">
-      <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc\Interface">
-      <UniqueIdentifier>{967a47b7-5757-4314-96b2-d66315e8a2d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc\Helper">
-      <UniqueIdentifier>{24630d36-f7d1-460d-ad70-b6cb05e3f110}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc\stdafx">
-      <UniqueIdentifier>{bb67dc92-fff6-4940-b261-dec902587c05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc\MyHelper">
-      <UniqueIdentifier>{eb687275-0466-48c6-9965-01a9862e6885}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\etc\etc">
-      <UniqueIdentifier>{0871c2c2-742f-41b8-b32e-85b2948883f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분">
-      <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Timer">
-      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Mesh">
-      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Object">
-      <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\ResourceHelper">
-      <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Camera">
-      <UniqueIdentifier>{a16daccd-3da9-4dcc-afc7-693885ab183f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Shader">
-      <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Shader\InstancingShader">
-      <UniqueIdentifier>{12cf152e-2dc8-4546-aa16-d32af97b33ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Shader\BasicShader">
-      <UniqueIdentifier>{325d7dd8-aee4-4f78-a8a1-465e8e50cb1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Light">
-      <UniqueIdentifier>{31141c54-b54b-42a2-8c71-eff1dad7c383}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Effect">
-      <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Scene">
-      <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DX\완성된 부분\Framework">
-      <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DX\HLSL">
       <UniqueIdentifier>{dbc570ce-1d63-49bd-93f8-9e14e6fb404b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine">
+      <UniqueIdentifier>{6e568fe5-da22-428f-91ba-8c3a3b3ee145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Timer">
+      <UniqueIdentifier>{2edc246e-21aa-48a5-ad7a-41db72521e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Mesh">
+      <UniqueIdentifier>{1750a595-65ff-4c5b-94d6-fd7ebbf8b695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Object">
+      <UniqueIdentifier>{4d3948cf-b5a2-46e2-b782-40eb4846d33f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\ResourceHelper">
+      <UniqueIdentifier>{2afdbd42-c38b-4f17-8f63-82ae572e11fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Camera">
+      <UniqueIdentifier>{a16daccd-3da9-4dcc-afc7-693885ab183f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader">
+      <UniqueIdentifier>{0c0c4cfc-e395-4358-ae76-4e9b2bdaacfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader\InstancingShader">
+      <UniqueIdentifier>{12cf152e-2dc8-4546-aa16-d32af97b33ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Shader\BasicShader">
+      <UniqueIdentifier>{325d7dd8-aee4-4f78-a8a1-465e8e50cb1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Light">
+      <UniqueIdentifier>{31141c54-b54b-42a2-8c71-eff1dad7c383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Effect">
+      <UniqueIdentifier>{00e07265-f593-495e-a1af-4fabd36308da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Scene">
+      <UniqueIdentifier>{c25eda15-ce2c-4a74-84df-9f5669c308fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Framework">
+      <UniqueIdentifier>{f109af3a-4f30-4806-ba8c-3895f02856ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\Terrain">
+      <UniqueIdentifier>{850f9e2d-8fe0-47c0-bcb1-7457c3d120fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc">
+      <UniqueIdentifier>{9205992c-a56c-43e7-8a55-85dda6c902dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\Interface">
+      <UniqueIdentifier>{967a47b7-5757-4314-96b2-d66315e8a2d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\Helper">
+      <UniqueIdentifier>{24630d36-f7d1-460d-ad70-b6cb05e3f110}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\stdafx">
+      <UniqueIdentifier>{bb67dc92-fff6-4940-b261-dec902587c05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\MyHelper">
+      <UniqueIdentifier>{eb687275-0466-48c6-9965-01a9862e6885}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX\engine\etc\etc">
+      <UniqueIdentifier>{0871c2c2-742f-41b8-b32e-85b2948883f8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceHelper.h">
-      <Filter>DX\완성된 부분\ResourceHelper</Filter>
+      <Filter>DX\engine\ResourceHelper</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
-      <Filter>DX\완성된 부분\Timer</Filter>
+      <Filter>DX\engine\Timer</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>DX\완성된 부분\Camera</Filter>
+      <Filter>DX\engine\Camera</Filter>
     </ClInclude>
     <ClInclude Include="GameFramework.h">
-      <Filter>DX\완성된 부분\Framework</Filter>
+      <Filter>DX\engine\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>DX\완성된 부분\Scene</Filter>
+      <Filter>DX\engine\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Interface.h">
-      <Filter>DX\etc\Interface</Filter>
+      <Filter>DX\engine\etc\Interface</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>DX\완성된 부분\Object</Filter>
+      <Filter>DX\engine\Object</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>DX\완성된 부분\Mesh</Filter>
+      <Filter>DX\engine\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="HeightMap.h">
-      <Filter>DX\Terrain</Filter>
+      <Filter>DX\engine\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
-      <Filter>DX\etc\Helper</Filter>
+      <Filter>DX\engine\etc\Helper</Filter>
     </ClInclude>
     <ClInclude Include="D3DX12Helper.h">
-      <Filter>DX\etc\Helper</Filter>
+      <Filter>DX\engine\etc\Helper</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>DX\etc\stdafx</Filter>
+      <Filter>DX\engine\etc\stdafx</Filter>
     </ClInclude>
     <ClInclude Include="MyDXHelper.hpp">
-      <Filter>DX\etc\MyHelper</Filter>
+      <Filter>DX\engine\etc\MyHelper</Filter>
     </ClInclude>
     <ClInclude Include="SUNKUE.hpp">
-      <Filter>DX\etc\MyHelper</Filter>
+      <Filter>DX\engine\etc\MyHelper</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>DX\etc\etc</Filter>
+      <Filter>DX\engine\etc\etc</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>DX\etc\etc</Filter>
+      <Filter>DX\engine\etc\etc</Filter>
     </ClInclude>
     <ClInclude Include="DX12_SUNKUE_ENGINE.h">
-      <Filter>DX\etc\etc</Filter>
+      <Filter>DX\engine\etc\etc</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
-      <Filter>DX\완성된 부분\Light</Filter>
+      <Filter>DX\engine\Light</Filter>
     </ClInclude>
     <ClInclude Include="Effect.h">
-      <Filter>DX\완성된 부분\Effect</Filter>
+      <Filter>DX\engine\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
-      <Filter>DX\Terrain</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainShader.h">
-      <Filter>DX\Terrain</Filter>
+      <Filter>DX\engine\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>DX\완성된 부분\Shader\BasicShader</Filter>
+      <Filter>DX\engine\Shader\BasicShader</Filter>
     </ClInclude>
     <ClInclude Include="InstancingShader.h">
-      <Filter>DX\완성된 부분\Shader\InstancingShader</Filter>
+      <Filter>DX\engine\Shader\InstancingShader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceHelper.cpp">
-      <Filter>DX\완성된 부분\ResourceHelper</Filter>
+      <Filter>DX\engine\ResourceHelper</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
-      <Filter>DX\완성된 부분\Timer</Filter>
+      <Filter>DX\engine\Timer</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>DX\완성된 부분\Camera</Filter>
+      <Filter>DX\engine\Camera</Filter>
     </ClCompile>
     <ClCompile Include="GameFramework.cpp">
-      <Filter>DX\완성된 부분\Framework</Filter>
+      <Filter>DX\engine\Framework</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>DX\완성된 부분\Scene</Filter>
+      <Filter>DX\engine\Scene</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>DX\완성된 부분\Object</Filter>
+      <Filter>DX\engine\Object</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>DX\완성된 부분\Mesh</Filter>
+      <Filter>DX\engine\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="HeightMap.cpp">
-      <Filter>DX\Terrain</Filter>
+      <Filter>DX\engine\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>DX\etc\stdafx</Filter>
+      <Filter>DX\engine\etc\stdafx</Filter>
     </ClCompile>
     <ClCompile Include="DX12_SUNKUE_ENGINE.cpp">
-      <Filter>DX\etc\etc</Filter>
+      <Filter>DX\engine\etc\etc</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>DX\완성된 부분\Light</Filter>
+      <Filter>DX\engine\Light</Filter>
     </ClCompile>
     <ClCompile Include="Effect.cpp">
-      <Filter>DX\완성된 부분\Effect</Filter>
+      <Filter>DX\engine\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
-      <Filter>DX\Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainShader.cpp">
-      <Filter>DX\Terrain</Filter>
+      <Filter>DX\engine\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>DX\완성된 부분\Shader\BasicShader</Filter>
+      <Filter>DX\engine\Shader\BasicShader</Filter>
     </ClCompile>
     <ClCompile Include="InstancingShader.cpp">
-      <Filter>DX\완성된 부분\Shader\InstancingShader</Filter>
+      <Filter>DX\engine\Shader\InstancingShader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
